@@ -2,17 +2,17 @@ use clap::{App, ArgMatches, SubCommand};
 
 mod create;
 
-use crate::cli::man;
+use crate::cli::bighelp;
 
 pub(crate) fn get_subcommand<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("charm")
         .about("Build and create Lucky charms.")
-        .arg(man::arg())
+        .arg(bighelp::arg())
         .subcommand(create::get_subcommand())
 }
 
 pub(crate) fn run(args: &ArgMatches) {
-    man::manpage(&args, include_str!("charm/charm.md"));
+    bighelp::help(&args, include_str!("charm/charm.md"));
 
     match args.subcommand() {
         ("create", Some(sub_args)) => create::run(sub_args),

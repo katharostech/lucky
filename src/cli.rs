@@ -10,7 +10,7 @@ pub fn run() {
 
     let args = get_cli().get_matches();
 
-    man::manpage(&args, include_str!("cli/lucky.md"));
+    bighelp::help(&args, include_str!("cli/lucky.md"));
 
     match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
@@ -19,18 +19,18 @@ pub fn run() {
     }
 }
 
-pub(crate) mod man {
-    pub(crate) fn manpage(args: &clap::ArgMatches, page: &str) {
-        if args.is_present("show_manpage") {
+pub(crate) mod bighelp {
+    pub(crate) fn help(args: &clap::ArgMatches, page: &str) {
+        if args.is_present("show_bighelp") {
             termimad::print_text(page);
             std::process::exit(0);
         }
     }
 
     pub(crate) fn arg<'a, 'b>() -> clap::Arg<'a, 'b> {
-        clap::Arg::with_name("show_manpage")
-            .help("Show a more detailed manual page")
-            .long("man")
+        clap::Arg::with_name("show_bighelp")
+            .help("Show a detailed help page ( like a man page )")
+            .long("bighelp")
             .short("H")
     }
 }
@@ -41,7 +41,7 @@ fn get_cli() -> App<'static, 'static> {
         .author(clap::crate_authors!())
         .about("The Lucky charm framework for Juju.")
         .global_setting(AppSettings::ColoredHelp)
-        .arg(man::arg());
+        .arg(bighelp::arg());
 
     app = app.subcommand(charm::get_subcommand());
 
