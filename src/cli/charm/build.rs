@@ -6,7 +6,7 @@ use clap::{App, Arg, ArgMatches};
 use walkdir::WalkDir;
 
 use crate::cli::doc;
-use crate::types::{CharmMetadata, JUJU_NORMAL_HOOKS};
+use crate::types::{CharmMetadata, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS};
 
 #[rustfmt::skip]
 /// Return the `build` subcommand
@@ -134,7 +134,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Create hook dir
     let hook_dir = target_dir.join("hooks");
     if !hook_dir.exists() {
-        create_dir_all(&hook_dir)?;;
+        create_dir_all(&hook_dir)?;
     }
 
     // Copy in Lucky binary
@@ -161,16 +161,61 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Create normal Juju hooks ( those not specific to a relation or storage )
     for hook in JUJU_NORMAL_HOOKS {
         // Skip the install hook because we have already created it
-        if hook == &"install" { continue; }
+        if hook == &"install" {
+            continue;
+        }
         let new_hook_path = hook_dir.join(hook);
 
         // Create hook from template
-        fs::write(&new_hook_path, format!(include_str!("build/hook-template.sh"), hook_name=hook))?;
+        fs::write(
+            &new_hook_path,
+            format!(include_str!("build/hook-template.sh"), hook_name = hook),
+        )?;
         set_file_mode(&new_hook_path, 0o755)?;
     }
 
     // Create relation hooks
+    for relation_name in metadata
+        .provides
+        .keys()
+        .chain(metadata.requires.keys())
+        .chain(metadata.peers.keys())
+    {
+        for hook_name_template in JUJU_RELATION_HOOKS {
+            let hook_name = hook_name_template.replace("{}", relation_name);
+            let new_hook_path = hook_dir.join(&hook_name);
 
+            // Create hook from template
+            fs::write(
+                &new_hook_path,
+                format!(
+                    include_str!("build/hook-template.sh"),
+                    hook_name = hook_name
+                ),
+            )?;
+            set_file_mode(&new_hook_path, 0o755)?;
+        }
+    }
+
+    // Create hooks for defined storages
+    if let Some(storage_data) = metadata.storage {
+        for storage_name in storage_data.keys() {
+            for hook_name_template in JUJU_STORAGE_HOOKS {
+                let hook_name = hook_name_template.replace("{}", storage_name);
+                let new_hook_path = hook_dir.join(&hook_name);
+
+                // Create hook from template
+                fs::write(
+                    &new_hook_path,
+                    format!(
+                        include_str!("build/hook-template.sh"),
+                        hook_name = hook_name
+                    ),
+                )?;
+                set_file_mode(&new_hook_path, 0o755)?;
+            }
+        }
+    }
 
     Ok(())
 }
@@ -181,21 +226,20 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
 
 /// `fs::create_dir_all` with extra error context
 fn create_dir_all(path: &Path) -> anyhow::Result<()> {
-    fs::create_dir_all(&path)
-        .context(format!("Could not create dir: {:?}", path))?;
+    fs::create_dir_all(&path).context(format!("Could not create dir: {:?}", path))?;
 
     Ok(())
 }
-
 
 /// Sets file permission mode on Unix with extra error context
 fn set_file_mode(path: &Path, mode: u32) -> anyhow::Result<()> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-            fs::set_permissions(path, fs::Permissions::from_mode(mode)).context(
-            format!("Could not set permissions on created file: {:?}", path),
-        )?;
+        fs::set_permissions(path, fs::Permissions::from_mode(mode)).context(format!(
+            "Could not set permissions on created file: {:?}",
+            path
+        ))?;
     }
 
     Ok(())
