@@ -122,8 +122,8 @@ fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result
                     End | Char('G') => view.try_scroll_pages(90000),
                     Up | Char('k') => view.try_scroll_lines(-1),
                     Down | Char('j') => view.try_scroll_lines(1),
-                    PageUp => view.try_scroll_pages(-1),
-                    PageDown => view.try_scroll_pages(1),
+                    PageUp | Backspace => view.try_scroll_pages(-1),
+                    PageDown | Char(' ') => view.try_scroll_pages(1),
                     Esc | Enter | Char('q') => break,
                     _ => (),
                 }
