@@ -79,6 +79,8 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         serde_yaml::from_str(&metadata_content).context("Couldn't parse charm metadata YAML")?;
     let charm_name = &metadata.name;
     let target_dir = build_dir.join(charm_name);
+    
+    // TODO: Do a quick sanity check: make sure that the charm has a parsable `lucky.yaml` file in it
 
     // Clear the target directory
     if target_dir.exists() {
