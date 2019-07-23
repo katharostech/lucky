@@ -104,7 +104,7 @@ steps:
     image: linuturk/mono-choco
     commands:
       - cd chocolatey
-      - sed -i "s/\$${version}/0.1.0-pre-release-${DRONE_BUILD_NUMBER}/" lucky.nuspec
+      - sed -i "s/{{version}}/0.1.0-pre-release-${DRONE_BUILD_NUMBER}/" lucky.nuspec
       - choco pack
 
   # Publish pre-release of to Chocolatey.org
