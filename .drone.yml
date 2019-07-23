@@ -1,0 +1,239 @@
+---
+kind: pipeline
+name: linux-build
+
+steps:
+  - name: build-lucky
+    image: clux/muslrust:nightly-2019-11-24
+    commands:
+      # Generate CLI docs
+      - cargo run --release --features doc-gen docs/book/src/
+      # Build Lucky CLI
+      - cargo build --release
+      - mkdir -p build
+      - mv target/x86_64-unknown-linux-musl/release/lucky build
+      - cd build/
+      - tar -czf lucky-linux-x86_64.tgz lucky
+
+  - name: build-book
+    image: hrektts/mdbook
+    depends_on:
+      - build-lucky
+    commands:
+      - cd docs/book
+      - mdbook build
+
+  - name: publish-book
+    image: plugins/gh-pages
+    depends_on:
+      - build-book
+    settings:
+      pages_directory: docs/book/build
+      username:
+        from_secret: github_username
+      password:
+        from_secret: github_access_key
+    when:
+      event:
+        - push
+      branch:
+        - master
+
+  # Publish pre-release to GitHub releases
+  - name: publish-pre-release
+    image: plugins/github-release
+    depends_on:
+      - build-lucky
+    settings:
+      title: pre-release
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-linux-x86_64.tgz
+    when:
+      ref:
+        - refs/tags/pre-release
+
+  # Publish release to GitHub releases
+  - name: publish-release
+    image: plugins/github-release
+    depends_on:
+      - build-lucky
+    settings:
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-linux-x86_64.tgz
+    when:
+      ref:
+        - refs/tags/v*
+
+trigger:
+  branch:
+    exclude:
+      - feature/*
+
+---
+kind: pipeline
+name: windows-build
+
+steps:
+  - name: build
+    image: rust:latest
+    commands:
+      - apt-get update
+      - apt-get install -y gcc-mingw-w64-x86-64 zip
+      - rustup default nightly-2019-11-24
+      - rustup target install x86_64-pc-windows-gnu
+      # Patch Some MingW Libs. See https://github.com/rust-lang/rust/issues/47048#issuecomment-474118132
+      - cp -f /usr/x86_64-w64-mingw32/lib/dllcrt2.o /usr/local/rustup/toolchains/nightly-2019-11-24-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/dllcrt2.o
+      - cp -f /usr/x86_64-w64-mingw32/lib/crt2.o /usr/local/rustup/toolchains/nightly-2019-11-24-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/crt2.o
+      - mkdir -p .cargo
+      - |
+        echo '[target.x86_64-pc-windows-gnu]
+        linker = "x86_64-w64-mingw32-gcc"' >> .cargo/config
+      - cargo build --target x86_64-pc-windows-gnu --release --no-default-features --features default_devkit
+      - mkdir -p build
+      - mv target/x86_64-pc-windows-gnu/release/lucky.exe build
+      - cd build/
+      - zip -r lucky-windows-x86_64.zip lucky.exe
+
+  - name: build-choco
+    depends_on:
+      - build
+    image: linuturk/mono-choco
+    commands:
+      - cd chocolatey
+      - sed -i "s/\$${version}/0.1.0-pre-release-${DRONE_BUILD_NUMBER}/" lucky.nuspec
+      - choco pack
+
+  # Publish pre-release of to Chocolatey.org
+  - name: publish-choco-pre-release
+    depends_on:
+      - build-choco
+    image: linuturk/mono-choco
+    environment:
+      API_KEY:
+        from_secret: chocolatey_api_key
+    commands:
+      - cd chocolatey
+      - choco push --api-key "$${API_KEY}" --source https://push.chocolatey.org/
+    when:
+      ref:
+        - refs/tags/pre-release
+
+  # Publish pre-release to GitHub releases
+  - name: publish-pre-release
+    image: plugins/github-release
+    depends_on:
+      - build
+      - build-choco
+    settings:
+      title: pre-release
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-windows-x86_64.zip
+    when:
+      ref:
+        - refs/tags/pre-release
+
+  # Publish release to GitHub releases
+  - name: publish-release
+    image: plugins/github-release
+    depends_on:
+      - build
+    settings:
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-windows-x86_64.zip
+    when:
+      ref:
+        - refs/tags/v*
+
+trigger:
+  branch:
+    exclude:
+      - feature/*
+
+---
+kind: pipeline
+name: macos-build
+
+steps:
+  - name: build
+    image: katharostech/rust-osxcross:rust-latest_v0.1.0
+    commands:
+      - PATH="$PATH:/build/osxcross/target/bin"
+      # Configure build to use Mac linker and libraries
+      - mkdir -p /drone/src/.cargo
+      - |
+        echo '[target.x86_64-apple-darwin]
+        linker = "x86_64-apple-darwin15-clang"' >> /drone/src/.cargo/config
+      - cd /drone/src
+      - export COREAUDIO_FRAMEWORKS_PATH='/System/Library/Frameworks'
+      - export CC=x86_64-apple-darwin15-clang
+      - cargo build --target x86_64-apple-darwin --release --no-default-features --features default_devkit
+      - mkdir -p build
+      - mv target/x86_64-apple-darwin/release/lucky build
+      - cd build/
+      - tar -czf lucky-mac-x86_64.tgz lucky
+      - sha256sum lucky-mac-x86_64.tgz | awk -F ' ' '{print $1}' > sha256.txt
+
+  # Publish pre-release to GitHub releases
+  - name: publish-pre-release
+    image: plugins/github-release
+    depends_on:
+      - build
+    settings:
+      title: pre-release
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-mac-x86_64.tgz
+    when:
+      ref:
+        - refs/tags/pre-release
+
+  # Update the Homebrew cask
+  - name: publish-pre-release-cask
+    image: alpine/git
+    depends_on:
+      - publish-pre-release
+    environment:
+      USER:
+        from_secret: github_username
+      PASSWORD:
+        from_secret: github_access_key
+    commands:
+      - git config --global user.email "zicklag@katharostech.com"
+      - git config --global user.name "Zicklag"
+      - git clone https://$${USER}:$${PASSWORD}@github.com/katharostech/homebrew-tap.git
+      - sed -i "/\w*sha256/s/\'[a-z0-9]*\'/\'$(cat build/sha256.txt)\'/" homebrew-tap/Casks/lucky-pre-release.rb
+      - cd homebrew-tap
+      - git add .
+      - git commit -m 'Update Lucky Pre-Release'
+      - git push
+    when:
+      ref:
+        - refs/tags/pre-release
+
+  # Publish release to GitHub releases
+  - name: publish-release
+    image: plugins/github-release
+    depends_on:
+      - build
+    settings:
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-mac-x86_64.tgz
+    when:
+      ref:
+        - refs/tags/v*
+
+trigger:
+  branch:
+    exclude:
+      - feature/*

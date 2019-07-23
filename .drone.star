@@ -1,3 +1,10 @@
+#
+# NOTE: This file is not being used currently due to issues with it not detecting pre-release
+# tag pushes. For now we are using the .drone.yml file instead. We will switch back to using this
+# script later when we fix the problems.
+#
+
+
 def main(ctx):
     # Config used by pipeline functions
     config = {}
