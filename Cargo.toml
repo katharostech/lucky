@@ -50,6 +50,7 @@ tokio = { version = "0.1.22", optional = true }
 futures = { version = "0.1.29", optional = true }
 function_name = "0.2.0"
 shrinkwraprs = "0.3.0"
+rand = { version = "0.7.3", default-feature = false }
 
 [features]
 default = ["color-backtrace", "daemon"]

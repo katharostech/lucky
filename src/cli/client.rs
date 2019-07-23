@@ -10,6 +10,7 @@ mod leader;
 mod port;
 mod private_address;
 mod public_address;
+mod random;
 mod relation;
 mod set_status;
 
@@ -49,6 +50,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
             Box::new(port::PortSubcommand),
             Box::new(relation::RelationSubcommand),
             Box::new(leader::LeaderSubcommand),
+            Box::new(random::RandomSubcommand),
         ]
     }
 
@@ -63,6 +65,12 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
 
     #[cfg(feature = "daemon")]
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
+        // Skip creation of client data if the matched subcommand was "random", which doesn't need
+        // the client connection.
+        if let Some(_) = args.subcommand_matches("random") {
+            return Ok(data);
+        }
+
         let socket_path = get_daemon_socket_path(args);
 
         // Connect to lucky daemon
