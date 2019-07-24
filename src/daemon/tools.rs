@@ -135,10 +135,17 @@ pub(super) fn run_host_script(
 ) -> anyhow::Result<()> {
     log::info!("Running host script: {}", script_name);
 
-    // Add bin dir to the PATH
+    // Add bin dirs to the PATH
     let path_env = if let Some(path) = std::env::var_os("PATH") {
         let mut paths = env::split_paths(&path).collect::<Vec<_>>();
+        // Add the charm's bin dir
         paths.push(daemon.charm_dir.join("bin"));
+
+        // Add the directory containing the Lucky executable
+        if let Some(path) = std::env::current_exe()?.parent() {
+            paths.push(path.to_owned());
+        };
+
         env::join_paths(paths).context("Path contains invalid character")?
     } else {
         daemon.charm_dir.join("bin").as_os_str().to_owned()
