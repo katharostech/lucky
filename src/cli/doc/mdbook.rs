@@ -129,8 +129,15 @@ fn recurse_gen_cli_doc<'a>(
 
     // If there is no doc page for the command
     } else {
-        // Add command usage documentation
-        content.push_str(format!("# {}\n\n", cli.name).as_str());
+        let app = command.get_cli();
+        // Add command title
+        content.push_str(&format!("# {}\n\n", cli.name));
+        // Add about message
+        content.push_str(&format!(
+            "{}\n\n",
+            app.long_about.unwrap_or_else(|| app.about.unwrap_or(""))
+        ));
+        // Add usage
         content.push_str(&get_app_usage_md(command));
     }
 
@@ -320,8 +327,8 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
                     name = subcommand.get_name(),
                     parent = app.name,
                     help = sub_app
-                        .long_about
-                        .unwrap_or_else(|| sub_app.about.unwrap_or(""))
+                        .about
+                        .unwrap_or_else(|| sub_app.long_about.unwrap_or(""))
                 )
                 .as_str(),
             );
