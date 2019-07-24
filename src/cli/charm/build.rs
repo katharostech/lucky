@@ -2,7 +2,6 @@ use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 use walkdir::WalkDir;
 
-use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
@@ -10,7 +9,7 @@ use crate::cli::*;
 use crate::config::load_yaml;
 use crate::types::{
     juju::{
-        CharmMetadata, RelationDef, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS,
+        CharmMetadata, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS,
     },
     LuckyMetadata,
 };
@@ -95,7 +94,7 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             .expect("Missing required arg `log_level`");
 
         // Load charm metadata
-        let mut charm_metadata: CharmMetadata = load_yaml(&charm_path, "metadata")?;
+        let charm_metadata: CharmMetadata = load_yaml(&charm_path, "metadata")?;
         // Load lucky metadata simply to validate the lucky.yaml file
         load_yaml::<LuckyMetadata>(&charm_path, "lucky")?;
         // Get charm name
@@ -159,21 +158,22 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             }
         }
 
-        // Add extra `lucky-data` relation to charm metadata
-        let lucky_data_relation = RelationDef {
-            interface: "lucky-data".into(),
-        };
-        if let Some(peers) = &mut charm_metadata.peers {
-            peers.insert("lucky-data".into(), lucky_data_relation);
-        } else {
-            let mut peers = HashMap::new();
-            peers.insert("lucky-data".into(), lucky_data_relation);
-            charm_metadata.peers = Some(peers);
-        }
-        write_file(
-            &target_dir.join("metadata.yaml"),
-            &serde_yaml::to_string(&charm_metadata)?,
-        )?;
+        // // Add extra `lucky-data` relation to charm metadata
+        // // TODO: We aren't using this `lucky-data` relation yet, but we might want to in the future.
+        // let lucky_data_relation = RelationDef {
+        //     interface: "lucky-data".into(),
+        // };
+        // if let Some(peers) = &mut charm_metadata.peers {
+        //     peers.insert("lucky-data".into(), lucky_data_relation);
+        // } else {
+        //     let mut peers = HashMap::new();
+        //     peers.insert("lucky-data".into(), lucky_data_relation);
+        //     charm_metadata.peers = Some(peers);
+        // }
+        // write_file(
+        //     &target_dir.join("metadata.yaml"),
+        //     &serde_yaml::to_string(&charm_metadata)?,
+        // )?;
 
         // Create bin dir
         let bin_dir = target_dir.join("bin");
