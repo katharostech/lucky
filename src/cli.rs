@@ -134,7 +134,7 @@ pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
 
             // Print varlink errors without the extra debug printing
             } else if let Some(varlink_error) = e.downcast_ref::<crate::rpc::Error>() {
-                let e = format_err!("Response from Lucky daemon: {}", varlink_error.kind());
+                let e = format_err!("{}", varlink_error.kind());
                 log::error!("{}", e);
                 std::process::exit(1);
 

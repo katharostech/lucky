@@ -30,7 +30,7 @@ macro_rules! daemon_set_status {
     ($daemon_state:expr, $script_state:expr) => {
         crate::daemon::tools::set_script_status(
             $daemon_state,
-            concat!("__", module_path!(), "::", function_name!(), "__"),
+            function_path!(),
             ScriptStatus {
                 state: $script_state,
                 message: None,
@@ -40,11 +40,17 @@ macro_rules! daemon_set_status {
     ($daemon_state:expr, $script_state:expr, $message:expr) => {
         crate::daemon::tools::set_script_status(
             $daemon_state,
-            concat!("__", module_path!(), "::", function_name!(), "__"),
+            function_path!(),
             ScriptStatus {
                 state: $script_state,
                 message: Some($message.into()),
             },
         )?;
+    };
+}
+
+macro_rules! function_path {
+    () => {
+        concat!("__", module_path!(), "::", function_name!(), "__")
     };
 }

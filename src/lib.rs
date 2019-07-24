@@ -13,11 +13,12 @@
 // instead of ignoring the warning here.
 #![allow(clippy::empty_enum)]
 
+#[macro_use]
+pub(crate) mod macros;
+
 pub mod cli;
 pub(crate) mod config;
 pub(crate) mod log;
-#[macro_use]
-pub(crate) mod macros;
 pub(crate) mod rpc;
 pub(crate) mod types;
 

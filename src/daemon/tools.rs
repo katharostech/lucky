@@ -69,7 +69,20 @@ pub(super) fn set_script_status(
     script_id: &str,
     status: ScriptStatus,
 ) -> anyhow::Result<()> {
-    log::info!(r#"Set status[{}]: {}"#, script_id, status);
+    // Log the status hiding internal statuses unless trace logging is enabled
+    log::info!(
+        "Set status[{}]: {}",
+        {
+            if script_id.starts_with("__lucky::") && log::log_enabled!(log::Level::Trace) {
+                script_id
+            } else if script_id.starts_with("__lucky::") {
+                "internal"
+            } else {
+                script_id
+            }
+        },
+        status
+    );
 
     // Insert script status
     state.script_statuses.insert(script_id.into(), status);
@@ -120,7 +133,7 @@ pub(super) fn run_host_script(
     script_name: &str,
     environment: &HashMap<String, String>,
 ) -> anyhow::Result<()> {
-    log::debug!("Running host script: {}", script_name);
+    log::info!("Running host script: {}", script_name);
 
     // Add bin dir to the PATH
     let path_env = if let Some(path) = std::env::var_os("PATH") {

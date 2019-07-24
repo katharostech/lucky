@@ -2,6 +2,7 @@ use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 use subprocess::{Exec, Redirection};
 
+use std::fs::OpenOptions;
 use std::io::Read;
 use std::path::PathBuf;
 use std::sync::{
@@ -48,6 +49,11 @@ impl<'a> CliCommand<'a> for StartSubcommand {
                     "`/var/lib/lucky/mysql_2/state`"
                 ))
                 .env("LUCKY_STATE_DIR"))
+            .arg(Arg::with_name("log_file")
+                .long("log-file")
+                .short('L')
+                .takes_value(true)
+                .help("File to write daemon logs to"))
             .args(&get_daemon_connection_args())
     }
 
@@ -60,6 +66,16 @@ impl<'a> CliCommand<'a> for StartSubcommand {
     }
 
     fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
+        if let Some(log_file) = args.value_of("log_file") {
+            let file = OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(log_file)
+                .context(format!("Could not open log file: {:?}", log_file))?;
+
+            crate::log::set_log_file(file);
+        }
+
         let unit_name = args
             .value_of("unit_name")
             .expect("Missing required arg: unit_name");
@@ -151,18 +167,23 @@ impl<'a> CliCommand<'a> for StartSubcommand {
             log::info!("Starting the lucky daemon");
 
             // Spawn another process for running the daemon in the background
+            let state_dir = state_dir.to_string_lossy();
+            let mut daemon_args = vec![
+                "start",
+                "--socket-path",
+                &socket_path,
+                "--unit-name",
+                &unit_name,
+                "--state-dir",
+                &state_dir,
+                "-F",
+            ];
+            if let Some(log_file) = args.value_of("log_file") {
+                daemon_args.extend(&["--log-file", &log_file])
+            }
             let mut output: Box<dyn Read> = Exec::cmd(std::env::current_exe()?)
                 .env("LUCKY_CONTEXT", "daemon")
-                .args(&[
-                    "start",
-                    "--socket-path",
-                    &socket_path,
-                    "--unit-name",
-                    &unit_name,
-                    "--state-dir",
-                    &state_dir.to_string_lossy(),
-                    "-F",
-                ])
+                .args(daemon_args.as_slice())
                 .stdout(Redirection::Pipe)
                 .stderr(Redirection::Merge)
                 .detached()
