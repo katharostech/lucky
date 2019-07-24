@@ -113,6 +113,7 @@ pub(crate) struct ContainerConfig {
     pub volumes: HashMap<VolumeTarget, VolumeSource>,
     // The port bindings
     pub ports: HashSet<PortBinding>,
+    pub network: Option<String>,
 }
 
 impl ContainerConfig {
@@ -208,6 +209,11 @@ impl ContainerConfig {
         } in &self.ports
         {
             options.expose(*container_port, protocol, *host_port);
+        }
+
+        // Set network
+        if let Some(network) = &self.network {
+            options.network_mode(network);
         }
 
         // Add volumes

@@ -145,3 +145,10 @@ method ContainerPortRemove(host_port: int, container_port: int, protocol: string
 method ContainerPortRemoveAll(container_name: ?string) -> ()
 # Get a list of the ports that have been bound for the container
 method ContainerPortGetAll(container_name: ?string) -> (ports: [](host_port: int, container_port: int, protocol: string))
+
+#
+# Container network
+#
+
+# Set the container network. Setting network_name to null will unset the network
+method ContainerNetworkSet(network_name: ?string, container_name: ?string) -> ()

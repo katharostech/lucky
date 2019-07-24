@@ -9,6 +9,7 @@ mod image;
 mod port;
 mod set_command;
 mod set_entrypoint;
+mod set_network;
 mod volume;
 
 pub(super) struct ContainerSubcommand;
@@ -35,6 +36,7 @@ impl<'a> CliCommand<'a> for ContainerSubcommand {
             Box::new(volume::VolumeSubcommand),
             Box::new(delete::DeleteSubcommand),
             Box::new(port::PortSubcommand),
+            Box::new(set_network::SetNetworkSubcommand),
         ]
     }
 

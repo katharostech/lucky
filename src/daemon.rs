@@ -1172,6 +1172,40 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
         Ok(())
     }
+
+    fn container_network_set(
+        &self,
+        call: &mut dyn rpc::Call_ContainerNetworkSet,
+        network_name: Option<String>,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Get the config for the requested container
+        let mut container_log_name = None;
+        let mut container = match &container_name {
+            Some(container_name) => {
+                container_log_name = Some(container_name.clone());
+                state.named_containers.get_mut(container_name)
+            }
+            None => state.default_container.as_mut(),
+        };
+
+        if let Some(container) = &mut container {
+            log::debug!(
+                "Setting container network{}: {}",
+                container_log_name.map_or("".into(), |x| format!("[{}]", x)),
+                network_name.as_ref().unwrap_or(&"unset".to_string()),
+            );
+
+            container.update(|c| c.config.network = network_name);
+        }
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
 }
 
 impl Drop for LuckyDaemon {
