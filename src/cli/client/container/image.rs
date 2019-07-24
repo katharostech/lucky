@@ -94,6 +94,9 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .arg(Arg::with_name("image")
                 .help("The container image")
                 .required(true))
+            .arg(Arg::with_name("no_pull")
+                .help("Don't attempt to pull image before running container")
+                .long("no-pull"))
             .arg(super::container_arg())
     }
 
@@ -120,7 +123,11 @@ impl<'a> CliCommand<'a> for SetSubcommand {
 
         // Set the image for the specified container
         client
-            .container_image_set(image.into(), container.map(Into::into))
+            .container_image_set(
+                image.into(),
+                container.map(Into::into),
+                args.is_present("no_pull"),
+            )
             .call()?;
 
         Ok(data)

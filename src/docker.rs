@@ -23,6 +23,8 @@ pub(crate) struct ContainerInfo {
     pub id: Option<String>,
     /// Marks this container as pending removal
     pub pending_removal: bool,
+    /// Whether or not to pull the Docker image before running it
+    pub pull_image: bool,
     /// The definition for the desired state of the container. This should match the actual state
     /// of the container if `dirty` is `false`.
     pub config: ContainerConfig,
@@ -33,6 +35,7 @@ impl ContainerInfo {
         ContainerInfo {
             id: None,
             pending_removal: false,
+            pull_image: true,
             config: ContainerConfig::new(image),
         }
     }

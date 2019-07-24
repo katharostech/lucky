@@ -314,15 +314,22 @@ fn apply_updates(
 
     // If this contianer was not meant to be removed
     if !container_info.pending_removal {
-        // Pull the image
-        // TODO: Add `latest` tag if tag is missing
-        let image_name = &container_info.config.image;
-        log::debug!("Pulling container image: {}", image_name);
-        block_on(
-            images
-                .pull(&PullOptions::builder().image(image_name).build())
-                .collect(),
-        )?;
+        let mut image_name = container_info.config.image.clone();
+
+        // Add `:latest` if the image name doesn't specify a tag
+        if !image_name.contains(":") {
+            image_name = format!("{}:latest", image_name);
+        }
+
+        if container_info.pull_image {
+            // Pull the image
+            log::debug!("Pulling container image: {}", image_name);
+            block_on(
+                images
+                    .pull(&PullOptions::builder().image(image_name).build())
+                    .collect(),
+            )?;
+        }
 
         // Create the container
         let docker_options = container_info.config.to_container_options(

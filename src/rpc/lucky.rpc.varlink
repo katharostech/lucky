@@ -97,7 +97,9 @@ method ContainerSetCommand(command: ?[]string, container_name: ?string) -> ()
 #
 
 # Set a container's image
-method ContainerImageSet(image: string, container_name: ?string) -> ()
+# 
+# If `no_pull` is set to `true` the image will not be pulled before starting the container
+method ContainerImageSet(image: string, container_name: ?string, no_pull: bool) -> ()
 # Get a container's image. Image will be none if container doesn't exist.
 method ContainerImageGet(container_name: ?string) -> (image: ?string)
 

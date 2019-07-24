@@ -628,6 +628,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         call: &mut dyn rpc::Call_ContainerImageSet,
         image: String,
         container_name: Option<String>,
+        no_pull: bool,
     ) -> varlink::Result<()> {
         let mut state = self.state.write().unwrap();
 
@@ -636,12 +637,16 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             if let Some(container) = state.named_containers.get_mut(&name) {
                 log::debug!("Set Docker image [{}]: {}", name, image);
                 // Set the image on existing container
-                container.update(|c| c.config.image = image);
+                container.update(|c| {
+                    c.config.image = image;
+                    c.pull_image = !no_pull;
+                });
             } else {
                 log::debug!("Adding new docker container: {}", name);
                 log::debug!("Set Docker image [{}]: {}", name, image);
                 // Create a new container with the given image
-                let new_container = ContainerInfo::new(&image);
+                let mut new_container = ContainerInfo::new(&image);
+                new_container.pull_image = !no_pull;
                 state.named_containers.insert(name, new_container.into());
             }
         // If this is for the default container
@@ -649,12 +654,16 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             if let Some(container) = &mut state.default_container {
                 log::debug!("Set container image: {}", image);
                 // Set the image on existing container
-                container.update(|c| c.config.image = image);
+                container.update(|c| {
+                    c.config.image = image;
+                    c.pull_image = !no_pull;
+                });
             } else {
                 log::debug!("Adding container");
                 log::debug!("Set container image: {}", image);
                 // Create a new container with the given image
-                let new_container = ContainerInfo::new(&image);
+                let mut new_container = ContainerInfo::new(&image);
+                new_container.pull_image = !no_pull;
                 state.default_container = Some(new_container.into());
             }
         }
