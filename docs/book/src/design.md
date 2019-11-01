@@ -18,10 +18,10 @@ After downloading the Lucky binary it will run the Lucky daemon. The Lucky binar
 
 ### Other Hooks
 
-All of the other hooks are scripts that simply use the Lucky CLI to tell the Lucky daemon that it needs to execute the code related to the triggered hook.
+All of the other hooks are scripts that simply use the Lucky CLI to notify the Lucky daemon of the hooks execuion and of the environment variables that came with the hook execution. It is then the Lucky daemon's job to trigger the appropriate user scripts.
 
 > **Note:** On a somewhat related note, in the event that something goes wrong that somehow kills the daemon process, when the next hook is triggered by Juju, the CLI will detect that the daemon has stopped and will start it again before notifying the newly started daemon of the triggered hook.
 
 ## The Lucky Daemon
 
-The Lucky daemon will be run by the charm and will continue running for the whole duration that the charm is installed. The daemon will listen on a Unix socket for commands that will be sent to it by the Lucky CLI. The Lucky daemon and CLI are provided by the same binary.
+The Lucky daemon will be run by the charm install hook and will continue running for the whole duration that the charm is installed. The daemon will listen on a Unix socket for commands that will be sent to it by the Lucky CLI. The Lucky daemon and CLI are provided by the same binary.
