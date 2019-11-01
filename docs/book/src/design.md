@@ -2,7 +2,7 @@
 
 The Lucky framework will be implemented in Rust and will consist of a daemon that runs as a part of the charm and a CLI that will be used by scripts to communicate to the daemon. The overall design can be seen in the diagram below.
 
-![charm-framework-diagram](./assets/charm-framework.svg)
+![charm-framework-diagram](./assets/lucky-framework.svg)
 
 To explain how the design works we will go through the different components step by step.
 
@@ -20,7 +20,7 @@ After downloading the Lucky binary it will run the Lucky daemon. The Lucky binar
 
 All of the other hooks are scripts that simply use the Lucky CLI to tell the Lucky daemon that it needs to execute the code related to the triggered hook.
 
-> **Note:** On a somewhat related note, in the event that something goes wrong that somehow kills the daemon process, when the next hook is triggered by Juju, the CLI will detect that the daemon has stopped and will start it again before notifying the daemon of the hook.
+> **Note:** On a somewhat related note, in the event that something goes wrong that somehow kills the daemon process, when the next hook is triggered by Juju, the CLI will detect that the daemon has stopped and will start it again before notifying the newly started daemon of the triggered hook.
 
 ## The Lucky Daemon
 
