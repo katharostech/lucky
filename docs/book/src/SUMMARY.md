@@ -1,3 +1,7 @@
 # Summary
 
-- [Overview](./overview.md)
+[Overview](./overview.md)
+
+---
+
+- [Design](./design.md)

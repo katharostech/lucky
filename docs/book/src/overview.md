@@ -8,4 +8,4 @@ We want {toolname} to as easy to use as possible and be very well documented. We
 
 ## Development
 
-We are very early in development. In fact, we haven't started writing any code yet! We are currently working on this documentation and on outlining the design plan before we start work on coding a proof-of-concept. If you have any questions or thoughts don't hesitate to open an issue.
+We are very early in development. In fact, we haven't started writing any code yet! We are currently working on this documentation and on outlining the [design](./design.md) plan before we start work on coding a proof-of-concept. If you have any questions or thoughts don't hesitate to open an issue.
