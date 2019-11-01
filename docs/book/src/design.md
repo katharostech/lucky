@@ -20,8 +20,31 @@ After downloading the Lucky binary it will run the Lucky daemon. The Lucky binar
 
 All of the other hooks are scripts that simply use the Lucky CLI to notify the Lucky daemon of the hooks execuion and of the environment variables that came with the hook execution. It is then the Lucky daemon's job to trigger the appropriate user scripts.
 
-> **Note:** On a somewhat related note, in the event that something goes wrong that somehow kills the daemon process, when the next hook is triggered by Juju, the CLI will detect that the daemon has stopped and will start it again before notifying the newly started daemon of the triggered hook.
+## The Lucky Daemon and CLI
 
-## The Lucky Daemon
+The Lucky daemon will be run by the charm install hook and will continue running for the whole duration that the charm is installed. The daemon will listen on a Unix socket for commands that will be sent to it by the Lucky CLI.
 
-The Lucky daemon will be run by the charm install hook and will continue running for the whole duration that the charm is installed. The daemon will listen on a Unix socket for commands that will be sent to it by the Lucky CLI. The Lucky daemon and CLI are provided by the same binary.
+As noted above the daemon will be notified for every Juju hook that is executed. It is the daemons job to, in response to the hooks, trigger the developers own charm scripts and to be those scripts' interface to both Docker and the Juju hook environment.
+
+When a developer writes scripts for Lucky charms, instead of using the normal Juju commands such as `set-status` and `get-relation` provided by the Juju hook environment, the scripts will use the Lucky CLI. The reason for this is that scripts executed inside of the Docker container will not have access to the Juju hook environment. By mounting the Lucky daemon's socket and the Lucky CLI into the Docker container, we provide a way for scripts inside of the container to access the Juju hook environment. The Lucky daemon, which will be responsible for executing the scripts, will also set helpful environment variables that can be used by the script, some of which will come from the Juju hook execution environment.
+
+The CLI will also provide commands to configure how the container is run, such as adding environment variables, ports, etc. The charm scripts will not themselves execute Docker commands directly, but will use the Lucky CLI instead.
+
+## Charm Scripts
+
+The charm developer will write two kinds of scripts, host scripts and container scripts. Both kinds of are essentially similar to the normal Juju hooks and can be any executable format. All of a charms container scripts will be mounted into the Docker container and will execute inside of the container while all of the host scripts will be run on the host. The scripts will be executed in response to the Juju hooks as outlined in a YAML file that could look something like this:
+
+**lucky.yml:**
+```yaml
+hooks:
+  install:
+    - host_script: do-some-host-stuff.sh
+    - conatiner_script: do-some-stuff-in-container.sh
+  update-status:
+    - host_script: healthcheck-service-from-host.sh
+    - container_script: make-sure-process-in-container-is-running.py
+  config-changed:
+    - container_script: update-application-config.sh
+```
+
+The scripts will be executed by the Lucky daemon in the order that they are defined in the YAML.
