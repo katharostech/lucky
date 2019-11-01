@@ -7,6 +7,8 @@ src = "src"
 
 [output.html]
 default-theme = "rust"
+git-repository-url = "https://github.com/katharostech/juju-container-framework"
+git-repository-icon = "fa-github"
 
 [build]
 build-dir = "build"
