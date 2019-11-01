@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Design - Juju Container Framework ( Name Pending )</title>
+        <title>Design - Lucky - A charming framework for Juju</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -110,14 +110,14 @@
                             
                         </div>
 
-                        <h1 class="menu-title">Juju Container Framework ( Name Pending )</h1>
+                        <h1 class="menu-title">Lucky - A charming framework for Juju</h1>
 
                         <div class="right-buttons">
                             <a href="print.html" title="Print this book" aria-label="Print this book">
                                 <i id="print-button" class="fa fa-print"></i>
                             </a>
                             
-                            <a href="https://github.com/katharostech/juju-container-framework" title="Git repository" aria-label="Git repository">
+                            <a href="https://github.com/katharostech/lucky" title="Git repository" aria-label="Git repository">
                                 <i id="git-repository-button" class="fa fa-github"></i>
                             </a>
                             
@@ -150,21 +150,21 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#design" id="design">Design</a></h1>
-<p>The {toolname} framework will be implemented in Rust and will consist of a daemon that runs as a part of the charm and a CLI that will be used by scripts to communicate to the daemon. The overall design can be seen in the diagram below.</p>
+<p>The Lucky framework will be implemented in Rust and will consist of a daemon that runs as a part of the charm and a CLI that will be used by scripts to communicate to the daemon. The overall design can be seen in the diagram below.</p>
 <p><img src="./assets/charm-framework.svg" alt="charm-framework-diagram" /></p>
 <p>To explain how the design works we will go through the different components step by step.</p>
 <h2><a class="header" href="#hooks" id="hooks">Hooks</a></h2>
-<p>Just like every Juju charm, charms built with the {toolname} framework implement a number of different hooks that the Juju controller will execute. These hooks will not be implemented by the developer but will be provided by the {tollname} charm template.</p>
+<p>Just like every Juju charm, charms built with the Lucky framework implement a number of different hooks that the Juju controller will execute. These hooks will not be implemented by the developer but will be provided by the Lucky charm template.</p>
 <h3><a class="header" href="#install" id="install">Install</a></h3>
-<p>The install hook will first download one of our automated builds of the {toolname} framework, which will be a standalone Rust executable. The install hook will be sure to download the binary appropriate to the platform architecture.</p>
-<p>After downloading the {toolname} binary it will run the {toolname} daemon. The {toolname} binary also acts as the CLI that is used to communicate with the running daemon. The install hook will use this CLI to tell the daemon to execute the developer's install hooks. This will be explained in more detail later.</p>
+<p>The install hook will first download one of our automated builds of the Lucky framework, which will be a standalone Rust executable. The install hook will be sure to download the binary appropriate to the platform architecture.</p>
+<p>After downloading the Lucky binary it will run the Lucky daemon. The Lucky binary also acts as the CLI that is used to communicate with the running daemon. The install hook will use this CLI to tell the daemon to execute the developer's install hooks. This will be explained in more detail later.</p>
 <h3><a class="header" href="#other-hooks" id="other-hooks">Other Hooks</a></h3>
-<p>All of the other hooks are scripts that simply use the {toolname} CLI to tell the {toolname} daemon that it needs to execute the code related to the triggered hook.</p>
+<p>All of the other hooks are scripts that simply use the Lucky CLI to tell the Lucky daemon that it needs to execute the code related to the triggered hook.</p>
 <blockquote>
 <p><strong>Note:</strong> On a somewhat related note, in the event that something goes wrong that somehow kills the daemon process, when the next hook is triggered by Juju, the CLI will detect that the daemon has stopped and will start it again before notifying the daemon of the hook.</p>
 </blockquote>
-<h2><a class="header" href="#the-toolname-daemon" id="the-toolname-daemon">The {toolname} Daemon</a></h2>
-<p>The {toolname} daemon will be run by the charm and will continue running for the whole duration that the charm is installed. The daemon will listen on a Unix socket for commands that will be sent to it by the {toolname} CLI. The {toolname} daemon and CLI are provided by the same binary.</p>
+<h2><a class="header" href="#the-lucky-daemon" id="the-lucky-daemon">The Lucky Daemon</a></h2>
+<p>The Lucky daemon will be run by the charm and will continue running for the whole duration that the charm is installed. The daemon will listen on a Unix socket for commands that will be sent to it by the Lucky CLI. The Lucky daemon and CLI are provided by the same binary.</p>
 
                     </main>
 
