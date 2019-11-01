@@ -1,5 +1,5 @@
 [book]
-title = "Juju Container Framework ( Name Pending )"
+title = "Lucky - A charming framework for Juju"
 authors = ["Katharos Technology LLC and contributors"]
 language = "en"
 multilingual = false
@@ -7,7 +7,7 @@ src = "src"
 
 [output.html]
 default-theme = "rust"
-git-repository-url = "https://github.com/katharostech/juju-container-framework"
+git-repository-url = "https://github.com/katharostech/lucky"
 git-repository-icon = "fa-github"
 
 [build]
