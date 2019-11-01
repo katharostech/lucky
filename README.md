@@ -1,6 +1,6 @@
-# juju-container-framework ( JCF )
+# juju-container-framework ( Name Pending )
 
-This is the home of a work-in-progress charm writing framework for [Juju]. The framwork will seek to provide a well-documented and easy-to-approach developer experience for writing charms that run Docker containers.
+This is the home of a work-in-progress charm writing framework for [Juju]. The framwork will seek to provide a well-documented and easy-to-approach developer experience for writing charms that run Docker containers. While currently we are focusing on Docker containers, as development progresses, this framework could very well end up being useful for writing non-Docker charms as well.
 
 The original discussion that started this effort can be found [here][discussion] on the [Juju forums][forums].
 
