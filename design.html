@@ -151,7 +151,7 @@
                     <main>
                         <h1><a class="header" href="#design" id="design">Design</a></h1>
 <p>The Lucky framework will be implemented in Rust and will consist of a daemon that runs as a part of the charm and a CLI that will be used by scripts to communicate to the daemon. The overall design can be seen in the diagram below.</p>
-<p><img src="./assets/charm-framework.svg" alt="charm-framework-diagram" /></p>
+<p><img src="./assets/lucky-framework.svg" alt="charm-framework-diagram" /></p>
 <p>To explain how the design works we will go through the different components step by step.</p>
 <h2><a class="header" href="#hooks" id="hooks">Hooks</a></h2>
 <p>Just like every Juju charm, charms built with the Lucky framework implement a number of different hooks that the Juju controller will execute. These hooks will not be implemented by the developer but will be provided by the Lucky charm template.</p>
@@ -161,7 +161,7 @@
 <h3><a class="header" href="#other-hooks" id="other-hooks">Other Hooks</a></h3>
 <p>All of the other hooks are scripts that simply use the Lucky CLI to tell the Lucky daemon that it needs to execute the code related to the triggered hook.</p>
 <blockquote>
-<p><strong>Note:</strong> On a somewhat related note, in the event that something goes wrong that somehow kills the daemon process, when the next hook is triggered by Juju, the CLI will detect that the daemon has stopped and will start it again before notifying the daemon of the hook.</p>
+<p><strong>Note:</strong> On a somewhat related note, in the event that something goes wrong that somehow kills the daemon process, when the next hook is triggered by Juju, the CLI will detect that the daemon has stopped and will start it again before notifying the newly started daemon of the triggered hook.</p>
 </blockquote>
 <h2><a class="header" href="#the-lucky-daemon" id="the-lucky-daemon">The Lucky Daemon</a></h2>
 <p>The Lucky daemon will be run by the charm and will continue running for the whole duration that the charm is installed. The daemon will listen on a Unix socket for commands that will be sent to it by the Lucky CLI. The Lucky daemon and CLI are provided by the same binary.</p>
