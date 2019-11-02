@@ -1,0 +1,7 @@
+variables:
+  - name: charm_display_name
+    default_value: My Charm
+  - name: charm_name
+    default_value: "{{ to_snake_case charm_display_name }}"
+  - name: charm_summary
+  - name: charm_maintainer

@@ -1,0 +1,20 @@
+name: {{charm_name}}
+display-name: {{charm_display_name}}
+summary: {{charm_summary}}
+maintainer: {{charm_maintainer}}
+description: |
+  {{charm_summary}}
+tags:
+  # Replace "misc" with one or more whitelisted tags from this list:
+  # https://jujucharms.com/docs/stable/authors-charm-metadata
+  - misc
+subordinate: false
+provides:
+  provides-relation:
+    interface: interface-name
+requires:
+  requires-relation:
+    interface: interface-name
+peers:
+  peer-relation:
+    interface: interface-name
