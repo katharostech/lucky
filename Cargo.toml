@@ -5,6 +5,7 @@ authors = ["zicklag <zicklag@katharostech.com>"]
 edition = "2018"
 
 [dependencies]
+zip = { version = "0.5", features = ["bzip2"], default-features = false }
 
 [build-dependencies]
 zip = { version = "0.5", features = ["bzip2"], default-features = false }
