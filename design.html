@@ -161,7 +161,7 @@
 <p><strong>Note:</strong> The Lucky binary also acts as the CLI that is used to communicate with the running daemon.</p>
 </blockquote>
 <h3><a class="header" href="#other-hooks" id="other-hooks">Other Hooks</a></h3>
-<p>All of the other hooks are scripts that simply use the Lucky CLI to notify the Lucky daemon of the hooks execuion and of the environment variables that came with the hook execution. It is then the Lucky daemon's job to trigger the appropriate user scripts.</p>
+<p>All of the other hooks are scripts that simply use the Lucky CLI to notify the Lucky daemon of the hooks execution and of the environment variables that came with the hook execution. It is then the Lucky daemon's job to trigger the appropriate user scripts.</p>
 <h2><a class="header" href="#the-lucky-daemon-and-cli" id="the-lucky-daemon-and-cli">The Lucky Daemon and CLI</a></h2>
 <p>The Lucky daemon will be run by the charm install hook and will continue running for the whole duration that the charm is installed. The daemon will listen on a Unix socket for commands that will be sent to it by the Lucky CLI.</p>
 <p>As noted above the daemon will be notified for every Juju hook that is executed. It is the daemon's job to, in response to the hooks, trigger the developers own charm scripts and to be those scripts' interface to both Docker and the Juju hook environment.</p>
@@ -173,9 +173,9 @@
 <pre><code class="language-yaml">hooks:
   install:
     - host_script: do-some-host-stuff.sh
-    - conatiner_script: do-some-stuff-in-container.sh
+    - container_script: do-some-stuff-in-container.sh
   update-status:
-    - host_script: healthcheck-service-from-host.sh
+    - host_script: health-check-service-from-host.sh
     - container_script: make-sure-process-in-container-is-running.py
   config-changed:
     - container_script: update-application-config.sh

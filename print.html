@@ -152,7 +152,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#overview" id="overview">Overview</a></h1>
-<p>Lucky is a work-in-progress framwork for writing <a href="https://jaas.ai/">Juju</a> charms. It is being designed specifically to support writing Docker-powered charms easily. In the future the framework could be useful for more than Docker charms, but development is currently focused on providing facilities to run and configure Docker containers.</p>
+<p>Lucky is a work-in-progress framework for writing <a href="https://jaas.ai/">Juju</a> charms. It is being designed specifically to support writing Docker-powered charms easily. In the future the framework could be useful for more than Docker charms, but development is currently focused on providing facilities to run and configure Docker containers.</p>
 <p>We want Lucky to as easy to use as possible and be very well documented. We will focus on putting the developer's experience first, starting small and adding features as they become necessary or useful.</p>
 <h2><a class="header" href="#developer-experience" id="developer-experience">Developer Experience</a></h2>
 <p>The Lucky framework will provide a charm template that will contain the boilerplate necessary to get started writing a charm with the framework, and it will provide a CLI that will be used by the charm code to interact with Docker and with the Juju controller.</p>
@@ -171,7 +171,7 @@
 <p><strong>Note:</strong> The Lucky binary also acts as the CLI that is used to communicate with the running daemon.</p>
 </blockquote>
 <h3><a class="header" href="#other-hooks" id="other-hooks">Other Hooks</a></h3>
-<p>All of the other hooks are scripts that simply use the Lucky CLI to notify the Lucky daemon of the hooks execuion and of the environment variables that came with the hook execution. It is then the Lucky daemon's job to trigger the appropriate user scripts.</p>
+<p>All of the other hooks are scripts that simply use the Lucky CLI to notify the Lucky daemon of the hooks execution and of the environment variables that came with the hook execution. It is then the Lucky daemon's job to trigger the appropriate user scripts.</p>
 <h2><a class="header" href="#the-lucky-daemon-and-cli" id="the-lucky-daemon-and-cli">The Lucky Daemon and CLI</a></h2>
 <p>The Lucky daemon will be run by the charm install hook and will continue running for the whole duration that the charm is installed. The daemon will listen on a Unix socket for commands that will be sent to it by the Lucky CLI.</p>
 <p>As noted above the daemon will be notified for every Juju hook that is executed. It is the daemon's job to, in response to the hooks, trigger the developers own charm scripts and to be those scripts' interface to both Docker and the Juju hook environment.</p>
@@ -183,9 +183,9 @@
 <pre><code class="language-yaml">hooks:
   install:
     - host_script: do-some-host-stuff.sh
-    - conatiner_script: do-some-stuff-in-container.sh
+    - container_script: do-some-stuff-in-container.sh
   update-status:
-    - host_script: healthcheck-service-from-host.sh
+    - host_script: health-check-service-from-host.sh
     - container_script: make-sure-process-in-container-is-running.py
   config-changed:
     - container_script: update-application-config.sh
