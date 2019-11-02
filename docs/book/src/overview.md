@@ -1,6 +1,6 @@
 # Overview
 
-Lucky is a work-in-progress framwork for writing [Juju] charms. It is being designed specifically to support writing Docker-powered charms easily. In the future the framework could be useful for more than Docker charms, but development is currently focused on providing facilities to run and configure Docker containers.
+Lucky is a work-in-progress framework for writing [Juju] charms. It is being designed specifically to support writing Docker-powered charms easily. In the future the framework could be useful for more than Docker charms, but development is currently focused on providing facilities to run and configure Docker containers.
 
 We want Lucky to as easy to use as possible and be very well documented. We will focus on putting the developer's experience first, starting small and adding features as they become necessary or useful.
 

@@ -20,7 +20,7 @@ After downloading the Lucky binary it will run the Lucky daemon.
 
 ### Other Hooks
 
-All of the other hooks are scripts that simply use the Lucky CLI to notify the Lucky daemon of the hooks execuion and of the environment variables that came with the hook execution. It is then the Lucky daemon's job to trigger the appropriate user scripts.
+All of the other hooks are scripts that simply use the Lucky CLI to notify the Lucky daemon of the hooks execution and of the environment variables that came with the hook execution. It is then the Lucky daemon's job to trigger the appropriate user scripts.
 
 ## The Lucky Daemon and CLI
 
@@ -41,9 +41,9 @@ The charm developer will write two kinds of scripts, host scripts and container 
 hooks:
   install:
     - host_script: do-some-host-stuff.sh
-    - conatiner_script: do-some-stuff-in-container.sh
+    - container_script: do-some-stuff-in-container.sh
   update-status:
-    - host_script: healthcheck-service-from-host.sh
+    - host_script: health-check-service-from-host.sh
     - container_script: make-sure-process-in-container-is-running.py
   config-changed:
     - container_script: update-application-config.sh
