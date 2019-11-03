@@ -19,7 +19,8 @@ fn get_cli() -> App<'static, 'static> {
         .author(clap::crate_authors!())
         .about("The Lucky charm framework for Juju.")
         .global_setting(AppSettings::ColoredHelp)
-        .setting(AppSettings::SubcommandRequiredElseHelp);
+        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .after_help(include_str!("cli/help.txt"));
 
     app = app.subcommand(charm::get_subcommand());
 
