@@ -4,6 +4,8 @@ use std::io;
 const CHARM_TEMPLATE_ARCHIVE: &[u8] =
     include_bytes!(concat!(env!("OUT_DIR"), "/charm_template.zip"));
 
+const CHARM_HOOK_TEMPLATE: &[u8] = include_bytes!("../charm_hooks/hook-template.hbs");
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let zip_reader = std::io::Cursor::new(CHARM_TEMPLATE_ARCHIVE);
     let mut zip = zip::ZipArchive::new(zip_reader)?;
@@ -29,10 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         {
             use std::os::unix::fs::PermissionsExt;
 
-            if (&*file.name()).contains("hooks") {
-                // Make hooks executable
-                fs::set_permissions(&outpath, fs::Permissions::from_mode(0o744))?;
-            } else if let Some(mode) = file.unix_mode() {
+            if let Some(mode) = file.unix_mode() {
                 fs::set_permissions(&outpath, fs::Permissions::from_mode(mode))?;
             }
         }

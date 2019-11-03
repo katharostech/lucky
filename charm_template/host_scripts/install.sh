@@ -1,0 +1,1 @@
+lucky set-status maintenance "Running `install.sh` host script."

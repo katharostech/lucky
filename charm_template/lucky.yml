@@ -1,0 +1,10 @@
+# This allows you to set which of your scripts to run and in what order when
+# hooks are triggered.
+hooks:
+  install:
+    # Run a script on the host. `install.sh` must exist in the `host_scripts`
+    # directory.
+    - host_script: install.sh
+    # Run a script inside the container. `configure.sh` must exist in the
+    # `container_scripts` directory.
+    - container_script: configure.sh

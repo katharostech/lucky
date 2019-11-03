@@ -1,0 +1,1 @@
+lucky set-status maintenance "Running `configure.sh` container script"
