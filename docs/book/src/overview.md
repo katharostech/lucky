@@ -14,4 +14,4 @@ We will be focusing on making it easy to write charms in bash or any other shell
 
 ## Development
 
-We are very early in development. We have just started work the proof of concept. We have a [design](./design.md) document outlining our current plan for the framework. This may change as we get into development. If you have any questions or thoughts don't hesitate to open an issue.
+We are very early in development. We have just started work on the proof of concept. We have a [design](./design.md) document outlining our current plan for the framework. This may change as we get into development. If you have any questions or thoughts don't hesitate to open an issue.
