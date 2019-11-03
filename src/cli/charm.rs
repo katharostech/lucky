@@ -12,6 +12,6 @@ pub(crate) fn get_subcommand<'a, 'b>() -> App<'a, 'b> {
 pub(crate) fn run(args: &ArgMatches) {
     match args.subcommand() {
         ("create", Some(sub_args)) => create::run(sub_args),
-        _ => panic!("Unimplemented subcommand or failure to show help.")
+        _ => panic!("Unimplemented subcommand or failure to show help."),
     }
 }

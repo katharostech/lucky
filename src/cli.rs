@@ -4,12 +4,16 @@ use clap::{App, AppSettings};
 mod charm;
 
 pub fn run() {
+    // Enable colored backtraces
+    #[cfg(feature = "color-backtrace")]
+    color_backtrace::install();
+
     let args = get_cli().get_matches();
 
     match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
 
-        _ => panic!("Unimplemented subcommand or failure to show help.")
+        _ => panic!("Unimplemented subcommand or failure to show help."),
     }
 }
 

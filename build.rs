@@ -6,16 +6,16 @@ use std::path::Path;
 use walkdir::WalkDir;
 
 fn main() {
-    let manifest_dir_path = format!("{}/charm_template", env::var("CARGO_MANIFEST_DIR").unwrap());
+    let charm_template_dir = format!("{}/charm_template", env::var("CARGO_MANIFEST_DIR").unwrap());
     let charm_template_zip_path = format!("{}/charm_template.zip", env::var("OUT_DIR").unwrap());
-    let prefix = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let prefix = &charm_template_dir;
 
     let file_writer = File::create(&charm_template_zip_path).unwrap();
     let mut zip = zip::ZipWriter::new(file_writer);
     let options =
         zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Bzip2);
 
-    let dir_iter = WalkDir::new(&manifest_dir_path).into_iter();
+    let dir_iter = WalkDir::new(&charm_template_dir).into_iter();
 
     let mut buffer = Vec::new();
     for entry in dir_iter {
