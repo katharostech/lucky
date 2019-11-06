@@ -19,21 +19,7 @@ pub fn run() {
     }
 }
 
-pub(crate) mod bighelp {
-    pub(crate) fn help(args: &clap::ArgMatches, page: &str) {
-        if args.is_present("show_bighelp") {
-            termimad::print_text(page);
-            std::process::exit(0);
-        }
-    }
-
-    pub(crate) fn arg<'a, 'b>() -> clap::Arg<'a, 'b> {
-        clap::Arg::with_name("show_bighelp")
-            .help("Show a detailed help page ( like a man page )")
-            .long("bighelp")
-            .short("H")
-    }
-}
+pub(crate) mod bighelp;
 
 fn get_cli() -> App<'static, 'static> {
     let mut app = App::new("Lucky")

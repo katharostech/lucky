@@ -1,0 +1,24 @@
+                                                [38;5;11m[4m[1mLucky - The Lucky charm framwork for Juju[0m
+
+Welcome to the Lucky CLI. Lucky is a framework for creating Juju charms. The Lucky framework is designed to make it [38;5;13m[3m[4m[1measy[0m and [38;5;13m[3m[4m[1mfun[0m to write
+ charms that are powered by Docker containers.
+
+[38;5;11m[4mThe Bighelp Pages[0m
+
+Most of the commands in the Lucky CLI have an extra "bighelp" page, like this one, that can be accessed with the [48;5;236m--bighelp[0m or [48;5;236m-H[0m flag. We
+ will strive to make these built-in docs to be enough to learn to use Lucky all by themselves.
+
+[38;5;244m[1m▐[0m [38;5;13m[1mTip:[0m On Unix systems or with Windows Git bash, it can be useful to pipe these docs to [48;5;236mless[0m to provide a pager. You can do so like this:
+[38;5;244m[1m▐[0m 
+[38;5;244m[1m▐[0m $ lucky -H | less -R
+[38;5;244m[1m▐[0m  
+[38;5;244m[1m▐[0m You can also add this to your [48;5;236m.bashrc[0m or other shell init file to automatically add the [48;5;236m-R[0m flag to all runs of [48;5;236mless[0m:
+[38;5;244m[1m▐[0m 
+[38;5;244m[1m▐[0m export LESS="-R"
+
+[38;5;11m[4mGetting Started[0m
+
+For charm development you will be most interested in the "charm" subcommand which can be used to build and create charms. The other
+ commands are only used on the server, but their help messages can be useful during development.
+
+Please consult the documentation at https://katharostech.github.io/lucky for more information.

@@ -1,7 +1,14 @@
-# Lucky CLI
+# Lucky - The Lucky charm framwork for Juju
 
-## Getting Started 
+Welcome to the Lucky CLI. Lucky is a framework for creating Juju charms. The Lucky framework is designed to make it ***easy*** and ***fun*** to write charms that are powered by Docker containers.
 
-For charm development you will be most interested in the "charm" subcommand which can be used to build and create charms. The other commands are only used on the server, but their help messages can be useful during development.
+## The Bighelp Pages
 
-Please consult the documentation at https://katharostech.github.io/lucky for more information.
+Most of the commands in the Lucky CLI have an extra "bighelp" page, like this one, that can be accessed with the `--bighelp` or `-H` flag. We will strive to make these built-in docs sufficient enough to learn to use Lucky without even using the internet!
+
+> **Tip:** On Unix systems or with Windows Git bash you can pipe the docs to `cat` or `less` to skip the pager or use a different one:
+> 
+> $ lucky -H | less -R # Use less because it is more featured than the built-in pager
+> $ lucky -H | cat # Don't use a pager
+
+## Getting Started
