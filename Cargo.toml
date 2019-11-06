@@ -12,6 +12,7 @@ serde = { version = "1.0", features = ["derive"] }
 color-backtrace = { version = "0.2", optional = true }
 # TODO: Maybe replace this dependency with a handmade one
 rprompt = "1.0"
+termimad = "0.7"
 
 [features]
 default = ["color-backtrace"]
