@@ -12,3 +12,9 @@ Most of the commands in the Lucky CLI have an extra "bighelp" page, like this on
 > $ lucky -H | cat # Don't use a pager
 
 ## Getting Started
+
+The first step to getting started with Lucky is to create your charm using the built-in charm template.
+
+    $ lucky charm create [charmname]
+
+You will be prompted for some basic fields that it will fill out for you in the charm metadata.
