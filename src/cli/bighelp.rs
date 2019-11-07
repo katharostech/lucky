@@ -43,7 +43,7 @@ pub(crate) fn help(args: &clap::ArgMatches, page: &str) {
                         Down | Char('j') => view.try_scroll_lines(1),
                         PageUp => view.try_scroll_pages(-1),
                         PageDown => view.try_scroll_pages(1),
-                        Esc | Char('q') => break,
+                        Esc | Enter | Char('q') => break,
                         _ => (),
                     }
                     w.flush().unwrap();
