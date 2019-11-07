@@ -10,12 +10,20 @@ pub fn run() {
 
     let args = get_cli().get_matches();
 
-    bighelp::help(&args, include_str!("cli/lucky.md"));
+    if let Err(e) = bighelp::help(&args, include_str!("cli/lucky.md")) {
+        println!("{}", e);
+    };
 
-    match args.subcommand() {
+    if let Err(e) = match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
-        ("", None) => println!("TODO: show help"),
+        ("", None) => {
+            println!("TODO: show help");
+            Ok(())
+        }
         _ => panic!("Unimplemented subcommand or failure to show help."),
+    } {
+        println!("{}", e);
+        std::process::exit(1);
     }
 }
 

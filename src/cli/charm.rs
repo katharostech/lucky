@@ -11,12 +11,15 @@ pub(crate) fn get_subcommand<'a, 'b>() -> App<'a, 'b> {
         .subcommand(create::get_subcommand())
 }
 
-pub(crate) fn run(args: &ArgMatches) {
-    bighelp::help(&args, include_str!("charm/charm.md"));
+pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
+    bighelp::help(&args, include_str!("charm/charm.md"))?;
 
     match args.subcommand() {
         ("create", Some(sub_args)) => create::run(sub_args),
-        ("", None) => println!("TODO: show help"),
+        ("", None) => {
+            println!("TODO: show help");
+            Ok(())
+        }
         _ => panic!("Unimplemented subcommand or failure to show help."),
     }
 }

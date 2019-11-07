@@ -21,6 +21,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "arrayref"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -467,6 +472,7 @@ dependencies = [
 name = "lucky"
 version = "0.1.0"
 dependencies = [
+ "anyhow 1.0.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "atty 0.2.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "color-backtrace 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -475,6 +481,7 @@ dependencies = [
  "rprompt 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.102 (registry+https://github.com/rust-lang/crates.io-index)",
  "termimad 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "thiserror 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "walkdir 2.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "zip 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -1015,6 +1022,7 @@ dependencies = [
 [metadata]
 "checksum addr2line 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "95b06ae5a8a3bae54910c9029a52f83203ce2001c71b10b1faae3a337fee4ab5"
 "checksum ansi_term 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ee49baf6cb617b853aa8d93bf420db2383fab46d314482ca2803b40d5fde979b"
+"checksum anyhow 1.0.19 (registry+https://github.com/rust-lang/crates.io-index)" = "57114fc2a6cc374bce195d3482057c846e706d252ff3604363449695684d7a0d"
 "checksum arrayref 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)" = "0d382e583f07208808f6b1249e60848879ba3543f57c32277bf52d69c2f0f0ee"
 "checksum arrayvec 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)" = "cd9fd44efafa8690358b7408d253adf110036b88f55672a933f01d616ad9b1b9"
 "checksum atty 0.2.13 (registry+https://github.com/rust-lang/crates.io-index)" = "1803c647a3ec87095e7ae7acfca019e98de5ec9a7d01343f611cf3152ed71a90"
