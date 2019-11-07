@@ -29,7 +29,7 @@ impl Default for TemplateData {
 
 #[rustfmt::skip]
 pub(crate) fn get_subcommand<'a>() -> App<'a> {
-    App::new("create")
+    crate::cli::new_app("create")
         .about("Create a new lucky charm.")
         .arg(Arg::with_name("target_dir")
             .help("The directory to create the charm in")

@@ -1,3 +1,5 @@
+//! Commandline interface module
+
 use clap::{App, AppSettings};
 
 // Help utility
@@ -6,13 +8,16 @@ pub(crate) mod doc;
 // Subcommands
 mod charm;
 
+/// Run the application
 pub fn run() {
     // Enable colored backtraces
     #[cfg(feature = "color-backtrace")]
     color_backtrace::install();
 
+    // Collect arguments from the commandline
     let args = get_cli().get_matches();
 
+    // Run the chosen subcommand
     if let Err(e) = match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
         ("doc", _) => doc::run(include_str!("cli/lucky.md")),
@@ -25,11 +30,14 @@ pub fn run() {
     }
 }
 
+/// Returns a default app with the given name. This is used by subcommands to provide
+/// modifiable default settings.
 fn new_app<'a>(name: &str) -> App<'a> {
     App::new(name)
         .setting(AppSettings::ColoredHelp)
         .setting(AppSettings::VersionlessSubcommands)
         .setting(AppSettings::SubcommandRequiredElseHelp)
+        .setting(AppSettings::DisableHelpSubcommand)
         .mut_arg("help", |arg| arg
             .short('h')
             .long("help")
