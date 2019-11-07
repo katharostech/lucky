@@ -1,6 +1,6 @@
 use std::fs;
 use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
@@ -9,6 +9,7 @@ use rprompt::prompt_reply_stdout;
 use serde::Serialize;
 
 #[derive(Serialize)]
+/// The input data to the charm template
 struct TemplateData {
     pub charm_display_name: String,
     pub charm_name: String,
@@ -28,6 +29,7 @@ impl Default for TemplateData {
 }
 
 #[rustfmt::skip]
+/// Return the `create` subcommand
 pub(crate) fn get_subcommand<'a>() -> App<'a> {
     crate::cli::new_app("create")
         .about("Create a new lucky charm.")
@@ -60,8 +62,17 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
             .takes_value(true))       
 }
 
+/// Run the `create` subcommand
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
-    // TODO: Make sure dir doesn't already exit
+    // Make sure target directory doesn't already exist
+    let target_dir = Path::new(
+        args.value_of("target_dir")
+            .expect("Missing required argument: target_dir"),
+    );
+    if target_dir.exists() {
+        anyhow::bail!("Error: target directory already exists");
+    }
+
     // Create handlebars tempate engine
     let mut handlebars = Handlebars::new();
     // Clear the escape handler
@@ -94,7 +105,9 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     if !args.is_present("use_defaults") {
         // Prompt for missing display name
         if !args.is_present("display_name") {
-            let default = args.value_of("target_dir").expect("Missing target dir");
+            let default = target_dir
+                .file_name()
+                .map_or(target_dir.to_string_lossy(), |x| x.to_string_lossy());
             let response = prompt_reply_stdout(&format!("Display name [{}]: ", default))?;
             let value: String;
             if response.trim() == "" {

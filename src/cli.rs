@@ -23,9 +23,7 @@ pub fn run() {
         ("doc", _) => doc::run(include_str!("cli/lucky.md")),
         _ => panic!("Unimplemented subcommand or failure to show help."),
     } {
-        // If this fails to print we don't care to handle the error, we can't do anything about it
-        // but we don't want to panic.
-        eprintln!("{}", e);
+        eprintln!("{:?}", e);
         std::process::exit(1);
     }
 }

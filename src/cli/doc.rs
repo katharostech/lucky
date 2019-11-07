@@ -12,8 +12,9 @@ use crossterm::{
 use std::io::{stdout, Write};
 use termimad::*;
 
+/// Render the document
 pub(crate) fn run(document: &str) -> anyhow::Result<()> {
-    // Customize doc style
+    // Create a doc skin
     let mut skin = MadSkin::default();
     skin.set_headers_fg(Yellow);
     skin.bold.set_fg(Magenta);
@@ -45,6 +46,9 @@ pub(crate) fn run(document: &str) -> anyhow::Result<()> {
                     Esc | Enter | Char('q') => break,
                     _ => (),
                 }
+                // Make it full-screen in case the terminal size has changed.
+                // For now it will only resize if you hit a button
+                view.resize(&Area::full_screen());
                 w.flush()?;
             }
         }
@@ -59,7 +63,6 @@ pub(crate) fn run(document: &str) -> anyhow::Result<()> {
         // Print page
         // NOTE: This will still print out the colors so that you can pipe
         // the output to `less -R` or `cat` and still get the color.
-        // TODO: This can apparently panic: https://github.com/Canop/termimad/issues/7
         skin.write_text(&document)?;
     }
 
@@ -69,9 +72,10 @@ pub(crate) fn run(document: &str) -> anyhow::Result<()> {
 
 use clap::{App, AppSettings};
 
+/// Return the `doc` subcommand
 pub(crate) fn get_subcommand<'a>() -> App<'a> {
     crate::cli::new_app("doc")
         .about("Show a detailed help page ( like a man page )")
         .setting(AppSettings::DisableHelpSubcommand)
-        .unset_setting(AppSettings::SubcommandRequiredElseHelp)
+        .unset_setting(AppSettings::ArgRequiredElseHelp)
 }
