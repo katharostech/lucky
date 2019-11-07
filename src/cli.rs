@@ -36,7 +36,7 @@ fn new_app<'a>(name: &str) -> App<'a> {
     App::new(name)
         .setting(AppSettings::ColoredHelp)
         .setting(AppSettings::VersionlessSubcommands)
-        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .setting(AppSettings::ArgRequiredElseHelp)
         .setting(AppSettings::DisableHelpSubcommand)
         .mut_arg("help", |arg| {
             arg.short('h')
