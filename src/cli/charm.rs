@@ -1,25 +1,20 @@
-use clap::{App, ArgMatches, SubCommand};
+use clap::{App, ArgMatches};
 
 mod create;
 
-use crate::cli::bighelp;
+use crate::cli::doc;
 
-pub(crate) fn get_subcommand<'a, 'b>() -> App<'a, 'b> {
-    SubCommand::with_name("charm")
+pub(crate) fn get_subcommand<'a>() -> App<'a> {
+    crate::cli::new_app("charm")
         .about("Build and create Lucky charms.")
-        .arg(bighelp::arg())
         .subcommand(create::get_subcommand())
+        .subcommand(doc::get_subcommand())
 }
 
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
-    bighelp::help(&args, include_str!("charm/charm.md"))?;
-
     match args.subcommand() {
         ("create", Some(sub_args)) => create::run(sub_args),
-        ("", None) => {
-            eprintln!("TODO: Show help");
-            Ok(())
-        }
+        ("doc", _) => doc::run(include_str!("./charm/charm.md")),
         _ => panic!("Unimplemented subcommand or failure to show help."),
     }
 }

@@ -3,7 +3,7 @@ use std::io;
 use std::path::PathBuf;
 
 use anyhow::Context;
-use clap::{App, Arg, ArgMatches, SubCommand};
+use clap::{App, Arg, ArgMatches};
 use handlebars::Handlebars;
 use rprompt::prompt_reply_stdout;
 use serde::Serialize;
@@ -28,34 +28,34 @@ impl Default for TemplateData {
 }
 
 #[rustfmt::skip]
-pub(crate) fn get_subcommand<'a, 'b>() -> App<'a, 'b> {
-    SubCommand::with_name("create")
+pub(crate) fn get_subcommand<'a>() -> App<'a> {
+    App::new("create")
         .about("Create a new lucky charm.")
         .arg(Arg::with_name("target_dir")
             .help("The directory to create the charm in")
             .required(true))
         .arg(Arg::with_name("use_defaults")
             .long("use-defaults")
-            .short("D")
+            .short('D')
             .help("Do not prompt and use default values for unprovided fields"))
         .arg(Arg::with_name("charm_name")
             .long("name")
-            .short("n")
+            .short('n')
             .help("The name of the charm. Defaults to the target_dir")
             .takes_value(true))
         .arg(Arg::with_name("display_name")
             .long("display-name")
-            .short("d")
+            .short('d')
             .help("The display name of the charm ( may contain spaces )")
             .takes_value(true))
         .arg(Arg::with_name("charm_summary")
             .long("summary")
-            .short("s")
+            .short('s')
             .help("Short description of the charm")
             .takes_value(true))
         .arg(Arg::with_name("charm_maintainer")
             .long("maintainer")
-            .short("m")
+            .short('m')
             .help("The charm maintainer")
             .takes_value(true))       
 }

@@ -1,5 +1,8 @@
 use clap::{App, AppSettings};
 
+// Help utility
+pub(crate) mod doc;
+
 // Subcommands
 mod charm;
 
@@ -10,16 +13,9 @@ pub fn run() {
 
     let args = get_cli().get_matches();
 
-    if let Err(e) = bighelp::help(&args, include_str!("cli/lucky.md")) {
-        eprintln!("{}", e);
-    };
-
     if let Err(e) = match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
-        ("", None) => {
-            eprintln!("TODO: Show help");
-            Ok(())
-        }
+        ("doc", _) => doc::run(include_str!("cli/lucky.md")),
         _ => panic!("Unimplemented subcommand or failure to show help."),
     } {
         // If this fails to print we don't care to handle the error, we can't do anything about it
@@ -29,17 +25,23 @@ pub fn run() {
     }
 }
 
-pub(crate) mod bighelp;
+fn new_app<'a>(name: &str) -> App<'a> {
+    App::new(name)
+        .setting(AppSettings::ColoredHelp)
+        .setting(AppSettings::VersionlessSubcommands)
+        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .mut_arg("help", |arg| arg
+            .short('h')
+            .long("help")
+            .help("Show help: --help shows more information when available"))
+}
 
-fn get_cli() -> App<'static, 'static> {
-    let mut app = App::new("Lucky")
+/// Get the Lucky clap App
+fn get_cli() -> App<'static> {
+    new_app("lucky")
         .version(clap::crate_version!())
         .author(clap::crate_authors!())
         .about("The Lucky charm framework for Juju.")
-        .global_setting(AppSettings::ColoredHelp)
-        .arg(bighelp::arg());
-
-    app = app.subcommand(charm::get_subcommand());
-
-    app
+        .subcommand(charm::get_subcommand())
+        .subcommand(doc::get_subcommand())
 }
