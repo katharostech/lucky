@@ -38,10 +38,11 @@ fn new_app<'a>(name: &str) -> App<'a> {
         .setting(AppSettings::VersionlessSubcommands)
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .setting(AppSettings::DisableHelpSubcommand)
-        .mut_arg("help", |arg| arg
-            .short('h')
-            .long("help")
-            .help("Show help: --help shows more information when available"))
+        .mut_arg("help", |arg| {
+            arg.short('h')
+                .long("help")
+                .help("Show help: --help shows more information when available")
+        })
 }
 
 /// Get the Lucky clap App
