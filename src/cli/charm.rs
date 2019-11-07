@@ -17,7 +17,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     match args.subcommand() {
         ("create", Some(sub_args)) => create::run(sub_args),
         ("", None) => {
-            println!("TODO: show help");
+            eprintln!("TODO: Show help");
             Ok(())
         }
         _ => panic!("Unimplemented subcommand or failure to show help."),

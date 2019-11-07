@@ -61,7 +61,7 @@ pub(crate) fn help(args: &clap::ArgMatches, page: &str) -> anyhow::Result<()> {
             // NOTE: This will still print out the colors so that you can pipe
             // the output to `less -R` or `cat` and still get the color.
             // TODO: This can apparently panic: https://github.com/Canop/termimad/issues/7
-            skin.print_text(&page);
+            skin.write_text(&page)?;
         }
 
         // Exit process

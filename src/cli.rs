@@ -11,18 +11,20 @@ pub fn run() {
     let args = get_cli().get_matches();
 
     if let Err(e) = bighelp::help(&args, include_str!("cli/lucky.md")) {
-        println!("{}", e);
+        eprintln!("{}", e);
     };
 
     if let Err(e) = match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
         ("", None) => {
-            println!("TODO: show help");
+            eprintln!("TODO: Show help");
             Ok(())
         }
         _ => panic!("Unimplemented subcommand or failure to show help."),
     } {
-        println!("{}", e);
+        // If this fails to print we don't care to handle the error, we can't do anything about it
+        // but we don't want to panic.
+        eprintln!("{}", e);
         std::process::exit(1);
     }
 }
