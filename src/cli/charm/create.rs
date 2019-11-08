@@ -85,7 +85,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Clear the escape handler
     handlebars.register_escape_fn(handlebars::no_escape);
 
-    // Initialize template
+    // Initialize template settings
     let mut template_settings = TemplateData::default();
 
     // Set charm name
