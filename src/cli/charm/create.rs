@@ -67,7 +67,9 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
 
 /// Run the `create` subcommand
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
-    if args.is_present("doc") { doc::run(get_subcommand(), "lucky", include_str!("create.md"))?; }
+    if args.is_present("doc") {
+        doc::run(get_subcommand(), "lucky", include_str!("create.md"))?;
+    }
 
     // Make sure target directory doesn't already exist
     let target_dir = Path::new(

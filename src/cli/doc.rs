@@ -1,5 +1,6 @@
-//! Handles printing bighelp pages
+//! Handles printing doc pages
 
+use anyhow::Context;
 use crossterm::{
     cursor::{Hide, Show},
     input::{input, InputEvent::*, KeyEvent::*},
@@ -7,32 +8,33 @@ use crossterm::{
     screen::{EnterAlternateScreen, LeaveAlternateScreen, RawScreen},
     style::{style, Attribute::*, Color, Color::*},
 };
-use std::io::{stdout, Read, Write, Seek, SeekFrom};
-use std::fs::OpenOptions;
 use std::collections::HashMap;
-use anyhow::Context;
+use std::fs::OpenOptions;
+use std::io::{stdout, Read, Seek, SeekFrom, Write};
 use termimad::*;
 
-pub(crate) fn get_markdown_skin() -> MadSkin {
-    let mut skin = MadSkin::default();
-        skin.set_headers_fg(DarkYellow);
-        skin.bold.set_fg(Magenta);
-        skin.italic.add_attr(Underlined);
-        // Clear code block formatting for now because we are inlining the help and it gets its
-        // styling messed up. See: https://github.com/Canop/termimad/issues/8.
-        // TODO: Fix that so that we can use inline code styling again.
-        skin.inline_code.set_bg(Color::Reset);
-        skin.code_block.set_bg(Color::Reset);
-        skin.code_block.align = Alignment::Left;
-    
-    skin
-}
-
-lazy_static::lazy_static!{
+lazy_static::lazy_static! {
+    /// Creates a colored `USAGE: ` + args template for use in the do pages
     static ref USAGE_TEMPLATE: String = {
         let usage_header = style("USAGE:").with(DarkYellow);
         format!("{} {{usage}}\n\n{{all-args}}", usage_header)
     };
+}
+
+/// Get the markdown renderer skin
+pub(crate) fn get_markdown_skin() -> MadSkin {
+    let mut skin = MadSkin::default();
+    skin.set_headers_fg(DarkYellow);
+    skin.bold.set_fg(Magenta);
+    skin.italic.add_attr(Underlined);
+    // Clear code block formatting for now because we are inlining the help and it gets its
+    // styling messed up. See: https://github.com/Canop/termimad/issues/8.
+    // TODO: Fix that so that we can use inline code styling again.
+    skin.inline_code.set_bg(Color::Reset);
+    skin.code_block.set_bg(Color::Reset);
+    skin.code_block.align = Alignment::Left;
+
+    skin
 }
 
 /// Render the document
@@ -40,17 +42,17 @@ lazy_static::lazy_static!{
 /// @param doc_name     Used to save the position that the user has scrolled to for that doc
 /// @param document     The markdown document to render
 pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result<()> {
-    // Hide help, doc, and version flags in command help
+    // Hide the help, doc, and version flags in the command help message
     command = command
         .mut_arg("help", |arg| arg.hidden_long_help(true))
         .mut_arg("doc", |arg| arg.hidden_long_help(true))
         .mut_arg("version", |arg| arg.hidden_long_help(true));
-    
+
     // Insert help message into document
     let mut help_message = String::new();
-    unsafe { // This is OK because we know that `write_long_help` will produce valid UTF-8
-        
-        command.template = Some(&USAGE_TEMPLATE);
+    command.template = Some(&USAGE_TEMPLATE);
+    unsafe {
+        // This unsafe code is OK because we know that `write_long_help` will produce valid UTF-8
         command.write_long_help(help_message.as_mut_vec())?;
     }
     let document = document.replace("{{help_message}}", &help_message);
@@ -80,7 +82,7 @@ pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> any
             if let Ok(positions) = serde_yaml::from_str(&config_content) {
                 scrolled_positions = positions;
 
-            // If we can't parse the config, we just leave it initialized as an empty HashMap
+                // If we can't parse the config, we just leave it initialized as an empty HashMap
             }
 
             // Set config file for use later

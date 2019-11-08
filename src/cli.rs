@@ -25,7 +25,9 @@ fn execute() -> anyhow::Result<()> {
     let args = get_cli().get_matches();
 
     // Show the docs if necessary
-    if args.is_present("doc") { doc::run(get_cli(), "lucky", include_str!("cli/lucky.md"))?; }
+    if args.is_present("doc") {
+        doc::run(get_cli(), "lucky", include_str!("cli/cli.md"))?;
+    }
 
     // Run a subcommand
     match args.subcommand() {
