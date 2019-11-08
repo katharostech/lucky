@@ -20,7 +20,7 @@ pub fn run() {
     // Run the chosen subcommand
     if let Err(e) = match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
-        ("doc", _) => doc::run(include_str!("cli/lucky.md")),
+        ("doc", _) => doc::run("lucky", include_str!("cli/lucky.md")),
         _ => panic!("Unimplemented subcommand or failure to show help."),
     } {
         eprintln!("{:?}", e);

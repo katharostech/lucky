@@ -1,0 +1,9 @@
+Some of the subcommands for lucky have more detailed documentation that can be accessed with the `doc` subcommand. For example, running `lucky charm doc` will give you information about using the `charm` subcommand.
+
+The docs will open in a pager that has the following key bindings:
+
+Scroll up:      k, Up Arrow
+Scroll down:    j, Down Arrow
+Go to top:      g, Home
+Go to bottom:   G, End
+Exit:           q, Esc, Enter

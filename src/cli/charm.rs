@@ -17,7 +17,7 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     match args.subcommand() {
         ("create", Some(sub_args)) => create::run(sub_args).context("Could not create charm"),
-        ("doc", _) => doc::run(include_str!("./charm/charm.md")),
+        ("doc", _) => doc::run("lucky_charm", include_str!("./charm/charm.md")),
         _ => panic!("Unimplemented subcommand or failure to show help."),
     }
 }
