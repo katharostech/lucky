@@ -100,41 +100,22 @@ pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> any
         area.pad(1, 1);
         let mut view = MadView::from(document.to_owned(), area, skin);
 
-        // Scroll view to the last viewed position
+        // Scroll to the last viewed position
         if let Some(&pos) = scrolled_positions.get(doc_name) {
             view.write_on(&mut w)?;
             view.try_scroll_lines(pos);
         }
 
-        // Skipping the help message for now unless we decide it is a good idea.
-        // /// Print the pager help message
-        // fn print_help(w: &mut dyn Write) -> anyhow::Result<()> {
-        //     // Add the help message to the bottom of the viewer
-        //     if let Some(size) = termsize::get() {
-        //         queue!(w, MoveTo(0, size.rows))?;
-        //     } else {
-        //         queue!(w, MoveTo(0, 0))?;
-        //     }
-        //     queue!(w, PrintStyledContent(
-        //         style("Type Enter to exit")
-        //         .with(Black)
-        //         .on(Grey)
-        //     ))?;
-        //     Ok(())
-        // }
-
-        // print_help(&mut w)?;
-
         // Listen for events and redraw screen
         let mut events = input().read_sync();
         loop {
             view.write_on(&mut w)?;
-            // print_help(&mut w)?;
 
             if let Some(Keyboard(key)) = events.next() {
                 match key {
                     Home | Char('g') => view.scroll = 0,
-                    End | Char('G') => view.try_scroll_pages(1000), // There might be a better way to get to the end
+                    // TODO: find be a better way to scroll to end of page
+                    End | Char('G') => view.try_scroll_pages(90000),
                     Up | Char('k') => view.try_scroll_lines(-1),
                     Down | Char('j') => view.try_scroll_lines(1),
                     PageUp => view.try_scroll_pages(-1),
@@ -160,7 +141,7 @@ pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> any
             file.sync_all()?;
         }
 
-        // Clean up revert screen
+        // Clean up and revert screen
         queue!(w, Show)?;
         queue!(w, LeaveAlternateScreen)?;
         w.flush()?;
@@ -168,8 +149,8 @@ pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> any
     // If this isn't a tty
     } else {
         // Print page
-        // NOTE: This will still print out the colors so that you can pipe
-        // the output to `less -R` or `cat` and still get the color.
+        // NOTE: This will still print out the colors so that you can pipe the output to `less -R`
+        // or `cat` and still get the color. Open an issue of you think it should be different.
         skin.write_text(&document)?;
     }
 
@@ -177,7 +158,7 @@ pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> any
     std::process::exit(0);
 }
 
-/// Return the `doc` subcommand
+/// Return the `doc` argument
 pub(crate) fn get_arg<'a>() -> clap::Arg<'a> {
     clap::Arg::with_name("doc")
         .help("Show the detailed command documentation ( similar to a man page )")
