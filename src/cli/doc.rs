@@ -5,7 +5,7 @@ use crossterm::{
     input::{input, InputEvent::*, KeyEvent::*},
     queue,
     screen::{EnterAlternateScreen, LeaveAlternateScreen, RawScreen},
-    style::{Attribute::*, Color::*},
+    style::{Attribute::*, Color, Color::*},
 };
 use std::io::{stdout, Read, Write, Seek, SeekFrom};
 use std::fs::OpenOptions;
@@ -18,14 +18,34 @@ pub(crate) fn get_markdown_skin() -> MadSkin {
         skin.set_headers_fg(Yellow);
         skin.bold.set_fg(Magenta);
         skin.italic.add_attr(Underlined);
+        // Clear code block formatting for now because we are inlining the help and it gets its
+        // styling messed up
+        skin.inline_code.set_bg(Color::Reset);
+        skin.code_block.set_bg(Color::Reset);
+        skin.code_block.align = Alignment::Left;
     
     skin
 }
 
 /// Render the document
+/// @param command      The clap App that you are printing help for. Used to print help info in doc
 /// @param doc_name     Used to save the position that the user has scrolled to for that doc
 /// @param document     The markdown document to render
-pub(crate) fn run(doc_name: &str, document: &str) -> anyhow::Result<()> {
+pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result<()> {
+    // Insert help message
+    let mut help_message = String::new();
+    command = command
+        .mut_arg("help", |arg| arg.hidden_long_help(true))
+        .mut_arg("doc", |arg| arg.hidden_long_help(true))
+        .mut_arg("version", |arg| arg.hidden_long_help(true));
+    
+    unsafe { // This is OK because we know that `write_long_help` will produce valid UTF-8
+        command.template = Some("USAGE: {usage}\n\n{all-args}");
+        command.write_long_help(help_message.as_mut_vec())?;
+    }
+    
+    let document = document.replace("{{help_message}}", &help_message);
+
     // Create a doc skin
     let skin = get_markdown_skin();
 
@@ -146,13 +166,11 @@ pub(crate) fn run(doc_name: &str, document: &str) -> anyhow::Result<()> {
     std::process::exit(0);
 }
 
-use clap::{App, AppSettings};
-
 /// Return the `doc` subcommand
-pub(crate) fn get_subcommand<'a>() -> App<'a> {
-    crate::cli::new_app("doc")
-        .about("Show the detailed command documentation ( similar to a man page )")
-        .after_help(include_str!("doc/after_help.txt"))
-        .setting(AppSettings::DisableHelpSubcommand)
-        .unset_setting(AppSettings::ArgRequiredElseHelp)
+pub(crate) fn get_arg<'a>() -> clap::Arg<'a> {
+    clap::Arg::with_name("doc")
+        .help("Show the detailed command documentation ( similar to a man page )")
+        .long("doc")
+        .short('H')
+        .long_help(include_str!("doc/long_help.txt"))
 }

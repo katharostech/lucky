@@ -2,6 +2,8 @@
 
 Welcome to the Lucky CLI. Lucky is a framework for creating Juju charms. The Lucky framework is designed to make it ***easy*** and ***fun*** to write charms that are powered by Docker containers.
 
+{{help_message}}
+
 ## The Bighelp Pages
 
 Most of the commands in the Lucky CLI have an extra "bighelp" page, like this one, that can be accessed with the `--bighelp` or `-H` flag. We will strive to make these built-in docs sufficient enough to learn to use Lucky without even using the internet!

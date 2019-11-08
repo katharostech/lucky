@@ -1,0 +1,12 @@
+Show detailed documentation page ( similar to a man page ). Pager controls:
+
+Scroll up:      k, Up Arrow
+Scroll down:    j, Down Arrow
+Go to top:      g, Home
+Go to bottom:   G, End
+Exit:           q, Esc, Enter
+
+You can also use less or cat:
+
+$ lucky --doc | less -R
+$ lucky --doc | cat

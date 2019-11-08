@@ -10,14 +10,17 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
     crate::cli::new_app("charm")
         .about("Build and create Lucky charms.")
         .subcommand(create::get_subcommand())
-        .subcommand(doc::get_subcommand())
+        .arg(doc::get_arg())
 }
 
 /// Run the `charm` subcommand
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
+     // Show the docs if necessary
+    if args.is_present("doc") { doc::run(get_subcommand(), "lucky", include_str!("charm/charm.md"))?; }
+
+    // Run a subcommand
     match args.subcommand() {
         ("create", Some(sub_args)) => create::run(sub_args).context("Could not create charm"),
-        ("doc", _) => doc::run("lucky_charm", include_str!("./charm/charm.md")),
         _ => panic!("Unimplemented subcommand or failure to show help."),
     }
 }

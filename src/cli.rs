@@ -10,6 +10,13 @@ mod charm;
 
 /// Run the application
 pub fn run() {
+    if let Err(e) = execute() {
+        eprintln!("{:?}", e);
+        std::process::exit(1);
+    }
+}
+
+fn execute() -> anyhow::Result<()> {
     // Enable colored backtraces
     #[cfg(feature = "color-backtrace")]
     color_backtrace::install();
@@ -17,15 +24,16 @@ pub fn run() {
     // Collect arguments from the commandline
     let args = get_cli().get_matches();
 
-    // Run the chosen subcommand
-    if let Err(e) = match args.subcommand() {
+    // Show the docs if necessary
+    if args.is_present("doc") { doc::run(get_cli(), "lucky", include_str!("cli/lucky.md"))?; }
+
+    // Run a subcommand
+    match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
-        ("doc", _) => doc::run("lucky", include_str!("cli/lucky.md")),
         _ => panic!("Unimplemented subcommand or failure to show help."),
-    } {
-        eprintln!("{:?}", e);
-        std::process::exit(1);
-    }
+    }?;
+
+    Ok(())
 }
 
 /// Returns a default app with the given name. This is used by subcommands to provide
@@ -39,7 +47,7 @@ fn new_app<'a>(name: &str) -> App<'a> {
         .mut_arg("help", |arg| {
             arg.short('h')
                 .long("help")
-                .help("Show help: --help shows more information when available")
+                .help("Show help: --help shows more information")
         })
 }
 
@@ -49,6 +57,6 @@ fn get_cli() -> App<'static> {
         .version(clap::crate_version!())
         .author(clap::crate_authors!())
         .about("The Lucky charm framework for Juju.")
+        .arg(doc::get_arg())
         .subcommand(charm::get_subcommand())
-        .subcommand(doc::get_subcommand())
 }
