@@ -21,6 +21,7 @@ anyhow = "1.0"
 dirs = "2.0"
 serde_yaml = "0.8"
 termsize = "0.1"
+lazy_static = "1.4"
 
 [features]
 default = ["color-backtrace"]

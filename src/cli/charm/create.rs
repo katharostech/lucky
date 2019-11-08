@@ -28,14 +28,17 @@ impl Default for TemplateData {
     }
 }
 
+use crate::cli::doc;
+
 #[rustfmt::skip]
 /// Return the `create` subcommand
 pub(crate) fn get_subcommand<'a>() -> App<'a> {
     crate::cli::new_app("create")
         .about("Create a new lucky charm.")
+        .arg(doc::get_arg())
         .arg(Arg::with_name("target_dir")
             .help("The directory to create the charm in")
-            .required(true))
+            .required_unless("doc"))
         .arg(Arg::with_name("use_defaults")
             .long("use-defaults")
             .short('D')
@@ -64,6 +67,8 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
 
 /// Run the `create` subcommand
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
+    if args.is_present("doc") { doc::run(get_subcommand(), "lucky", include_str!("create.md"))?; }
+
     // Make sure target directory doesn't already exist
     let target_dir = Path::new(
         args.value_of("target_dir")

@@ -4,19 +4,16 @@ Welcome to the Lucky CLI. Lucky is a framework for creating Juju charms. The Luc
 
 {{help_message}}
 
-## The Bighelp Pages
+## The Doc Pages and Help
 
-Most of the commands in the Lucky CLI have an extra "bighelp" page, like this one, that can be accessed with the `--bighelp` or `-H` flag. We will strive to make these built-in docs sufficient enough to learn to use Lucky without even using the internet!
+Most of the commands in the Lucky CLI have an extra doc page, like this one, that can be accessed with the `--doc` or `-H` flag. We will strive to make these built-in docs sufficient enough to learn to use Lucky without even using the internet!
 
-> **Tip:** On Unix systems or with Windows Git bash you can pipe the docs to `cat` or `less` to skip the pager or use a different one:
-> 
-> $ lucky -H | less -R # Use less because it is more featured than the built-in pager
-> $ lucky -H | cat # Don't use a pager
+Another useful thing to know is that you will get different output by using the `-h` and `--help` flags. The `-h` flag will give you more compact help output while the `--help` flag will give you more details on the available options.
 
 ## Getting Started
 
 The first step to getting started with Lucky is to create your charm using the built-in charm template.
 
-    $ lucky charm create [charmname]
+    $ lucky charm create [target_directory]
 
 You will be prompted for some basic fields that it will fill out for you in the charm metadata.
