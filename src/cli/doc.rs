@@ -68,7 +68,7 @@ pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> any
         if let Some(config_dir) = dirs::config_dir() {
             // Open config file
             let mut config_path = config_dir.clone();
-            config_path.push("lucky_doc_positions.yml");
+            config_path.push("lucky_doc_positions.json");
             let mut file = OpenOptions::new()
                 .read(true)
                 .write(true)
@@ -78,8 +78,8 @@ pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> any
             let mut config_content = String::new();
             file.read_to_string(&mut config_content)?;
 
-            // If the config file contains readable YAML
-            if let Ok(positions) = serde_yaml::from_str(&config_content) {
+            // If the config file contains readable JSON
+            if let Ok(positions) = serde_json::from_str(&config_content) {
                 scrolled_positions = positions;
 
                 // If we can't parse the config, we just leave it initialized as an empty HashMap
@@ -156,7 +156,7 @@ pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> any
             file.seek(SeekFrom::Start(0))?;
 
             // Write out the new scrolled positions
-            serde_yaml::to_writer(&file, &scrolled_positions)?;
+            serde_json::to_writer(&file, &scrolled_positions)?;
             file.sync_all()?;
         }
 
