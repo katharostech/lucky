@@ -6,7 +6,7 @@ Go to top:      g, Home
 Go to bottom:   G, End
 Exit:           q, Esc, Enter
 
-You can also use less or cat:
+You can also use less or cat instead of the default pager:
 
 $ lucky --doc | less -R
 $ lucky --doc | cat
