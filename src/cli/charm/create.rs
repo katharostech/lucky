@@ -116,12 +116,11 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
                 .file_name()
                 .map_or(target_dir.to_string_lossy(), |x| x.to_string_lossy());
             let response = prompt_reply_stdout(&format!("Display name [{}]: ", default))?;
-            let value: String;
-            if response.trim() == "" {
-                value = String::from(default);
+            let value = if response.trim() == "" {
+                String::from(default)
             } else {
-                value = response;
-            }
+                response
+            };
             template_settings.charm_display_name = value;
         }
 
@@ -132,12 +131,11 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
                 .replace(" ", "_")
                 .to_lowercase();
             let response = prompt_reply_stdout(&format!("Charm name [{}]: ", default))?;
-            let value: String;
-            if response.trim() == "" {
-                value = String::from(default);
+            let value = if response.trim() == "" {
+                String::from(default)
             } else {
-                value = response;
-            }
+                response
+            };
             template_settings.charm_name = value;
         }
 
@@ -145,12 +143,11 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         if !args.is_present("charm_summary") {
             let default = &template_settings.charm_summary;
             let response = prompt_reply_stdout(&format!("Charm summary [{}]: ", default))?;
-            let value: String;
-            if response.trim() == "" {
-                value = String::from(default);
+            let value = if response.trim() == "" {
+                String::from(default)
             } else {
-                value = response;
-            }
+                response
+            };
             template_settings.charm_summary = value;
         }
 
@@ -158,12 +155,11 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         if !args.is_present("charm_maintainer") {
             let default = &template_settings.charm_maintainer;
             let response = prompt_reply_stdout(&format!("Charm maintainer [{}]: ", default))?;
-            let value: String;
-            if response.trim() == "" {
-                value = String::from(default);
+            let value = if response.trim() == "" {
+                String::from(default)
             } else {
-                value = response;
-            }
+                response
+            };
             template_settings.charm_maintainer = value;
         }
 
