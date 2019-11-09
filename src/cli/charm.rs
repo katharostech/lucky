@@ -19,7 +19,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     doc::show_doc(
         &args,
         get_subcommand(),
-        "lucky",
+        "lucky_charm",
         include_str!("charm/charm.md"),
     )?;
 
