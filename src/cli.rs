@@ -1,6 +1,7 @@
 //! Commandline interface module
 
 use clap::{App, AppSettings};
+use crossterm::style::{style, Color};
 
 // Help utility
 pub(crate) mod doc;
@@ -11,7 +12,7 @@ mod charm;
 /// Run the application
 pub fn run() {
     if let Err(e) = execute() {
-        eprintln!("{:?}", e);
+        eprintln!("\n{} {:?}", style("Error:").with(Color::Red), e);
         std::process::exit(1);
     }
 }
@@ -25,9 +26,7 @@ fn execute() -> anyhow::Result<()> {
     let args = get_cli().get_matches();
 
     // Show the docs if necessary
-    if args.is_present("doc") {
-        doc::run(get_cli(), "lucky", include_str!("cli/cli.md"))?;
-    }
+    doc::show_doc(&args, get_cli(), "lucky", include_str!("cli/cli.md"))?;
 
     // Run a subcommand
     match args.subcommand() {
@@ -57,7 +56,6 @@ fn new_app<'a>(name: &str) -> App<'a> {
 fn get_cli() -> App<'static> {
     new_app("lucky")
         .version(clap::crate_version!())
-        .author(clap::crate_authors!())
         .about("The Lucky charm framework for Juju.")
         .arg(doc::get_arg())
         .subcommand(charm::get_subcommand())

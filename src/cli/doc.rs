@@ -41,7 +41,7 @@ pub(crate) fn get_markdown_skin() -> MadSkin {
 /// @param command      The clap App that you are printing help for. Used to print help info in doc
 /// @param doc_name     Used to save the position that the user has scrolled to for that doc
 /// @param document     The markdown document to render
-pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result<()> {
+fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result<()> {
     // Hide the help, doc, and version flags in the command help message
     command = command
         .mut_arg("help", |arg| arg.hidden_long_help(true))
@@ -68,6 +68,10 @@ pub(crate) fn run(mut command: clap::App, doc_name: &str, document: &str) -> any
         if let Some(config_dir) = dirs::config_dir() {
             // Open config file
             let mut config_path = config_dir.clone();
+            std::fs::create_dir_all(&config_path).context(format!(
+                "Couldn't create config directory: {:?}",
+                &config_path
+            ))?;
             config_path.push("lucky_doc_positions.json");
             let mut file = OpenOptions::new()
                 .read(true)
@@ -165,4 +169,18 @@ pub(crate) fn get_arg<'a>() -> clap::Arg<'a> {
         .long("doc")
         .short('H')
         .long_help(include_str!("doc/long_help.txt"))
+}
+
+/// Show the documentation if the doc flag is present
+pub(crate) fn show_doc(
+    args: &clap::ArgMatches,
+    app: clap::App,
+    doc_name: &str,
+    document: &str,
+) -> anyhow::Result<()> {
+    if args.is_present("doc") {
+        run(app, doc_name, document).context("Could not show documentation")?;
+    }
+
+    Ok(())
 }

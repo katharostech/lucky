@@ -16,9 +16,12 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
 /// Run the `charm` subcommand
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Show the docs if necessary
-    if args.is_present("doc") {
-        doc::run(get_subcommand(), "lucky", include_str!("charm/charm.md"))?;
-    }
+    doc::show_doc(
+        &args,
+        get_subcommand(),
+        "lucky",
+        include_str!("charm/charm.md"),
+    )?;
 
     // Run a subcommand
     match args.subcommand() {

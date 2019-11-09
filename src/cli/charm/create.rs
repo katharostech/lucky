@@ -67,9 +67,7 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
 
 /// Run the `create` subcommand
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
-    if args.is_present("doc") {
-        doc::run(get_subcommand(), "lucky", include_str!("create.md"))?;
-    }
+    doc::show_doc(args, get_subcommand(), "lucky", include_str!("create.md"))?;
 
     // Make sure target directory doesn't already exist
     let target_dir = Path::new(
@@ -115,7 +113,8 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
             let default = target_dir
                 .file_name()
                 .map_or(target_dir.to_string_lossy(), |x| x.to_string_lossy());
-            let response = prompt_reply_stdout(&format!("Display name [{}]: ", default))?;
+            let response = prompt_reply_stdout(&format!("Display name [{}]: ", default))
+                .context("Could not prompt for display name")?;
             let value = if response.trim() == "" {
                 String::from(default)
             } else {
@@ -130,7 +129,8 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
                 .charm_display_name
                 .replace(" ", "_")
                 .to_lowercase();
-            let response = prompt_reply_stdout(&format!("Charm name [{}]: ", default))?;
+            let response = prompt_reply_stdout(&format!("Charm name [{}]: ", default))
+                .context("Could not prompt for charm name")?;
             let value = if response.trim() == "" {
                 String::from(default)
             } else {
@@ -142,7 +142,8 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         // Prompt for missing summary
         if !args.is_present("charm_summary") {
             let default = &template_settings.charm_summary;
-            let response = prompt_reply_stdout(&format!("Charm summary [{}]: ", default))?;
+            let response = prompt_reply_stdout(&format!("Charm summary [{}]: ", default))
+                .context("Could not prompt for charm summary")?;
             let value = if response.trim() == "" {
                 String::from(default)
             } else {
@@ -154,7 +155,8 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         // Prompt for missing maintainer
         if !args.is_present("charm_maintainer") {
             let default = &template_settings.charm_maintainer;
-            let response = prompt_reply_stdout(&format!("Charm maintainer [{}]: ", default))?;
+            let response = prompt_reply_stdout(&format!("Charm maintainer [{}]: ", default))
+                .context("Could not prompt for charm maintainer")?;
             let value = if response.trim() == "" {
                 String::from(default)
             } else {
@@ -179,11 +181,12 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
 
     // Create the zip reader from the embeded charm template archive
     let zip_reader = std::io::Cursor::new(crate::CHARM_TEMPLATE_ARCHIVE);
-    let mut zip = zip::ZipArchive::new(zip_reader)?;
+    let zip_error_message = "Internal error: problem reading embedded charm template zip";
+    let mut zip = zip::ZipArchive::new(zip_reader).context(zip_error_message)?;
 
     // Iterate through the items in the zip
     for i in 0..zip.len() {
-        let mut file = zip.by_index(i)?;
+        let mut file = zip.by_index(i).context(zip_error_message)?;
         let mut outpath = PathBuf::from(
             args.value_of("target_dir")
                 .expect("missing required argument `target_dir`"),
@@ -193,7 +196,8 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         // If file entry is a directory
         if file.name().ends_with('/') {
             // Create a directory
-            fs::create_dir_all(&outpath)?;
+            fs::create_dir_all(&outpath)
+                .context(format!("Could not create directory: {:?}", outpath))?;
 
         // If it is a file
         } else {
@@ -202,7 +206,8 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
                 // If the parent doesn't exist yet
                 if !p.exists() {
                     // Create the parent directories
-                    fs::create_dir_all(&p)?;
+                    fs::create_dir_all(&p)
+                        .context(format!("Could not create directory: {:?}", p))?;
                 }
             }
 
@@ -220,20 +225,21 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
                 );
 
                 // Render the template to the output file
-                let mut outfile = fs::File::create(&outpath)
-                    .context("Could not create file for charm template")?;
-                handlebars.render_template_source_to_write(
-                    &mut file,
-                    &template_settings,
-                    &mut outfile,
-                )?;
+                let mut outfile = fs::File::create(&outpath).context(format!(
+                    "Could not create file for charm template: {:?}",
+                    outpath
+                ))?;
+                handlebars
+                    .render_template_source_to_write(&mut file, &template_settings, &mut outfile)
+                    .context(format!("Could not render template to file: {:?}", outfile))?;
 
             // If it is a normal file
             } else {
                 // Create file and write contents
-                let error_message = "Could not create file while creating charm template";
-                let mut outfile = fs::File::create(&outpath).context(error_message)?;
-                io::copy(&mut file, &mut outfile).context(error_message)?;
+                let mut outfile = fs::File::create(&outpath)
+                    .context(format!("Could not create file: {:?}", outpath))?;
+                io::copy(&mut file, &mut outfile)
+                    .context(format!("Could not write to file: {:?}", outpath))?;
             }
         }
 
@@ -244,8 +250,8 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
             // If there is a mode set for the file in the zip
             if let Some(mode) = file.unix_mode() {
                 // Set ther permissions on the created file
-                fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).with_context(
-                    || format!("Could not set permissions on created file: {:?}", &outpath),
+                fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).context(
+                    format!("Could not set permissions on created file: {:?}", &outpath),
                 )?;
             }
         }
