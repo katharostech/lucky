@@ -11,10 +11,19 @@ mod charm;
 
 /// Run the application
 pub fn run() {
-    if let Err(e) = execute() {
-        eprintln!("\n{} {:?}", style("Error:").with(Color::Red), e);
-        std::process::exit(1);
-    }
+    std::panic::catch_unwind(|| {
+        if let Err(e) = execute() {
+            eprintln!("\n{} {:?}", style("Error:").with(Color::Red), e);
+            std::process::exit(1);
+        }
+    }).or_else(|_| -> Result<(), ()> {
+        eprintln!(concat!(
+            "\n {} The program has encountered a critical internal error and will now exit.\n",
+            "This is a bug. Please consider reporting it on our Taiga project. TODO!!\n"
+        ), style("Error:").with(Color::Red));
+
+        Ok(())
+    }).expect("Panic while handling panic");
 }
 
 fn execute() -> anyhow::Result<()> {
