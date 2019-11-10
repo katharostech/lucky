@@ -70,7 +70,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     if !metadata_path.exists() {
         anyhow::bail!(
             "Could not locate a metadata.yaml file in the given charm directory: {:?}",
-            &charm_path
+            &charm_path.canonicalize()?
         );
     }
     let metadata_content = fs::read_to_string(&metadata_path)
@@ -91,8 +91,16 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Copy charm contents to build directory
     for entry in WalkDir::new(charm_path).into_iter().filter_entry(|e| {
         // Don't include any files in the build dir
-        let entry_path = e.path().canonicalize().unwrap(); // TODO: Handle these unwraps somehow
-        let build_dir = build_dir.canonicalize().unwrap();
+        let entry_path = if let Ok(path) = e.path().canonicalize() {
+            path
+        } else {
+            return false;
+        };
+        let build_dir = if let Ok(path) = build_dir.canonicalize() {
+            path
+        } else {
+            return false;
+        };
         !(build_dir == entry_path || entry_path.strip_prefix(build_dir).is_ok())
     }) {
         let entry = entry?;
@@ -113,8 +121,10 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
 
         // Copy file
         if source_path.is_file() {
-            fs::copy(source_path, &target_path)
-                .context(format!("Could not copy file {:?} to {:?}", source_path, &target_path))?;
+            fs::copy(source_path, &target_path).context(format!(
+                "Could not copy file {:?} to {:?}",
+                source_path, &target_path
+            ))?;
         }
     }
 
