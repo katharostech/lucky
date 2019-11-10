@@ -89,6 +89,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     }
 
     // Copy charm contents to build directory
+    let build_dir_canonical = build_dir.canonicalize()?;
     for entry in WalkDir::new(charm_path).into_iter().filter_entry(|e| {
         // Don't include any files in the build dir
         let entry_path = if let Ok(path) = e.path().canonicalize() {
@@ -96,12 +97,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         } else {
             return false;
         };
-        let build_dir = if let Ok(path) = build_dir.canonicalize() {
-            path
-        } else {
-            return false;
-        };
-        !(build_dir == entry_path || entry_path.strip_prefix(build_dir).is_ok())
+        !entry_path.strip_prefix(&build_dir_canonical).is_ok()
     }) {
         let entry = entry?;
         let relative_path = entry
@@ -127,6 +123,50 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
             ))?;
         }
     }
+
+    // Create bin dir
+    let bin_dir = target_dir.join("bin");
+    if !bin_dir.exists() {
+        fs::create_dir_all(&bin_dir)
+            .context(format!("Could not create dir: {:?}", bin_dir))?;
+    }
+
+    // Create hook dir
+    let hook_dir = target_dir.join("hooks");
+    if !hook_dir.exists() {
+        fs::create_dir_all(&hook_dir)
+            .context(format!("Could not create dir: {:?}", hook_dir))?;
+    }
+
+    // Copy in Lucky binary
+    if !args.is_present("use_local_lucky") {
+        // We will require the -l flag until our first release
+        anyhow::bail!(concat!(
+            "Currently the --use-local-lucky or -l flag is required to build a charm. Once we ",
+            "have made our first release, lucky will be able to automatically download the ",
+            "required version from GitHub so that it can run on whatever architecture the charm ",
+            "is deployed to"
+        ));
+    } else {
+        // Copy in the Lucky executable
+        let lucky_path = bin_dir.join("lucky");
+        let executable_path = std::env::current_exe()?;
+        fs::copy(&executable_path, &lucky_path)?;
+
+        // Create install hook
+        let install_hook_path = hook_dir.join("install");
+        fs::write(&install_hook_path, include_str!("build/install-hook.sh"))?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+             fs::set_permissions(&install_hook_path, fs::Permissions::from_mode(0o755)).context(
+                format!("Could not set permissions on created file: {:?}", &install_hook_path),
+            )?;
+        }
+    }
+
+    // Create Juju hooks
+
 
     Ok(())
 }
