@@ -1,7 +1,9 @@
+use std::fs;
 use std::path::Path;
 
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
+use walkdir::WalkDir;
 
 use crate::cli::doc;
 use crate::types::CharmMetadata;
@@ -57,7 +59,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         args.value_of("build_dir")
             .expect("Missing required argument: build_dir"),
     );
-    std::fs::create_dir_all(&build_dir).context("Could not create build directory")?;
+    fs::create_dir_all(&build_dir).context("Could not create build directory")?;
 
     // Load charm metadata
     let metadata_path = if charm_path.join("metadata.yaml").exists() {
@@ -71,13 +73,50 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
             &charm_path
         );
     }
-    let metadata_content = std::fs::read_to_string(&metadata_path)
+    let metadata_content = fs::read_to_string(&metadata_path)
         .context(format!("Couldn't read file: {:?}", metadata_path))?;
     let metadata: CharmMetadata =
         serde_yaml::from_str(&metadata_content).context("Couldn't parse charm metadata YAML")?;
     let charm_name = &metadata.name;
-
     let target_dir = build_dir.join(charm_name);
+
+    // Clear the target directory
+    if target_dir.exists() {
+        fs::remove_dir_all(&target_dir).context(format!(
+            "Could not remove build target directory: {:?}",
+            target_dir
+        ))?;
+    }
+
+    // Copy charm contents to build directory
+    for entry in WalkDir::new(charm_path).into_iter().filter_entry(|e| {
+        // Don't include any files in the build dir
+        let entry_path = e.path().canonicalize().unwrap(); // TODO: Handle these unwraps somehow
+        let build_dir = build_dir.canonicalize().unwrap();
+        !(build_dir == entry_path || entry_path.strip_prefix(build_dir).is_ok())
+    }) {
+        let entry = entry?;
+        let relative_path = entry
+            .path()
+            .strip_prefix(charm_path)
+            .expect("Internal error parsing build paths");
+        let source_path = entry.path();
+        let target_path = target_dir.join(relative_path);
+
+        // Create parent dir
+        if let Some(parent) = &target_path.parent() {
+            if !parent.exists() {
+                fs::create_dir_all(&parent)
+                    .context(format!("Could not create directory: {:?}", parent))?;
+            }
+        }
+
+        // Copy file
+        if source_path.is_file() {
+            fs::copy(source_path, &target_path)
+                .context(format!("Could not copy file {:?} to {:?}", source_path, &target_path))?;
+        }
+    }
 
     Ok(())
 }
