@@ -34,7 +34,7 @@ use crate::cli::doc;
 /// Return the `create` subcommand
 pub(crate) fn get_subcommand<'a>() -> App<'a> {
     crate::cli::new_app("create")
-        .about("Create a new lucky charm.")
+        .about("Create a new lucky charm")
         .arg(doc::get_arg())
         .arg(Arg::with_name("target_dir")
             .help("The directory to create the charm in")
@@ -173,8 +173,10 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // User skipped prompts and opt-ed for default values
     } else {
         if !args.is_present("display_name") {
-            template_settings.charm_display_name =
-                String::from(args.value_of("target_dir").expect("Missing target dir"));
+            template_settings.charm_display_name = target_dir
+                .file_name()
+                .map_or(target_dir.to_string_lossy(), |x| x.to_string_lossy())
+                .to_string();
         }
         if !args.is_present("charm_name") {
             template_settings.charm_name = template_settings
