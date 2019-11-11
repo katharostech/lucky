@@ -28,8 +28,9 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
             .short('l'))
         .stop_custom_headings()
         .arg(Arg::with_name("build_dir")
-            .help(concat!("The directory to put the built charm in. Defaults to the `build` ",
-                          "directory in the charm_dir."))
+            .help(concat!(
+                "The directory to put the built charm in. Defaults to the `build` ",
+                "directory in the charm_dir."))
             .long_help(concat!(
                 "The directory to put the built charm in. Defaults to the `build` directory ",
                 "in the charm dir. The built charm will be in `build_dir/charm_name`."))
