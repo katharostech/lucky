@@ -24,7 +24,7 @@ pub fn run() {
         eprintln!(
             concat!(
                 "\n {} The program has encountered a critical internal error and will now exit.\n",
-                "This is a bug. Please consider reporting it on our Taiga project. TODO!!\n"
+                "This is a bug. TODO: Setup Taiga project for reporting errors!!\n"
             ),
             style("Error:").with(Color::Red)
         );

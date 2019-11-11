@@ -28,13 +28,14 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
             .short('l'))
         .stop_custom_headings()
         .arg(Arg::with_name("build_dir")
-            .help("The directory to put the built charm in")
+            .help(concat!("The directory to put the built charm in. Defaults to the `build` ",
+                          "directory in the charm_dir."))
             .long_help(concat!(
-                "The directory to put the built charm in. The built charm will be in ",
-                "`build_dir/charm_name`."))
+                "The directory to put the built charm in. Defaults to the `build` directory ",
+                "in the charm dir. The built charm will be in `build_dir/charm_name`."))
             .long("build-dir")
             .short('b')
-            .default_value("build"))
+            .takes_value(true))
         .arg(Arg::with_name("charm_dir")
             .help("The path to the charm you want to build")
             .required(false)
@@ -58,18 +59,20 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     );
 
     // Create build dir
-    let build_dir = Path::new(
-        args.value_of("build_dir")
-            .expect("Missing required argument: build_dir"),
-    );
+    let build_dir = if let Some(build_dir) = args.value_of("build_dir") {
+        Path::new(build_dir).to_path_buf()
+    } else {
+        charm_path.join("build")
+    };
     create_dir_all(&build_dir)?;
 
     // Load charm metadata
     let charm_metadata: CharmMetadata = load_yaml(&charm_path, "metadata")?;
     // Make sure there is a valid lucky.yaml file
     load_yaml::<LuckyMetadata>(&charm_path, "lucky")?;
-
+    // Get charm name
     let charm_name = &charm_metadata.name;
+    // Get build target dir
     let target_dir = build_dir.join(charm_name);
 
     // Clear the target directory
@@ -146,7 +149,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
 
         // Create install hook
         let install_hook_path = hook_dir.join("install");
-        fs::write(&install_hook_path, include_str!("build/install-hook.sh"))?;
+        write_file(&install_hook_path, include_str!("build/install-hook.sh"))?;
         set_file_mode(&install_hook_path, 0o755)?;
     }
 
@@ -159,9 +162,9 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         let new_hook_path = hook_dir.join(hook);
 
         // Create hook from template
-        fs::write(
+        write_file(
             &new_hook_path,
-            format!(include_str!("build/hook-template.sh"), hook_name = hook),
+            &format!(include_str!("build/hook-template.sh"), hook_name = hook),
         )?;
         set_file_mode(&new_hook_path, 0o755)?;
     }
@@ -173,9 +176,9 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
             let new_hook_path = hook_dir.join(&hook_name);
 
             // Create hook from template
-            fs::write(
+            write_file(
                 &new_hook_path,
-                format!(
+                &format!(
                     include_str!("build/hook-template.sh"),
                     hook_name = hook_name
                 ),
@@ -203,9 +206,9 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
                 let new_hook_path = hook_dir.join(&hook_name);
 
                 // Create hook from template
-                fs::write(
+                write_file(
                     &new_hook_path,
-                    format!(
+                    &format!(
                         include_str!("build/hook-template.sh"),
                         hook_name = hook_name
                     ),
@@ -234,7 +237,7 @@ where
     };
     if !file_path.exists() {
         anyhow::bail!(
-            "Could not locate a {}.yaml file in the given charm directory: {:?}",
+            "Could not locate a {}.yaml file in the charm directory: {:?}",
             base_name,
             &dir_path
         );
@@ -247,10 +250,15 @@ where
     Ok(data)
 }
 
+fn write_file(path: &Path, content: &str) -> anyhow::Result<()> {
+    fs::write(&path, content)
+        .context(format!("Could not write file: {:?}", &path))?;
+    Ok(())
+}
+
 /// `fs::create_dir_all` with extra error context
 fn create_dir_all(path: &Path) -> anyhow::Result<()> {
     fs::create_dir_all(&path).context(format!("Could not create dir: {:?}", path))?;
-
     Ok(())
 }
 
