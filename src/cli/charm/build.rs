@@ -6,7 +6,7 @@ use clap::{App, Arg, ArgMatches};
 use walkdir::WalkDir;
 
 use crate::cli::doc;
-use crate::types::CharmMetadata;
+use crate::types::{CharmMetadata, JUJU_NORMAL_HOOKS};
 
 #[rustfmt::skip]
 /// Return the `build` subcommand
@@ -59,7 +59,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         args.value_of("build_dir")
             .expect("Missing required argument: build_dir"),
     );
-    fs::create_dir_all(&build_dir).context("Could not create build directory")?;
+    create_dir_all(&build_dir)?;
 
     // Load charm metadata
     let metadata_path = if charm_path.join("metadata.yaml").exists() {
@@ -95,9 +95,11 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         let entry_path = if let Ok(path) = e.path().canonicalize() {
             path
         } else {
+            // TODO: Handle this error with the not yet created `try_filter_entry`:
+            // https://github.com/BurntSushi/walkdir/issues/131
             return false;
         };
-        !entry_path.strip_prefix(&build_dir_canonical).is_ok()
+        !(&entry_path == &build_dir_canonical)
     }) {
         let entry = entry?;
         let relative_path = entry
@@ -110,8 +112,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         // Create parent dir
         if let Some(parent) = &target_path.parent() {
             if !parent.exists() {
-                fs::create_dir_all(&parent)
-                    .context(format!("Could not create directory: {:?}", parent))?;
+                create_dir_all(&parent)?;
             }
         }
 
@@ -127,15 +128,13 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Create bin dir
     let bin_dir = target_dir.join("bin");
     if !bin_dir.exists() {
-        fs::create_dir_all(&bin_dir)
-            .context(format!("Could not create dir: {:?}", bin_dir))?;
+        create_dir_all(&bin_dir)?;
     }
 
     // Create hook dir
     let hook_dir = target_dir.join("hooks");
     if !hook_dir.exists() {
-        fs::create_dir_all(&hook_dir)
-            .context(format!("Could not create dir: {:?}", hook_dir))?;
+        create_dir_all(&hook_dir)?;;
     }
 
     // Copy in Lucky binary
@@ -156,17 +155,48 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         // Create install hook
         let install_hook_path = hook_dir.join("install");
         fs::write(&install_hook_path, include_str!("build/install-hook.sh"))?;
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-             fs::set_permissions(&install_hook_path, fs::Permissions::from_mode(0o755)).context(
-                format!("Could not set permissions on created file: {:?}", &install_hook_path),
-            )?;
-        }
+        set_file_mode(&install_hook_path, 0o755)?;
     }
 
-    // Create Juju hooks
+    // Create normal Juju hooks ( those not specific to a relation or storage )
+    for hook in JUJU_NORMAL_HOOKS {
+        // Skip the install hook because we have already created it
+        if hook == &"install" { continue; }
+        let new_hook_path = hook_dir.join(hook);
 
+        // Create hook from template
+        fs::write(&new_hook_path, format!(include_str!("build/hook-template.sh"), hook_name=hook))?;
+        set_file_mode(&new_hook_path, 0o755)?;
+    }
+
+    // Create relation hooks
+
+
+    Ok(())
+}
+
+//
+// Utilities
+//
+
+/// `fs::create_dir_all` with extra error context
+fn create_dir_all(path: &Path) -> anyhow::Result<()> {
+    fs::create_dir_all(&path)
+        .context(format!("Could not create dir: {:?}", path))?;
+
+    Ok(())
+}
+
+
+/// Sets file permission mode on Unix with extra error context
+fn set_file_mode(path: &Path, mode: u32) -> anyhow::Result<()> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+            fs::set_permissions(path, fs::Permissions::from_mode(mode)).context(
+            format!("Could not set permissions on created file: {:?}", path),
+        )?;
+    }
 
     Ok(())
 }
