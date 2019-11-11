@@ -9,6 +9,7 @@ pub(crate) mod doc;
 // Subcommands
 mod charm;
 mod daemon;
+mod client;
 
 /// Run the application
 pub fn run() {
@@ -41,19 +42,29 @@ fn execute() -> anyhow::Result<()> {
     color_backtrace::install();
 
     // Collect arguments from the commandline
-    let args = get_cli().get_matches();
+    let args = get_cli()?.get_matches();
+
+    // If there is a specified Lucky context
+    if let Ok(context) = std::env::var("LUCKY_CONTEXT") {
+        // Run the specified subcommand instead
+        return match context.as_ref() {
+            "charm" => return charm::run(&args),
+            "daemon" => return daemon::run(&args),
+            "client" => client::run(&args),
+            other => anyhow::bail!("Unrecognized LUCKY_CONTEXT: {}", other),
+        }
+    }
 
     // Show the docs if necessary
-    doc::show_doc(&args, get_cli(), "lucky", include_str!("cli/cli.md"))?;
+    doc::show_doc(&args, get_cli()?, "lucky", include_str!("cli/cli.md"))?;
 
     // Run a subcommand
     match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
         ("daemon", Some(sub_args)) => daemon::run(sub_args),
+        ("client", Some(sub_args)) => client::run(sub_args),
         _ => panic!("Unimplemented subcommand or failure to show help."),
-    }?;
-
-    Ok(())
+    }
 }
 
 /// Returns a default app with the given name. This is used by subcommands to provide
@@ -72,11 +83,24 @@ fn new_app<'a>(name: &str) -> App<'a> {
 }
 
 /// Get the Lucky clap App
-fn get_cli() -> App<'static> {
-    new_app("lucky")
+fn get_cli() -> anyhow::Result<App<'static>> {
+    // If there is a specified context
+    if let Ok(context) = std::env::var("LUCKY_CONTEXT") {
+        // Return the specified subcommand instead of the global CLI
+        match context.as_ref() {
+            "charm" => return Ok(charm::get_subcommand()),
+            "daemon" => return Ok(daemon::get_subcommand()),
+            "client" => return Ok(client::get_subcommand()),
+            other => anyhow::bail!("Unrecognized LUCKY_CONTEXT: {}", other),
+        }
+    }
+
+    // Return full CLI
+    Ok(new_app("lucky")
         .version(clap::crate_version!())
         .about("The Lucky charm framework for Juju.")
         .arg(doc::get_arg())
         .subcommand(charm::get_subcommand())
         .subcommand(daemon::get_subcommand())
+        .subcommand(client::get_subcommand()))
 }
