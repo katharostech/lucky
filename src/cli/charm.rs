@@ -9,7 +9,7 @@ use crate::cli::doc;
 /// Return the `charm` subcommand
 pub(crate) fn get_subcommand<'a>() -> App<'a> {
     crate::cli::new_app("charm")
-        .about("Build and create Lucky charms.")
+        .about("Build and create Lucky charms")
         .subcommand(create::get_subcommand())
         .subcommand(build::get_subcommand())
         .arg(doc::get_arg())

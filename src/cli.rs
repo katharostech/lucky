@@ -8,6 +8,7 @@ pub(crate) mod doc;
 
 // Subcommands
 mod charm;
+mod daemon;
 
 /// Run the application
 pub fn run() {
@@ -48,6 +49,7 @@ fn execute() -> anyhow::Result<()> {
     // Run a subcommand
     match args.subcommand() {
         ("charm", Some(sub_args)) => charm::run(sub_args),
+        ("daemon", Some(sub_args)) => daemon::run(sub_args),
         _ => panic!("Unimplemented subcommand or failure to show help."),
     }?;
 
@@ -76,4 +78,5 @@ fn get_cli() -> App<'static> {
         .about("The Lucky charm framework for Juju.")
         .arg(doc::get_arg())
         .subcommand(charm::get_subcommand())
+        .subcommand(daemon::get_subcommand())
 }
