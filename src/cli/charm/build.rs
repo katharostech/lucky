@@ -6,7 +6,10 @@ use clap::{App, Arg, ArgMatches};
 use walkdir::WalkDir;
 
 use crate::cli::doc;
-use crate::types::{CharmMetadata, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS};
+use crate::types::juju::{
+    CharmMetadata, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS,
+};
+use crate::types::lucky::LuckyMetadata;
 
 #[rustfmt::skip]
 /// Return the `build` subcommand
@@ -62,25 +65,12 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     create_dir_all(&build_dir)?;
 
     // Load charm metadata
-    let metadata_path = if charm_path.join("metadata.yaml").exists() {
-        charm_path.join("metadata.yaml")
-    } else {
-        charm_path.join("metadata.yml")
-    };
-    if !metadata_path.exists() {
-        anyhow::bail!(
-            "Could not locate a metadata.yaml file in the given charm directory: {:?}",
-            &charm_path.canonicalize()?
-        );
-    }
-    let metadata_content = fs::read_to_string(&metadata_path)
-        .context(format!("Couldn't read file: {:?}", metadata_path))?;
-    let metadata: CharmMetadata =
-        serde_yaml::from_str(&metadata_content).context("Couldn't parse charm metadata YAML")?;
-    let charm_name = &metadata.name;
+    let charm_metadata: CharmMetadata = load_yaml(&charm_path, "metadata")?;
+    // Make sure there is a valid lucky.yaml file
+    load_yaml::<LuckyMetadata>(&charm_path, "lucky")?;
+
+    let charm_name = &charm_metadata.name;
     let target_dir = build_dir.join(charm_name);
-    
-    // TODO: Do a quick sanity check: make sure that the charm has a parsable `lucky.yaml` file in it
 
     // Clear the target directory
     if target_dir.exists() {
@@ -177,12 +167,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     }
 
     // Create relation hooks
-    for relation_name in metadata
-        .provides
-        .keys()
-        .chain(metadata.requires.keys())
-        .chain(metadata.peers.keys())
-    {
+    let create_relation_hook = |relation_name: &String| -> anyhow::Result<()> {
         for hook_name_template in JUJU_RELATION_HOOKS {
             let hook_name = hook_name_template.replace("{}", relation_name);
             let new_hook_path = hook_dir.join(&hook_name);
@@ -197,10 +182,21 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
             )?;
             set_file_mode(&new_hook_path, 0o755)?;
         }
+
+        Ok(())
+    };
+    if let Some(relation_names) = charm_metadata.provides {
+        relation_names.keys().try_for_each(create_relation_hook)?;
+    }
+    if let Some(relation_names) = charm_metadata.requires {
+        relation_names.keys().try_for_each(create_relation_hook)?;
+    }
+    if let Some(relation_names) = charm_metadata.peers {
+        relation_names.keys().try_for_each(create_relation_hook)?;
     }
 
     // Create hooks for defined storages
-    if let Some(storage_data) = metadata.storage {
+    if let Some(storage_data) = charm_metadata.storage {
         for storage_name in storage_data.keys() {
             for hook_name_template in JUJU_STORAGE_HOOKS {
                 let hook_name = hook_name_template.replace("{}", storage_name);
@@ -225,6 +221,31 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
 //
 // Utilities
 //
+
+/// Loads a yaml file with either a `.yml` or `.yaml` extension into the given type
+fn load_yaml<T>(dir_path: &Path, base_name: &str) -> anyhow::Result<T>
+where
+    T: serde::de::DeserializeOwned,
+{
+    let file_path = if dir_path.join(format!("{}.yaml", base_name)).exists() {
+        dir_path.join(format!("{}.yaml", base_name))
+    } else {
+        dir_path.join(format!("{}.yml", base_name))
+    };
+    if !file_path.exists() {
+        anyhow::bail!(
+            "Could not locate a {}.yaml file in the given charm directory: {:?}",
+            base_name,
+            &dir_path
+        );
+    }
+    let file_content =
+        fs::read_to_string(&file_path).context(format!("Could not read file: {:?}", file_path))?;
+    let data: T = serde_yaml::from_str(&file_content)
+        .context(format!("Could not parse YAML: {:?}", file_path))?;
+
+    Ok(data)
+}
 
 /// `fs::create_dir_all` with extra error context
 fn create_dir_all(path: &Path) -> anyhow::Result<()> {
