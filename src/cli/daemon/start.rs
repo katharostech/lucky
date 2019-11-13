@@ -25,9 +25,9 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     varlink::listen(
         service,
         "unix:/run/lucky.sock;mode=700",
-        1, // Min worker threads
+        1,               // Min worker threads
         num_cpus::get(), // Max worker threads
-        0, // Timeout
+        0,               // Timeout
     )?;
 
     Ok(())

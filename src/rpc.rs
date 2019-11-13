@@ -11,7 +11,11 @@ use std::sync::{Arc, RwLock};
 struct LuckyRpc;
 
 impl VarlinkInterface for LuckyRpc {
-    fn run_hook(&self, call: &mut dyn Call_RunHook, hook_name: String) -> varlink::Result<()> {
+    fn trigger_hook(
+        &self,
+        call: &mut dyn Call_TriggerHook,
+        hook_name: String,
+    ) -> varlink::Result<()> {
         println!("Ran hook: {}", hook_name);
 
         call.reply()?;
