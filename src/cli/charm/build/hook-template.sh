@@ -1,2 +1,2 @@
 #/bin/bash
-../lucky daemon run-hook {hook_name}
+../lucky daemon trigger-hook {hook_name}
