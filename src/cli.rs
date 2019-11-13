@@ -8,8 +8,8 @@ pub(crate) mod doc;
 
 // Subcommands
 mod charm;
-mod daemon;
 mod client;
+mod daemon;
 
 /// Run the application
 pub fn run() {
@@ -52,7 +52,7 @@ fn execute() -> anyhow::Result<()> {
             "daemon" => return daemon::run(&args),
             "client" => client::run(&args),
             other => anyhow::bail!("Unrecognized LUCKY_CONTEXT: {}", other),
-        }
+        };
     }
 
     // Show the docs if necessary

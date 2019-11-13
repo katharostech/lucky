@@ -1,0 +1,8 @@
+# The Lucky charm frameowrk for Juju.
+#
+# This is the varlink RPC schema definition for the Lucky daemon and client communication
+# protocol.
+interface lucky.rpc
+
+# Run a Lucky hook
+method RunHook(hook_name: String) -> ()

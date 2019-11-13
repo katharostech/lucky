@@ -1,8 +1,8 @@
 use anyhow::Context;
 use clap::{App, ArgMatches};
 
-mod start;
 mod run_hook;
+mod start;
 
 use crate::cli::doc;
 
@@ -28,7 +28,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Run a subcommand
     match args.subcommand() {
         ("start", Some(sub_args)) => start::run(sub_args).context("Could not start daemon"),
-        ("run_hook", Some(sub_args)) => run_hook::run(sub_args).context("Could not run hook"),
+        ("run-hook", Some(sub_args)) => run_hook::run(sub_args).context("Could not run hook"),
         _ => panic!("Unimplemented subcommand or failure to show help."),
     }
 }

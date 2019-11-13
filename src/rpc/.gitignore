@@ -1,0 +1,2 @@
+# Ignore the generated varlink source file
+lucky_rpc.rs

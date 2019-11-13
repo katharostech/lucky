@@ -6,6 +6,10 @@ use std::path::Path;
 use walkdir::WalkDir;
 
 fn main() {
+    // Generate Rust source from Varlink RPC interface definition
+    varlink_generator::cargo_build_tosource("src/rpc/lucky.rpc.varlink", /* rustfmt */ true);
+
+    // Package charm template ZIP for inclusion into the binary
     let charm_template_dir = format!("{}/charm_template", env::var("CARGO_MANIFEST_DIR").unwrap());
     let charm_template_zip_path = format!("{}/charm_template.zip", env::var("OUT_DIR").unwrap());
     let prefix = &charm_template_dir;

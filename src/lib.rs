@@ -6,6 +6,7 @@
 #![warn(future_incompatible)]
 
 pub mod cli;
+pub(crate) mod rpc;
 pub(crate) mod types;
 
 pub(crate) const CHARM_TEMPLATE_ARCHIVE: &[u8] =

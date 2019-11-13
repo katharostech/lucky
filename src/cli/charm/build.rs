@@ -252,8 +252,7 @@ where
 }
 
 fn write_file(path: &Path, content: &str) -> anyhow::Result<()> {
-    fs::write(&path, content)
-        .context(format!("Could not write file: {:?}", &path))?;
+    fs::write(&path, content).context(format!("Could not write file: {:?}", &path))?;
     Ok(())
 }
 
