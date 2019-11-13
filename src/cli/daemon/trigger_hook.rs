@@ -9,7 +9,11 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .about("Run a hook through the Lucky daemon")
         .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
         .arg(doc::get_arg())
-        .arg(Arg::with_name("hook_name").required(true))
+        .arg(
+            Arg::with_name("hook_name")
+                .help("The name of the hook to trigger")
+                .required(true),
+        )
 }
 
 /// Run the `trigger-hook` subcommand
