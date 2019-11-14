@@ -5,7 +5,7 @@ use std::process::{Command, Stdio};
 use std::sync::{Arc, RwLock};
 
 use crate::cli::doc;
-use crate::rpc::{self, VarlinkClientInterface};
+use crate::daemon::{self, VarlinkClientInterface};
 
 #[rustfmt::skip]
 /// Return the `trigger-hook` subcommand
@@ -61,7 +61,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     })?;
 
     // Connect to service and trigger the hook
-    let mut service = rpc::get_client(connection);
+    let mut service = daemon::get_client(connection);
     service
         .trigger_hook(
             args.value_of("hook_name")
@@ -70,8 +70,8 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         )
         .call()?;
 
-    println!(
-        r#"{} Ran hook "{}"!"#,
+    println!( // TODO: logging
+        r#"{} Ran hook "{}""#,
         crossterm::style::style("Success:").with(crossterm::style::Color::Green),
         args.value_of("hook_name")
             .expect("Missing required argument: hook_name")

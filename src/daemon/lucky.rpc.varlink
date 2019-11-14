@@ -6,3 +6,5 @@ interface lucky.rpc
 
 # Run trigger a Juju hook
 method TriggerHook(hook_name: String) -> ()
+# Stops the deamon service
+method StopDaemon() -> ()

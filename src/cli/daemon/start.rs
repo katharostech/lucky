@@ -1,7 +1,10 @@
-use clap::{App, ArgMatches};
 use anyhow::Context;
+use clap::{App, ArgMatches};
 
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 
 use crate::cli::doc;
 
@@ -24,19 +27,21 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         include_str!("start/start.md"),
     )?;
 
-    let service = crate::rpc::get_service();
-
+    // The running flag is used to shutdown the server by setting it to `false`
+    let running = Arc::new(AtomicBool::new(true));
+    
+    let service = crate::daemon::get_service(running.clone());
     let listen_address = format!("unix:{};mode=700", socket_path);
 
-    let running = Arc::new(AtomicBool::new(true));
-    let r = running.clone();
-
     // Set signal handler
+    let r = running.clone();
     ctrlc::set_handler(move || {
         println!("Shutting down server"); // TODO: print this message with logging instead
         r.store(false, Ordering::SeqCst);
-    }).context("Error setting signal handler for SIGINT/SIGTERM")?;
+    })
+    .context("Error setting signal handler for SIGINT/SIGTERM")?;
 
+    // Start varlink server
     varlink::listen(
         service,
         &listen_address,

@@ -2,6 +2,7 @@ use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 
 mod start;
+mod stop;
 mod trigger_hook;
 
 use crate::cli::doc;
@@ -13,6 +14,7 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .about("Run the Lucky daemon")
         .subcommand(start::get_subcommand())
         .subcommand(trigger_hook::get_subcommand())
+        .subcommand(stop::get_subcommand())
         .arg(doc::get_arg())
         .arg(Arg::with_name("unit_name")
             .long("unit-name")
@@ -67,6 +69,9 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         }
         ("trigger-hook", Some(sub_args)) => {
             trigger_hook::run(sub_args, &socket_path).context("Could not trigger hook")
+        },
+        ("stop", Some(sub_args)) => {
+            stop::run(sub_args, &socket_path).context("Could not stop daemon")
         }
         _ => panic!("Unimplemented subcommand or failure to show help."),
     }
