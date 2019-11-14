@@ -70,7 +70,8 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         )
         .call()?;
 
-    println!( // TODO: logging
+    println!(
+        // TODO: logging
         r#"{} Ran hook "{}""#,
         crossterm::style::style("Success:").with(crossterm::style::Color::Green),
         args.value_of("hook_name")

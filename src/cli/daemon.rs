@@ -69,7 +69,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         }
         ("trigger-hook", Some(sub_args)) => {
             trigger_hook::run(sub_args, &socket_path).context("Could not trigger hook")
-        },
+        }
         ("stop", Some(sub_args)) => {
             stop::run(sub_args, &socket_path).context("Could not stop daemon")
         }

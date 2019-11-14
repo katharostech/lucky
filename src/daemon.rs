@@ -43,7 +43,7 @@ impl VarlinkInterface for LuckyDaemon {
 
     /// Stop the Lucky daemon
     fn stop_daemon(&self, call: &mut dyn Call_StopDaemon) -> varlink::Result<()> {
-        // Set the running=false. 
+        // Set the running=false.
         println!("Shutting down server"); // TODO: logging
         self.running.store(false, Ordering::SeqCst);
 

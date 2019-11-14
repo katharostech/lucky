@@ -29,7 +29,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
 
     // The running flag is used to shutdown the server by setting it to `false`
     let running = Arc::new(AtomicBool::new(true));
-    
+
     let service = crate::daemon::get_service(running.clone());
     let listen_address = format!("unix:{};mode=700", socket_path);
 
