@@ -53,12 +53,15 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
 
         // If there was no --start-if-not-running flag
         } else {
-            Err(e.into())
+            Err(e).context(format!(
+                r#"Could not connect to lucky daemon at: "{}""#,
+                connection_address
+            ))
         }
     })?;
 
+    // Connect to service and trigger the hook
     let mut service = rpc::get_client(connection);
-
     service
         .trigger_hook(
             args.value_of("hook_name")

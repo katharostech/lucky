@@ -49,6 +49,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         include_str!("daemon/daemon.md"),
     )?;
 
+    // Determine the socket path
     let socket_path = match args.value_of("socket_path") {
         Some(path) => path.to_string(),
         None => format!(

@@ -1,4 +1,7 @@
 use clap::{App, ArgMatches};
+use anyhow::Context;
+
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
 use crate::cli::doc;
 
@@ -24,11 +27,20 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     let service = crate::rpc::get_service();
 
     let listen_address = format!("unix:{};mode=700", socket_path);
-    // TODO: Make this server shutdown gracefully. This might help:
-    // https://docs.rs/varlink/8.1.0/varlink/enum.Listener.html
+
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+
+    // Set signal handler
+    ctrlc::set_handler(move || {
+        println!("Shutting down server"); // TODO: print this message with logging instead
+        r.store(false, Ordering::SeqCst);
+    }).context("Error setting signal handler for SIGINT/SIGTERM")?;
+
     varlink::listen(
         service,
         &listen_address,
+        running.clone(),
         1,               // Min worker threads
         num_cpus::get(), // Max worker threads
         0,               // Timeout

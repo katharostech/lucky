@@ -25,8 +25,9 @@ termsize = "0.1"
 lazy_static = "1.4"
 walkdir = "2.2"
 serde_yaml = "0.8"
-varlink = "10.0"
+varlink = { path = "lib/varlink/varlink" }
 num_cpus = "1.11"
+ctrlc = { version = "3.1", features = ["termination"] }
 
 [features]
 default = ["color-backtrace"]
