@@ -1,3 +1,2 @@
 #!/bin/bash
-../bin/lucky daemon start
-../bin/lucky daemon trigger-hook install
+../bin/lucky daemon trigger-hook install --start-if-not-running
