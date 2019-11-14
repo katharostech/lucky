@@ -34,8 +34,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
                 .expect("Missing required argument: hook_name")
                 .to_string(),
         )
-        .call()
-        .map_err(|e| anyhow::anyhow!("Error running hook: {:?}", e))?;
+        .call()?;
 
     println!(
         "{} Ran hook!",

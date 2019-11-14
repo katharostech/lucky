@@ -25,7 +25,7 @@ termsize = "0.1"
 lazy_static = "1.4"
 walkdir = "2.2"
 serde_yaml = "0.8"
-varlink = "8.0"
+varlink = "10.0"
 num_cpus = "1.11"
 
 [features]
@@ -34,4 +34,4 @@ default = ["color-backtrace"]
 [build-dependencies]
 zip = { version = "0.5", features = ["bzip2"], default-features = false }
 walkdir = "2.2"
-varlink_generator = "8.0"
+varlink_generator = "9.0"

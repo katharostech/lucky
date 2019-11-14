@@ -1378,9 +1378,9 @@ dependencies = [
 
 [[package]]
 name = "varlink"
-version = "8.1.0"
+version = "10.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50961469dd0df40c00640ec7a552b48fae0813dd1430cefae11d1fbb87a1f40a"
+checksum = "3e9ea65577eb459340e8b31131f80b58d5c514cba9394d7ecc6d8164a29e2e9d"
 dependencies = [
  "libc",
  "serde",
@@ -1394,15 +1394,15 @@ dependencies = [
 
 [[package]]
 name = "varlink_generator"
-version = "8.0.0"
+version = "9.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c966903893f8a889d6ebac5a6d68448c2894f082b609c14e0f7f45434ebf58e9"
+checksum = "3a56e7bf98749ac88a93149700cbddb9da8b9639b54d2d87958d872a38d28db9"
 dependencies = [
  "chainerror",
  "getopts",
- "proc-macro2 0.4.30",
- "quote 0.6.13",
- "syn 0.15.44",
+ "proc-macro2 1.0.6",
+ "quote 1.0.2",
+ "syn 1.0.8",
  "varlink_parser",
 ]
 
