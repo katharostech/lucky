@@ -40,7 +40,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         // The connection failed and --start-if-not-running has been specified
         if args.is_present("start_if_not_running") {
             // Start lucky daemon
-            println!("Starting lucky daemon"); // TODO: implementing logging for this notification
+            log::info!("Starting lucky daemon");
             Command::new(std::env::current_exe()?)
                 .args(&["daemon", "--socket-path", &socket_path, "start"])
                 .stdout(Stdio::null())
@@ -70,8 +70,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         )
         .call()?;
 
-    println!(
-        // TODO: logging
+    log::info!(
         r#"{} Ran hook "{}""#,
         crossterm::style::style("Success:").with(crossterm::style::Color::Green),
         args.value_of("hook_name")

@@ -35,7 +35,7 @@ impl VarlinkInterface for LuckyDaemon {
         call: &mut dyn Call_TriggerHook,
         hook_name: String,
     ) -> varlink::Result<()> {
-        println!("Ran hook: {} ( not really, though )", hook_name);
+        log::info!("Ran hook: {} ( not really, though )", hook_name);
 
         // Reply and exit
         call.reply(None)?;
@@ -45,7 +45,7 @@ impl VarlinkInterface for LuckyDaemon {
     /// Stop the Lucky daemon
     fn stop_daemon(&self, call: &mut dyn Call_StopDaemon) -> varlink::Result<()> {
         // Set the running=false.
-        println!("Shutting down server"); // TODO: logging
+        log::info!("Shutting down server"); // TODO: logging
         self.running.store(false, Ordering::SeqCst);
 
         // Reply and exit

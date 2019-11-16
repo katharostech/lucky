@@ -655,6 +655,7 @@ dependencies = [
  "dirs",
  "handlebars",
  "lazy_static",
+ "log",
  "num_cpus",
  "rprompt",
  "serde",

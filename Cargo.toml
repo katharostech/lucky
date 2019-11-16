@@ -28,6 +28,7 @@ serde_yaml = "0.8"
 varlink = { path = "lib/varlink/varlink" }
 num_cpus = "1.11"
 ctrlc = { version = "3.1", features = ["termination"] }
+log = "0.4"
 
 [features]
 default = ["color-backtrace"]
