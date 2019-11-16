@@ -44,11 +44,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     // Stop the daemon
     service.stop_daemon().call()?;
 
-    log::info!(
-        // TODO: logging
-        "{} Shutdown server",
-        crossterm::style::style("Success:").with(crossterm::style::Color::Green)
-    );
+    log::info!("Shutdown server");
 
     Ok(())
 }

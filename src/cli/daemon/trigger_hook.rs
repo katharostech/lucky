@@ -3,8 +3,8 @@ use clap::{App, Arg, ArgMatches};
 
 use std::process::{Command, Stdio};
 
-use crate::cli::doc;
 use crate::cli::daemon::try_connect_daemon;
+use crate::cli::doc;
 use crate::daemon::{self, VarlinkClientInterface};
 
 #[rustfmt::skip]
@@ -71,8 +71,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         .call()?;
 
     log::info!(
-        r#"{} Ran hook "{}""#,
-        crossterm::style::style("Success:").with(crossterm::style::Color::Green),
+        r#"Ran hook "{}""#,
         args.value_of("hook_name")
             .expect("Missing required argument: hook_name")
     );

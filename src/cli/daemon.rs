@@ -1,5 +1,5 @@
 use anyhow::Context;
-use clap::{App, Arg, ArgMatches};
+use clap::{App, AppSettings, Arg, ArgMatches};
 
 mod start;
 mod stop;
@@ -16,6 +16,7 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .subcommand(start::get_subcommand())
         .subcommand(trigger_hook::get_subcommand())
         .subcommand(stop::get_subcommand())
+        .setting(AppSettings::SubcommandRequiredElseHelp)
         .arg(doc::get_arg())
         .arg(Arg::with_name("unit_name")
             .long("unit-name")
@@ -42,7 +43,6 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
             .env("LUCKY_DAEMON_SOCKET"))
 }
 
-
 use crate::log::DaemonLogger;
 static DAEMON_LOGGER: DaemonLogger = DaemonLogger;
 
@@ -57,11 +57,11 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     )?;
 
     // Enable logging
-    log::set_logger(&DAEMON_LOGGER).map(|()| {
-        log::set_max_level(log::LevelFilter::Debug);
-    }).map_err(|e| {
-        anyhow::anyhow!("Could not set logger: {}", e)
-    })?;
+    log::set_logger(&DAEMON_LOGGER)
+        .map(|()| {
+            log::set_max_level(log::LevelFilter::Debug);
+        })
+        .map_err(|e| anyhow::anyhow!("Could not set logger: {}", e))?;
 
     // Determine the socket path
     let socket_path = match args.value_of("socket_path") {
@@ -90,7 +90,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
 }
 
 /// Test connection to daemon
-/// 
+///
 /// Returns true if it can connect successfully to daemon
 pub(crate) fn can_connect_daemon(connection_address: &str) -> bool {
     varlink::Connection::with_address(connection_address).is_ok()

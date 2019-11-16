@@ -1,4 +1,4 @@
-use log::{Record, Level, Metadata};
+use log::{Level, Metadata, Record};
 
 /// Logger used for the Lucky daemon
 pub(crate) struct DaemonLogger;
@@ -10,7 +10,12 @@ impl log::Log for DaemonLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            eprintln!("[lucky_daemon][{}]: {}", record.level(), record.args());
+            eprintln!(
+                "[{}][{}]: {}",
+                record.target(),
+                record.level(),
+                record.args()
+            );
         }
     }
 

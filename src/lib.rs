@@ -7,8 +7,8 @@
 
 pub mod cli;
 pub(crate) mod daemon;
-pub(crate) mod types;
 pub(crate) mod log;
+pub(crate) mod types;
 
 pub(crate) const CHARM_TEMPLATE_ARCHIVE: &[u8] =
     include_bytes!(concat!(env!("OUT_DIR"), "/charm_template.zip"));
