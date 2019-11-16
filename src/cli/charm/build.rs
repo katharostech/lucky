@@ -95,7 +95,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
             // https://github.com/BurntSushi/walkdir/issues/131
             return false;
         };
-        !(&entry_path == &build_dir_canonical)
+        entry_path != build_dir_canonical
     }) {
         let entry = entry?;
         let relative_path = entry

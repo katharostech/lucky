@@ -2,9 +2,9 @@ use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 
 use std::process::{Command, Stdio};
-use std::sync::{Arc, RwLock};
 
 use crate::cli::doc;
+use crate::cli::daemon::try_connect_daemon;
 use crate::daemon::{self, VarlinkClientInterface};
 
 #[rustfmt::skip]
@@ -79,36 +79,4 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     );
 
     Ok(())
-}
-
-/// Try to connect to daemon with 4 retries and 500 milisecond wait in-between
-fn try_connect_daemon(
-    connection_address: &str,
-) -> anyhow::Result<Arc<RwLock<varlink::Connection>>> {
-    let mut retries = 0;
-    let max_retries = 4;
-    let result;
-    loop {
-        let connection_result = varlink::Connection::with_address(connection_address);
-        match connection_result {
-            Ok(conn) => {
-                result = Ok(conn);
-                break;
-            }
-            Err(e) => {
-                retries += 1;
-                if retries == max_retries {
-                    result = Err(e);
-                    break;
-                }
-            }
-        }
-
-        std::thread::sleep(std::time::Duration::from_millis(500))
-    }
-
-    result.context(format!(
-        r#"Could not connect to lucky daemon at: "{}""#,
-        connection_address
-    ))
 }

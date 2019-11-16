@@ -8,6 +8,7 @@ use std::sync::{
 use std::process::{Command, Stdio};
 
 use crate::cli::doc;
+use crate::cli::daemon::try_connect_daemon;
 
 #[rustfmt::skip]
 /// Return the `start` subcommand
@@ -48,6 +49,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
 
     // If we are running in the forground
     if args.is_present("foreground") {
+        println!("Starting daemon in foreground");
         // Start varlink server
         varlink::listen(
             service,
@@ -56,15 +58,29 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
             1,               // Min worker threads
             num_cpus::get(), // Max worker threads
             0,               // Timeout
-        )?;
+        )
+        .context(format!("Could not daemon server on socket: {}", &socket_path))?;
     } else {
+        println!("Starting the lucky daemon");
         // Spawn another process for running the daemon in the background
-        Command::new(std::env::current_exe()?)
+        let child_daemon = Command::new(std::env::current_exe()?)
             .args(&["daemon", "--socket-path", &socket_path, "start", "-F"])
             .stdout(Stdio::null())
-            .stderr(Stdio::null())
+            .stderr(Stdio::piped())
             .spawn()
             .context("Could not start lucky daemon")?;
+
+        try_connect_daemon(&listen_address).or_else(move |_| {
+            eprintln!("Could not start daemon:");
+            {
+                let output = child_daemon.wait_with_output()?;
+                eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+            }
+            // Exit because we have already printed the error message
+            std::process::exit(1);
+            #[allow(unreachable_code)]
+            Err(anyhow::anyhow!("Unreachble error required by compiler"))
+        })?;
     }
 
     Ok(())
