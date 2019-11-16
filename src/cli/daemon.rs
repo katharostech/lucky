@@ -75,7 +75,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     };
 
     // Run a subcommand
-    match args.subcommand() {
+    let result = match args.subcommand() {
         ("start", Some(sub_args)) => {
             start::run(sub_args, &socket_path).context("Could not start daemon")
         }
@@ -86,6 +86,14 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
             stop::run(sub_args, &socket_path).context("Could not stop daemon")
         }
         _ => panic!("Unimplemented subcommand or failure to show help."),
+    };
+
+    // Log errors and exit
+    if let Err(e) = result {
+        log::error!("{:?}", e);
+        std::process::exit(1);
+    } else {
+        Ok(())
     }
 }
 
