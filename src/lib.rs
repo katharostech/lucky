@@ -11,6 +11,3 @@ pub(crate) mod types;
 
 pub(crate) const CHARM_TEMPLATE_ARCHIVE: &[u8] =
     include_bytes!(concat!(env!("OUT_DIR"), "/charm_template.zip"));
-
-// Not used yet. Commenting to squelch warning
-// pub(crate) const CHARM_HOOK_TEMPLATE: &[u8] = include_bytes!("../charm_hooks/hook-template.hbs");
