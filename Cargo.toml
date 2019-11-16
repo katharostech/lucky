@@ -36,3 +36,8 @@ default = ["color-backtrace"]
 zip = { version = "0.5", features = ["bzip2"], default-features = false }
 walkdir = "2.2"
 varlink_generator = "9.0"
+
+# Speed up development builds by not including debug info. Comment this out if you need the debug
+# symbols.
+[profile.dev]
+debug = false
