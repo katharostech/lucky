@@ -11,10 +11,10 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
         .about("Stop the Lucky daemon")
         .arg(doc::get_arg())
-        .arg(Arg::with_name("ignore_error")
-            .long("ignore-error")
-            .short('f')
-            .help("Don't complain if we are unable to connect to the daemon"))
+        .arg(Arg::with_name("ignore_already_stopped")
+            .long("ignore-already-stopped")
+            .short('i')
+            .help("Don't complain if the daemon is already stopped"))
 }
 
 /// Run the `stop` subcommand
@@ -30,7 +30,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     // Connect to lucky daemon
     let connection_address = format!("unix:{}", &socket_path);
     let connection = varlink::Connection::with_address(&connection_address).or_else(|e| {
-        if args.is_present("ignore_error") {
+        if args.is_present("ignore_already_stopped") {
             std::process::exit(0);
         } else {
             Err(e).context(format!(

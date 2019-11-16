@@ -1,9 +1,6 @@
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 
-use std::process::{Command, Stdio};
-
-use crate::cli::daemon::try_connect_daemon;
 use crate::cli::doc;
 use crate::daemon::{self, VarlinkClientInterface};
 
@@ -17,10 +14,6 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .arg(Arg::with_name("hook_name")
             .help("The name of the hook to trigger")
             .required(true))
-        .arg(Arg::with_name("start_if_not_running")
-            .long("start-if-not-running")
-            .short('s')
-            .help("Start the lucky daemon if it is not already running"))
 }
 
 /// Run the `trigger-hook` subcommand
@@ -36,29 +29,10 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     // Connect to lucky daemon
     let connection_address = format!("unix:{}", &socket_path);
     let connection_result = varlink::Connection::with_address(&connection_address);
-    let connection = connection_result.or_else(|e| {
-        // The connection failed and --start-if-not-running has been specified
-        if args.is_present("start_if_not_running") {
-            // Start lucky daemon
-            log::info!("Starting lucky daemon");
-            Command::new(std::env::current_exe()?)
-                .args(&["daemon", "--socket-path", &socket_path, "start"])
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn()
-                .context("Could not start lucky daemon")?;
-
-            // Attempt connection atain
-            try_connect_daemon(&connection_address)
-
-        // If there was no --start-if-not-running flag
-        } else {
-            Err(e).context(format!(
-                r#"Could not connect to lucky daemon at: "{}""#,
-                connection_address
-            ))
-        }
-    })?;
+    let connection = connection_result.context(format!(
+        r#"Could not connect to lucky daemon at: "{}""#,
+        connection_address
+    ))?;
 
     // Connect to service and trigger the hook
     let mut service = daemon::get_client(connection);

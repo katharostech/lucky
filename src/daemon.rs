@@ -13,18 +13,18 @@ use std::sync::{
 
 /// The Lucky Daemon RPC service
 struct LuckyDaemon {
-    /// Used to indicate that the server should still be running.
-    /// This will be set to false to indicate that the server should stop.
-    running: Arc<AtomicBool>,
+    /// Used to indicate that the server should stop listening.
+    /// This will be set to true to indicate that the server should stop.
+    stop_listening: Arc<AtomicBool>,
 }
 
 impl LuckyDaemon {
     /// Create a new daemon instance
     ///
-    /// @param running  A shared bool that will be set to false to indicate that the server should
+    /// @param stop_listening  A shared bool that will be set to true to indicate that the server should
     ///                 shutdown. The server shutdown itself is not handled by the daemon.
-    fn new(running: Arc<AtomicBool>) -> Self {
-        LuckyDaemon { running }
+    fn new(stop_listening: Arc<AtomicBool>) -> Self {
+        LuckyDaemon { stop_listening }
     }
 }
 
@@ -44,9 +44,9 @@ impl VarlinkInterface for LuckyDaemon {
 
     /// Stop the Lucky daemon
     fn stop_daemon(&self, call: &mut dyn Call_StopDaemon) -> varlink::Result<()> {
-        // Set the running=false.
-        log::info!("Shutting down server"); // TODO: logging
-        self.running.store(false, Ordering::SeqCst);
+        // Set the stop_listening=true.
+        log::info!("Shutting down server");
+        self.stop_listening.store(true, Ordering::SeqCst);
 
         // Reply and exit
         call.reply()?;
@@ -55,9 +55,9 @@ impl VarlinkInterface for LuckyDaemon {
 }
 
 /// Get the server service
-pub(crate) fn get_service(running: Arc<AtomicBool>) -> varlink::VarlinkService {
+pub(crate) fn get_service(stop_listening: Arc<AtomicBool>) -> varlink::VarlinkService {
     // Create a new daemon instance
-    let daemon_instance = LuckyDaemon::new(running);
+    let daemon_instance = LuckyDaemon::new(stop_listening);
 
     // Return the varlink service
     varlink::VarlinkService::new(
