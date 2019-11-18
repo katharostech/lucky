@@ -16,14 +16,21 @@ impl log::Log for DaemonLogger {
             if record.level() == Level::Debug {
                 cmd.arg("--debug");
             }
-            cmd.arg(format!("{}", record.args()));
+            cmd.arg(format!(
+                "[{}][{}]: {}",
+                record.target(),
+                record.level(),
+                record.args()
+            ));
 
-            cmd.spawn().map_err(|e| {
-                match e.kind() {
-                    std::io::ErrorKind::NotFound => (), // Ignore it if juju-log isn't in the path
-                    _ => eprintln!("[lucky::log][WARN]: Could not log to juju-log: {}", e)
-                }
-            }).ok();
+            cmd.spawn()
+                .map_err(|e| {
+                    match e.kind() {
+                        std::io::ErrorKind::NotFound => (), // Ignore it if juju-log isn't in the path
+                        _ => eprintln!("[lucky::log][WARN]: Could not log to juju-log: {}", e),
+                    }
+                })
+                .ok();
 
             // Log to standard out
             eprintln!(

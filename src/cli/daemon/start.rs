@@ -3,8 +3,8 @@ use clap::{App, Arg, ArgMatches};
 
 use std::process::{Command, Stdio};
 use std::sync::{
-    mpsc::sync_channel,
     atomic::{AtomicBool, Ordering},
+    mpsc::sync_channel,
     Arc,
 };
 
@@ -67,19 +67,23 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
 
         // Start varlink server in its own thread
         let (sender, reciever) = sync_channel(0);
-        let thread = std::thread::spawn(move ||{
-            sender.send(varlink::listen(
-                service,
-                &listen_address,
-                &varlink::ListenConfig {
-                    max_worker_threads: num_cpus::get(),
-                    stop_listening: Some(stop_listening.clone()),
-                    ..Default::default()
-                }
-            )).expect("Could not send result over thread");
+        let thread = std::thread::spawn(move || {
+            sender
+                .send(varlink::listen(
+                    service,
+                    &listen_address,
+                    &varlink::ListenConfig {
+                        max_worker_threads: num_cpus::get(),
+                        stop_listening: Some(stop_listening.clone()),
+                        ..Default::default()
+                    },
+                ))
+                .expect("Could not send result over thread");
         });
         // Get the server start resut and wait for the thread to exit
-        reciever.recv().expect("Could not recieve result from thread")?;
+        reciever
+            .recv()
+            .expect("Could not recieve result from thread")?;
         thread.join().expect("Could not join to thread");
 
     // If we should start in background
