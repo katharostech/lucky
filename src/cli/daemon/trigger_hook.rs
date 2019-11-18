@@ -34,21 +34,22 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         connection_address
     ))?;
 
-    // Connect to service and trigger the hook
-    let mut service = daemon::get_client(connection);
-    service
-        .trigger_hook(
-            args.value_of("hook_name")
-                .expect("Missing required argument: hook_name")
-                .to_string(),
-        )
-        .call()?;
+    let hook_name = args
+        .value_of("hook_name")
+        .expect("Missing required argument: hook_name")
+        .to_string();
 
-    log::info!(
-        r#"Ran hook "{}""#,
-        args.value_of("hook_name")
-            .expect("Missing required argument: hook_name")
-    );
+    // Connect to service and trigger the hook
+    log::info!(r#"Triggering hook "{}""#, &hook_name);
+    let mut service = daemon::get_client(connection);
+    for response in service.trigger_hook(hook_name.clone()).more()? {
+        let response = response?;
+        if let Some(output) = response.output {
+            eprintln!("{}", output);
+        }
+    }
+
+    log::info!(r#"Done running hook "{}""#, &hook_name);
 
     Ok(())
 }

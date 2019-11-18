@@ -38,6 +38,10 @@ impl VarlinkInterface for LuckyDaemon {
         log::info!("Ran hook: {} ( not really, though )", hook_name);
 
         // Reply and exit
+        call.set_continues(true);
+        call.reply(Some("Hello fello!".into()))?;
+        call.reply(Some("Goodbye dude!".into()))?;
+        call.set_continues(false);
         call.reply(None)?;
         Ok(())
     }
