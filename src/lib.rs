@@ -7,6 +7,7 @@
 
 pub mod cli;
 pub(crate) mod daemon;
+pub(crate) mod juju;
 pub(crate) mod log;
 pub(crate) mod types;
 

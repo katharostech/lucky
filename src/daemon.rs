@@ -35,7 +35,7 @@ impl VarlinkInterface for LuckyDaemon {
         call: &mut dyn Call_TriggerHook,
         hook_name: String,
     ) -> varlink::Result<()> {
-        log::info!("Ran hook: {} ( not really, though )", hook_name);
+        log::info!("Triggering hook: {}", hook_name);
 
         // Reply and exit
         call.set_continues(true);
