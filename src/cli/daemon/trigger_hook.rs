@@ -1,6 +1,8 @@
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 
+use std::io::Write;
+
 use crate::cli::doc;
 use crate::daemon::{self, VarlinkClientInterface};
 
@@ -45,7 +47,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     for response in service.trigger_hook(hook_name.clone()).more()? {
         let response = response?;
         if let Some(output) = response.output {
-            eprintln!("{}", output);
+            writeln!(std::io::stderr(), "{}", output).ok();
         }
     }
 

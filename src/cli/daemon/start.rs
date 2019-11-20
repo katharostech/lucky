@@ -68,17 +68,17 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         // Start varlink server in its own thread
         let (sender, reciever) = sync_channel(0);
         let thread = std::thread::spawn(move || {
-            sender
-                .send(varlink::listen(
-                    service,
-                    &listen_address,
-                    &varlink::ListenConfig {
-                        max_worker_threads: num_cpus::get(),
-                        stop_listening: Some(stop_listening.clone()),
-                        ..Default::default()
-                    },
-                ))
-                .expect("Could not send result over thread");
+            let result = varlink::listen(
+                service,
+                &listen_address,
+                &varlink::ListenConfig {
+                    max_worker_threads: num_cpus::get(),
+                    stop_listening: Some(stop_listening.clone()),
+                    ..Default::default()
+                },
+            );
+
+            sender.send(result).expect("Could not send result over thread");
         });
         // Get the server start resut and wait for the thread to exit
         reciever

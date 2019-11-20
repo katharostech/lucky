@@ -3,6 +3,8 @@
 use clap::{App, AppSettings};
 use crossterm::style::{style, Color};
 
+use std::io::Write;
+
 // Help utility
 pub(crate) mod doc;
 
@@ -16,20 +18,28 @@ pub fn run() {
     std::panic::catch_unwind(|| {
         // run program and report any errors
         if let Err(e) = execute() {
-            eprintln!("\n{} {:?}", style("Error:").with(Color::Red), e);
+            writeln!(
+                std::io::stderr(),
+                "\n{} {:?}",
+                style("Error:").with(Color::Red),
+                e
+            )
+            .ok();
             std::process::exit(1);
         }
     })
     // Catch any panics and print an error message. This will appear after the message given by
     // colored backtrace.
     .or_else(|_| -> Result<(), ()> {
-        eprintln!(
+        writeln!(
+            std::io::stderr(),
             concat!(
                 "\n {} The program has encountered a critical internal error and will now exit.\n",
                 "This is a bug. TODO: Setup Taiga project for reporting errors!!\n"
             ),
             style("Error:").with(Color::Red)
-        );
+        )
+        .ok();
 
         Ok(())
     })

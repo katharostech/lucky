@@ -1,4 +1,5 @@
 use log::{Level, Metadata, Record};
+use std::io::Write;
 use std::process::Command;
 
 /// Logger used for the Lucky daemon
@@ -26,19 +27,30 @@ impl log::Log for DaemonLogger {
             cmd.spawn()
                 .map_err(|e| {
                     match e.kind() {
-                        std::io::ErrorKind::NotFound => (), // Ignore it if juju-log isn't in the path
-                        _ => eprintln!("[lucky::log][WARN]: Could not log to juju-log: {}", e),
+                        // Ignore it if juju-log isn't in the path
+                        std::io::ErrorKind::NotFound => (),
+                        _ => {
+                            writeln!(
+                                std::io::stderr(),
+                                "[lucky::log][WARN]: Could not log to juju-log: {}",
+                                e
+                            )
+                            .ok();
+                            ()
+                        }
                     }
                 })
                 .ok();
 
             // Log to standard out
-            eprintln!(
+            writeln!(
+                std::io::stderr(),
                 "[{}][{}]: {}",
                 record.target(),
                 record.level(),
                 record.args()
-            );
+            )
+            .ok();
         }
     }
 
