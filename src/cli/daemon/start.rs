@@ -1,6 +1,8 @@
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
+use subprocess::{Exec, ExitStatus, Redirection};
 
+use std::io::Read;
 use std::process::{Command, Stdio};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
@@ -78,7 +80,9 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
                 },
             );
 
-            sender.send(result).expect("Could not send result over thread");
+            sender
+                .send(result)
+                .expect("Could not send result over thread");
         });
         // Get the server start resut and wait for the thread to exit
         reciever
@@ -91,12 +95,12 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         log::info!("Starting the lucky daemon");
 
         // Spawn another process for running the daemon in the background
-        Command::new(std::env::current_exe()?)
+        let mut output: Box<dyn Read> = Exec::cmd(std::env::current_exe()?)
             .args(&["daemon", "--socket-path", &socket_path, "start", "-F"])
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn()
+            .stdout(Redirection::Pipe)
+            .stderr(Redirection::Merge)
+            .detached()
+            .stream_stdout()
             .context("Could not start lucky daemon")?;
 
         // Make sure we can connect to the daemon
@@ -107,9 +111,14 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
             })
             // If we can't connect to the daemon
             .or_else(move |_| {
-                Err(anyhow::anyhow!(concat!(
-                    "Could not start daemon. Try running in the foreground with the -F flag to ",
-                    "see what the error message is."
+                let mut out = String::new();
+                output.read_to_string(&mut out).unwrap_or_else(|_| {
+                    out = "Could not read daemon logs".into();
+                    0
+                });
+                Err(anyhow::anyhow!(format!(
+                    "Could not connect to daemon. Dameon logs:\n----\n{}",
+                    out
                 )))
             })?;
     }
