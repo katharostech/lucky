@@ -32,8 +32,14 @@ fn run_command(cmd: &str, args: &[&str]) -> anyhow::Result<String> {
 /// Set the Juju status
 ///
 /// Returns the command output
-pub(crate) fn set_status(status: JujuStatus, message: &str) -> anyhow::Result<()> {
-    run_command("status-set", &[status.as_ref(), message])?;
+pub(crate) fn set_status(status: ScriptStatus) -> anyhow::Result<()> {
+    run_command(
+        "status-set",
+        &[
+            status.state.as_ref(),
+            &status.message.unwrap_or_else(|| "".into()),
+        ],
+    )?;
 
     Ok(())
 }

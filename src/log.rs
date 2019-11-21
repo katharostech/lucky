@@ -2,6 +2,24 @@ use log::{Level, Metadata, Record};
 use std::io::Write;
 use std::process::Command;
 
+/// Default Logger
+pub(crate) struct DefaultLogger;
+
+impl log::Log for DefaultLogger {
+    fn enabled(&self, _metadata: &Metadata) -> bool {
+        true
+    }
+
+    fn log(&self, record: &Record) {
+        if self.enabled(record.metadata()) {
+            // Log to stderr
+            writeln!(std::io::stderr(), "{}", record.args()).ok();
+        }
+    }
+
+    fn flush(&self) {}
+}
+
 /// Logger used for the Lucky daemon
 pub(crate) struct DaemonLogger;
 
@@ -12,12 +30,17 @@ impl log::Log for DaemonLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
+            let message = format!("[{}]: {}",
+                record.level(),
+                record.args()
+            );
+
             // Log to Juju
             let mut cmd = Command::new("juju-log");
             if record.level() <= Level::Debug {
                 cmd.arg("--debug");
             }
-            cmd.arg(format!("[{}]: {}", record.level(), record.args()));
+            cmd.arg(&message);
 
             cmd.spawn()
                 .map_err(|e| {
@@ -37,7 +60,7 @@ impl log::Log for DaemonLogger {
                 .ok();
 
             // Log to standard out
-            writeln!(std::io::stderr(), "[{}]: {}", record.level(), record.args()).ok();
+            writeln!(std::io::stderr(), "{}", message).ok();
         }
     }
 

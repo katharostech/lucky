@@ -1,5 +1,5 @@
 use anyhow::Context;
-use clap::{App, AppSettings, Arg, ArgMatches};
+use clap::{App, AppSettings, ArgMatches};
 
 mod start;
 mod stop;
@@ -18,29 +18,7 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .subcommand(stop::get_subcommand())
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .arg(doc::get_arg())
-        .arg(Arg::with_name("unit_name")
-            .long("unit-name")
-            .short('u')
-            .help("The name of the Juju unit that this daemon is running for")
-            .long_help(concat!(
-                "The name of the Juju unit that this daemon is running for. This will be used to ",
-                "determine path to the socket to listen on. For example a unit name of ",
-                r#""mysql/2" would listen on the socket "/run/lucky_mysql_2.sock"."#
-            ))
-            .takes_value(true)
-            .env("JUJU_UNIT_NAME")
-            .required_unless("socket_path"))
-        .arg(Arg::with_name("socket_path")
-            .long("socket-path")
-            .short('s')
-            .help("The path to the socket to listen on")
-            .long_help(concat!(
-                "The path to the socket to listen on. This will override the path determined by ",
-                "the unit-name argument."
-            ))
-            .takes_value(true)
-            .required_unless("unit_name")
-            .env("LUCKY_DAEMON_SOCKET"))
+        .args(&crate::cli::get_daemon_connection_args())
 }
 
 use crate::log::DaemonLogger;
