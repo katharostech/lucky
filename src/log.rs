@@ -7,19 +7,18 @@ pub(crate) struct DaemonLogger;
 
 impl log::Log for DaemonLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= Level::Debug
+        true
     }
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
             // Log to Juju
             let mut cmd = Command::new("juju-log");
-            if record.level() == Level::Debug {
+            if record.level() <= Level::Debug {
                 cmd.arg("--debug");
             }
             cmd.arg(format!(
-                "[{}][{}]: {}",
-                record.target(),
+                "[{}]: {}",
                 record.level(),
                 record.args()
             ));
@@ -32,7 +31,7 @@ impl log::Log for DaemonLogger {
                         _ => {
                             writeln!(
                                 std::io::stderr(),
-                                "[lucky::log][WARN]: Could not log to juju-log: {}",
+                                "[WARN]: Could not log to juju-log: {}",
                                 e
                             )
                             .ok();
@@ -45,8 +44,7 @@ impl log::Log for DaemonLogger {
             // Log to standard out
             writeln!(
                 std::io::stderr(),
-                "[{}][{}]: {}",
-                record.target(),
+                "[{}]: {}",
                 record.level(),
                 record.args()
             )

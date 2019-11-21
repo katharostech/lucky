@@ -47,7 +47,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     for response in service.trigger_hook(hook_name.clone()).more()? {
         let response = response?;
         if let Some(output) = response.output {
-            writeln!(std::io::stderr(), "{}", output).ok();
+            log::info!("output: {}", output);
         }
     }
 
