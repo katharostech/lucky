@@ -25,7 +25,7 @@ termsize = "0.1"
 lazy_static = "1.4"
 walkdir = "2.2"
 serde_yaml = "0.8"
-varlink = { path = "lib/varlink/varlink" }
+varlink = { git = "https://github.com/varlink/rust.git", rev = "04b2a5a" }
 num_cpus = "1.11"
 ctrlc = { version = "3.1", features = ["termination"] }
 log = "0.4"

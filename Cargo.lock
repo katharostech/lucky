@@ -1457,6 +1457,7 @@ dependencies = [
 [[package]]
 name = "varlink"
 version = "10.0.0"
+source = "git+https://github.com/varlink/rust.git?rev=04b2a5a#04b2a5a4b42bb25815df9956dbbd419f8f445a3a"
 dependencies = [
  "libc",
  "serde",

@@ -1,9 +1,8 @@
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
-use subprocess::{Exec, ExitStatus, Redirection};
+use subprocess::{Exec, Redirection};
 
 use std::io::Read;
-use std::process::{Command, Stdio};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     mpsc::sync_channel,

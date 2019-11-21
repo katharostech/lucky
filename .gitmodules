@@ -1,3 +1,0 @@
-[submodule "lib/varlink"]
-	path = lib/varlink
-	url = https://github.com/haraldh/varlink-rust.git

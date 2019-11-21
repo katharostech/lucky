@@ -3,8 +3,6 @@
 use anyhow::Context;
 use subprocess::{Exec, ExitStatus, Redirection};
 
-use serde_json::from_str;
-
 mod types;
 pub(crate) use types::*;
 
