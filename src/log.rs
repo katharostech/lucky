@@ -6,7 +6,7 @@ use std::process::Command;
 pub(crate) struct DaemonLogger;
 
 impl log::Log for DaemonLogger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
+    fn enabled(&self, _metadata: &Metadata) -> bool {
         true
     }
 
@@ -17,11 +17,7 @@ impl log::Log for DaemonLogger {
             if record.level() <= Level::Debug {
                 cmd.arg("--debug");
             }
-            cmd.arg(format!(
-                "[{}]: {}",
-                record.level(),
-                record.args()
-            ));
+            cmd.arg(format!("[{}]: {}", record.level(), record.args()));
 
             cmd.spawn()
                 .map_err(|e| {
@@ -35,20 +31,13 @@ impl log::Log for DaemonLogger {
                                 e
                             )
                             .ok();
-                            ()
                         }
                     }
                 })
                 .ok();
 
             // Log to standard out
-            writeln!(
-                std::io::stderr(),
-                "[{}]: {}",
-                record.level(),
-                record.args()
-            )
-            .ok();
+            writeln!(std::io::stderr(), "[{}]: {}", record.level(), record.args()).ok();
         }
     }
 

@@ -1,8 +1,6 @@
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 
-use std::io::Write;
-
 use crate::cli::doc;
 use crate::daemon::{self, VarlinkClientInterface};
 
