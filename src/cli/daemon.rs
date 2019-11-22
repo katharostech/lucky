@@ -21,9 +21,6 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .args(&crate::cli::get_daemon_connection_args())
 }
 
-use crate::log::DaemonLogger;
-static DAEMON_LOGGER: DaemonLogger = DaemonLogger;
-
 /// Run the `daemon` subcommand
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Show the docs if necessary
@@ -34,12 +31,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         include_str!("daemon/daemon.md"),
     )?;
 
-    // Enable logging
-    log::set_logger(&DAEMON_LOGGER)
-        .map(|()| {
-            log::set_max_level(log::LevelFilter::Debug);
-        })
-        .map_err(|e| anyhow::anyhow!("Could not set logger: {}", e))?;
+    crate::log::init_daemon_logger()?;
 
     // Determine the socket path
     let socket_path = match args.value_of("socket_path") {

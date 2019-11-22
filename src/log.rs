@@ -2,6 +2,35 @@ use log::{Level, Metadata, Record};
 use std::io::Write;
 use std::process::Command;
 
+/// Initialize a logger and set the max log level from the LUCKY_LOG_LEVEL environment variable
+fn init_logger(logger: &'static dyn log::Log) -> anyhow::Result<()> {
+    log::set_logger(logger)
+        .map(|()| {
+            if let Ok(level) = std::env::var("LUCKY_LOG_LEVEL") {
+                log::set_max_level(level.parse().unwrap_or(log::LevelFilter::Debug));
+            } else {
+                log::set_max_level(log::LevelFilter::Debug);
+            }
+        })
+        .map_err(|e| anyhow::anyhow!("Could not set logger: {}", e))?;
+
+    Ok(())
+}
+
+static DEFAULT_LOGGER: DefaultLogger = DefaultLogger;
+/// Initialize the default logger
+pub(crate) fn init_default_logger() -> anyhow::Result<()> {
+    init_logger(&DEFAULT_LOGGER)?;
+    Ok(())
+}
+
+static DAEMON_LOGGER: DaemonLogger = DaemonLogger;
+/// Initialize the daemon logger
+pub(crate) fn init_daemon_logger() -> anyhow::Result<()> {
+    init_logger(&DAEMON_LOGGER)?;
+    Ok(())
+}
+
 /// Default Logger
 pub(crate) struct DefaultLogger;
 

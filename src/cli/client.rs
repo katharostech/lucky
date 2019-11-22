@@ -17,9 +17,6 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .args(&crate::cli::get_daemon_connection_args())
 }
 
-use crate::log::DefaultLogger;
-static DEFAULT_LOGGER: DefaultLogger = DefaultLogger;
-
 /// Run the `client` subcommand
 pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Show the docs if necessary
@@ -30,12 +27,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         include_str!("client/client.md"),
     )?;
 
-    // Set logger
-    log::set_logger(&DEFAULT_LOGGER)
-        .map(|()| {
-            log::set_max_level(log::LevelFilter::Debug);
-        })
-        .map_err(|e| anyhow::anyhow!("Could not set logger: {}", e))?;
+    crate::log::init_default_logger()?;
 
     // Run a subcommand
     match args.subcommand() {
