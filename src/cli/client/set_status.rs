@@ -13,7 +13,7 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .about("Set the status of the current script")
         .arg(Arg::with_name("script_id")
             .long("script-id")
-            .short('i')
+            .short('I')
             .help("The ID of the script that is being run")
             .long_help(concat!(
                 "The ID of the script that is being run. Allows each script to have a status ",
@@ -52,14 +52,13 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         .value_of("script_id")
         .expect("Missing required argument: script_id");
 
-    log::trace!("script_id: {}", script_id);
-    log::trace!("Status: {:#?}", status);
-
     // Connect to lucky daemon
     let mut client = get_daemon_client(socket_path)?;
 
     // Set script status
-    client.set_status(status.into()).call()?;
+    client
+        .set_status(script_id.into(), status.into())
+        .call()?;
 
     Ok(())
 }

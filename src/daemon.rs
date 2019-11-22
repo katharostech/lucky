@@ -6,18 +6,21 @@
 pub(crate) mod lucky_rpc;
 pub(crate) use lucky_rpc as rpc;
 
-use crate::juju::ScriptStatus;
+use crate::juju::{ScriptState, ScriptStatus};
 
+use std::collections::HashMap;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, RwLock,
 };
 
+#[derive(Default)]
 /// The Lucky Daemon RPC service
 struct LuckyDaemon {
     /// Used to indicate that the server should stop listening.
     /// This will be set to true to indicate that the server should stop.
     stop_listening: Arc<AtomicBool>,
+    script_statuses: Arc<RwLock<HashMap<String, ScriptStatus>>>,
 }
 
 impl LuckyDaemon {
@@ -26,7 +29,39 @@ impl LuckyDaemon {
     /// stop_listening will be set to `true` by the daemon if it recieves a StopDaemon RPC. The
     /// actual stopping of the server itself is not handled by the daemon.
     fn new(stop_listening: Arc<AtomicBool>) -> Self {
-        LuckyDaemon { stop_listening }
+        LuckyDaemon {
+            stop_listening,
+            ..Default::default()
+        }
+    }
+
+    /// Consolidate script statuses into one status that can be used as the global Juju Status
+    fn get_juju_status(&self) -> ScriptStatus {
+        // The resulting Juju state
+        let mut juju_state = ScriptState::default();
+        // The resulting Juju status message
+        let mut juju_message = None;
+
+        for status in self.script_statuses.read().unwrap().values() {
+            // If this script state has a higher precedence
+            if status.state > juju_state {
+                // Set the Juju state to the more precedent state
+                juju_state = status.state;
+            }
+
+            if let Some(message) = &status.message {
+                if let Some(current) = juju_message {
+                    juju_message = Some([current, message.clone()].join(", "));
+                } else {
+                    juju_message = Some(message.clone());
+                }
+            }
+        }
+
+        ScriptStatus {
+            state: juju_state,
+            message: juju_message,
+        }
     }
 }
 
@@ -63,12 +98,19 @@ impl rpc::VarlinkInterface for LuckyDaemon {
     fn set_status(
         &self,
         call: &mut dyn rpc::Call_SetStatus,
+        script_id: String,
         status: rpc::ScriptStatus,
     ) -> varlink::Result<()> {
         let status: ScriptStatus = status.into();
-        log::info!("Setting script status: {:?}", status);
+        log::info!(r#"Setting status for script "{}": {}"#, script_id, status);
 
-        crate::juju::set_status(status).or_else(|e| call.reply_os_error(format!("{}", e)))?;
+        self.script_statuses
+            .write()
+            .unwrap()
+            .insert(script_id, status);
+
+        crate::juju::set_status(self.get_juju_status())
+            .or_else(|e| call.reply_os_error(format!("{}", e)))?;
 
         call.reply()?;
         Ok(())
