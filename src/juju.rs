@@ -1,12 +1,33 @@
 //! Module contains functions used to interact with Juju through the hook environment
-//! tools.
+//! tools. Also contains Juju specific types such as the Juju metadata.yaml struct.
 use anyhow::Context;
 use subprocess::{Exec, ExitStatus, Redirection};
+
+use crate::types::ScriptStatus;
 
 mod types;
 pub(crate) use types::*;
 
-/// This macro encapsulates all of the commen execution and error handling that is used when
+/// Set the Juju status
+///
+/// Returns the command output
+pub(crate) fn set_status(status: ScriptStatus) -> anyhow::Result<()> {
+    run_command(
+        "status-set",
+        &[
+            status.state.as_ref(),
+            &status.message.unwrap_or_else(|| "".into()),
+        ],
+    )?;
+
+    Ok(())
+}
+
+//
+// Helpers
+//
+
+/// This function encapsulates all of the common execution and error handling that is used when
 /// execting Juju commands.
 fn run_command(cmd: &str, args: &[&str]) -> anyhow::Result<String> {
     let capture = Exec::cmd(cmd)
@@ -27,19 +48,4 @@ fn run_command(cmd: &str, args: &[&str]) -> anyhow::Result<String> {
     }
 
     Ok(capture.stdout_str())
-}
-
-/// Set the Juju status
-///
-/// Returns the command output
-pub(crate) fn set_status(status: ScriptStatus) -> anyhow::Result<()> {
-    run_command(
-        "status-set",
-        &[
-            status.state.as_ref(),
-            &status.message.unwrap_or_else(|| "".into()),
-        ],
-    )?;
-
-    Ok(())
 }

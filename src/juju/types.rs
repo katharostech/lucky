@@ -1,88 +1,83 @@
-use strum_macros::{AsRefStr, EnumString, EnumVariantNames};
+use serde::Deserialize;
+use std::collections::HashMap;
 
-use crate::daemon::rpc::ScriptStatus as RpcScriptStatus;
-use crate::daemon::rpc::ScriptStatus_state as RpcScriptState;
+/// The list of the normal Juju hook names
+pub(crate) const JUJU_NORMAL_HOOKS: &[&str] = &[
+    "install",
+    "config-changed",
+    "leader-elected",
+    "leader-settings-changed",
+    "start",
+    "stop",
+    "upgrade-charm",
+    "update-status",
+    "collect-metrics",
+];
 
-#[derive(Copy, Clone, Debug, PartialEq, PartialOrd, AsRefStr, EnumString, EnumVariantNames)]
-#[strum(serialize_all = "snake_case")]
-/// A Lucky script state
-///
-/// The order of the variants are important in this case because the order of definition defines
-/// the order of precendence. For example, the Juju status will only be `Active` if all of the
-/// scripts are active. Any one script being a status of a higher precendence than all of the others
-/// will cause the Juju status to be set to that status. This functionality is implemented in
-/// `crate::daemon::LuckyDaemon::get_juju_status`.
-pub(crate) enum ScriptState {
-    /// The script is ready and providing the service
-    Active,
-    /// There is no error, but the script is wainting on some external resource before it can continue
-    Waiting,
-    /// The script is currently working on getting the service running
-    Maintenance,
-    /// The script cannot continue without extra user input
-    Blocked,
+#[allow(dead_code)]
+/// The list of the Juju relation hooks with the `{}` where the relation name should be
+pub(crate) const JUJU_RELATION_HOOKS: &[&str] = &[
+    "{}-relation-joined",
+    "{}-relation-changed",
+    "{}-relation-departed",
+    "{}-relation-broken",
+];
+
+#[allow(dead_code)]
+/// The list of the Juju storage hooks with the `{}` where the storage name should be
+pub(crate) const JUJU_STORAGE_HOOKS: &[&str] = &["{}-storage-attached", "{}-storage-detaching"];
+
+/// The charm metadata as defined in a charm's `metadata.yaml` file
+#[derive(Deserialize, Debug)]
+pub(crate) struct CharmMetadata {
+    pub name: String,
+    pub summary: Option<String>,
+    #[serde(rename = "display-name")]
+    pub display_name: Option<String>,
+    pub description: Option<String>,
+    pub maintainer: Option<String>,
+    pub maintainers: Option<Vec<String>>,
+    pub tags: Option<Vec<String>>,
+    pub series: Option<String>,
+    pub subordinate: Option<bool>,
+    pub terms: Option<Vec<String>>,
+    pub provides: Option<HashMap<String, RelationDef>>,
+    pub requires: Option<HashMap<String, RelationDef>>,
+    pub peers: Option<HashMap<String, RelationDef>>,
+    pub storage: Option<HashMap<String, StorageDef>>,
+    // TODO: Resources, payloads, and extra bindings
 }
 
-impl Default for ScriptState {
-    fn default() -> Self {
-        Self::Active
-    }
+/// The definition of a relation in the `metadata.yaml` file
+#[derive(Deserialize, Debug)]
+pub(crate) struct RelationDef {
+    pub interface: String,
 }
 
-// Implement `from` and `into` for the RPC version of this enum
-impl From<RpcScriptState> for ScriptState {
-    fn from(state: RpcScriptState) -> Self {
-        match state {
-            RpcScriptState::Maintenance => Self::Maintenance,
-            RpcScriptState::Blocked => Self::Blocked,
-            RpcScriptState::Waiting => Self::Waiting,
-            RpcScriptState::Active => Self::Active,
-        }
-    }
-}
-impl Into<RpcScriptState> for ScriptState {
-    fn into(self) -> RpcScriptState {
-        match self {
-            Self::Maintenance => RpcScriptState::Maintenance,
-            Self::Blocked => RpcScriptState::Blocked,
-            Self::Waiting => RpcScriptState::Waiting,
-            Self::Active => RpcScriptState::Active,
-        }
-    }
+/// See Juju Docs: https://discourse.jujucharms.com/t/writing-charms-that-use-storage/1128
+#[derive(Deserialize, Debug)]
+pub(crate) struct StorageDef {
+    #[serde(rename = "type")]
+    pub storage_type: StorageType,
+    pub description: Option<String>,
+    pub shared: Option<bool>,
+    #[serde(rename = "read-only")]
+    pub read_only: Option<bool>,
+    #[serde(rename = "minimum-size")]
+    pub minimum_size: Option<String>,
+    pub location: Option<String>,
+    pub multiple: Option<StorageMultiple>,
 }
 
-#[derive(Clone, Debug, Default)]
-/// Encapsulates the scripts state and an optional message
-pub(crate) struct ScriptStatus {
-    pub state: ScriptState,
-    pub message: Option<String>,
+#[derive(Deserialize, Debug)]
+pub(crate) enum StorageType {
+    #[serde(rename = "filesystem")]
+    Filesystem,
+    #[serde(rename = "block")]
+    Block,
 }
 
-impl std::fmt::Display for ScriptStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if let Some(message) = &self.message {
-            write!(f, "{}: {}", self.state.as_ref(), message)
-        } else {
-            write!(f, "{}", self.state.as_ref())
-        }
-        
-    }
-}
-
-// Implement `from` and `into` for the RPC version of this struct
-impl From<RpcScriptStatus> for ScriptStatus {
-    fn from(status: RpcScriptStatus) -> Self {
-        ScriptStatus {
-            state: status.state.into(),
-            message: status.message,
-        }
-    }
-}
-impl Into<RpcScriptStatus> for ScriptStatus {
-    fn into(self) -> RpcScriptStatus {
-        RpcScriptStatus {
-            state: self.state.into(),
-            message: self.message,
-        }
-    }
+#[derive(Deserialize, Debug)]
+pub(crate) struct StorageMultiple {
+    pub range: String,
 }

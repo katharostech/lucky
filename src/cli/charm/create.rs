@@ -8,6 +8,10 @@ use handlebars::Handlebars;
 use rprompt::prompt_reply_stdout;
 use serde::Serialize;
 
+/// Zip archive data for the charm template
+pub(crate) const CHARM_TEMPLATE_ARCHIVE: &[u8] =
+    include_bytes!(concat!(env!("OUT_DIR"), "/charm_template.zip"));
+
 #[derive(Serialize)]
 /// The input data to the charm template
 struct TemplateData {
@@ -187,7 +191,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     }
 
     // Create the zip reader from the embeded charm template archive
-    let zip_reader = std::io::Cursor::new(crate::CHARM_TEMPLATE_ARCHIVE);
+    let zip_reader = std::io::Cursor::new(CHARM_TEMPLATE_ARCHIVE);
     let zip_error_message = "Internal error: problem reading embedded charm template zip";
     let mut zip = zip::ZipArchive::new(zip_reader).context(zip_error_message)?;
 

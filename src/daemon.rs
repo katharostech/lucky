@@ -6,7 +6,7 @@
 pub(crate) mod lucky_rpc;
 pub(crate) use lucky_rpc as rpc;
 
-use crate::juju::{ScriptState, ScriptStatus};
+use crate::types::{ScriptState, ScriptStatus};
 
 use std::collections::HashMap;
 use std::sync::{
@@ -49,15 +49,19 @@ impl LuckyDaemon {
                 juju_state = status.state;
             }
 
+            // If there is a message with the status
             if let Some(message) = &status.message {
                 if let Some(current) = juju_message {
+                    // Add this message to Juju message
                     juju_message = Some([current, message.clone()].join(", "));
                 } else {
+                    // Set Juju message to this message
                     juju_message = Some(message.clone());
                 }
             }
         }
 
+        // Return Juju status
         ScriptStatus {
             state: juju_state,
             message: juju_message,
@@ -85,8 +89,8 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
     /// Stop the Lucky daemon
     fn stop_daemon(&self, call: &mut dyn rpc::Call_StopDaemon) -> varlink::Result<()> {
-        // Set the stop_listening=true.
         log::info!("Shutting down server");
+        // Set the stop_listening=true.
         self.stop_listening.store(true, Ordering::SeqCst);
 
         // Reply and exit
@@ -101,21 +105,27 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         script_id: String,
         status: rpc::ScriptStatus,
     ) -> varlink::Result<()> {
+        // Add status to script statuses
         let status: ScriptStatus = status.into();
         log::info!(r#"Setting status for script "{}": {}"#, script_id, status);
-
         self.script_statuses
             .write()
             .unwrap()
             .insert(script_id, status);
 
+        // Set the Juju status to the consolidated script statuses
         crate::juju::set_status(self.get_juju_status())
             .or_else(|e| call.reply_os_error(format!("{}", e)))?;
 
+        // Reply
         call.reply()?;
         Ok(())
     }
 }
+
+//
+// Helpers
+//
 
 /// Get the server service
 pub(crate) fn get_service(stop_listening: Arc<AtomicBool>) -> varlink::VarlinkService {

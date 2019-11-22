@@ -3,7 +3,7 @@ use clap::{App, Arg, ArgMatches};
 use crate::cli::daemon::get_daemon_client;
 use crate::cli::doc;
 use crate::daemon::rpc::VarlinkClientInterface;
-use crate::juju::{ScriptState, ScriptStatus};
+use crate::types::{ScriptState, ScriptStatus};
 
 #[rustfmt::skip]
 /// Return the subcommand

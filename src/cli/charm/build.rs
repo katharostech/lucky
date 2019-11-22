@@ -6,10 +6,10 @@ use clap::{App, Arg, ArgMatches};
 use walkdir::WalkDir;
 
 use crate::cli::doc;
-use crate::types::juju::{
+use crate::juju::{
     CharmMetadata, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS,
 };
-use crate::types::lucky::LuckyMetadata;
+use crate::types::LuckyMetadata;
 
 #[rustfmt::skip]
 /// Return the `build` subcommand
