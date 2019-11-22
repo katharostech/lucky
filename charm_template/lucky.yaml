@@ -4,7 +4,7 @@ hooks:
   install:
     # Run a script on the host. `install.sh` must exist in the `host_scripts`
     # directory.
-    - host_script: install.sh
+    - host-script: install.sh
     # Run a script inside the container. `configure.sh` must exist in the
     # `container_scripts` directory.
-    - container_script: configure.sh
+    - container-script: configure.sh
