@@ -12,8 +12,6 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .about("Communicate with the Lucky daemon in charm scripts")
         .subcommand(set_status::get_subcommand())
         .arg(doc::get_arg())
-        // TODO: These are the exact same arguments as for the `daemon` subcommand:
-        // we should probably remove the code duplication.
         .args(&crate::cli::get_daemon_connection_args())
 }
 
@@ -32,6 +30,6 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     // Run a subcommand
     match args.subcommand() {
         ("set-status", Some(sub_args)) => set_status::run(sub_args).context("Could not set status"),
-        _ => panic!("Unimplemented subcommand or failure to show help."),
+        _ => get_subcommand().write_help(&mut std::io::stderr()).map_err(|e| e.into()),
     }
 }

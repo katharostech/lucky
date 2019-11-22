@@ -29,6 +29,6 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     match args.subcommand() {
         ("create", Some(sub_args)) => create::run(sub_args).context("Could not create charm"),
         ("build", Some(sub_args)) => build::run(sub_args).context("Could not build charm"),
-        _ => panic!("Unimplemented subcommand or failure to show help."),
+        _ => get_subcommand().write_help(&mut std::io::stderr()).map_err(|e| e.into()),
     }
 }

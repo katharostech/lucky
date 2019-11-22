@@ -16,7 +16,6 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .subcommand(start::get_subcommand())
         .subcommand(trigger_hook::get_subcommand())
         .subcommand(stop::get_subcommand())
-        .setting(AppSettings::SubcommandRequiredElseHelp)
         .arg(doc::get_arg())
         .args(&crate::cli::get_daemon_connection_args())
 }
@@ -55,7 +54,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         ("stop", Some(sub_args)) => {
             stop::run(sub_args, &socket_path).context("Could not stop daemon")
         }
-        _ => panic!("Unimplemented subcommand or failure to show help."),
+        _ => get_subcommand().write_help(&mut std::io::stderr()).map_err(|e| e.into()),
     };
 
     // Log errors and exit

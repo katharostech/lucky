@@ -73,7 +73,7 @@ fn execute() -> anyhow::Result<()> {
         ("charm", Some(sub_args)) => charm::run(sub_args),
         ("daemon", Some(sub_args)) => daemon::run(sub_args),
         ("client", Some(sub_args)) => client::run(sub_args),
-        _ => panic!("Unimplemented subcommand or failure to show help."),
+        _ => get_cli()?.write_help(&mut std::io::stderr()).map_err(|e| e.into()),
     }
 }
 
