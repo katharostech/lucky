@@ -1,8 +1,8 @@
 use clap::{App, Arg, ArgMatches};
 
-use crate::cli::daemon::try_connect_daemon;
+use crate::cli::daemon::get_daemon_client;
 use crate::cli::doc;
-use crate::daemon::{self, rpc::VarlinkClientInterface};
+use crate::daemon::rpc::VarlinkClientInterface;
 use crate::juju::{ScriptState, ScriptStatus};
 
 #[rustfmt::skip]
@@ -56,12 +56,10 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     log::trace!("Status: {:#?}", status);
 
     // Connect to lucky daemon
-    let connection = try_connect_daemon(&socket_path)?;
+    let mut client = get_daemon_client(socket_path)?;
 
-    // TODO: Connect to daemon and create an RPC for setting the status.
-    let mut service = daemon::get_client(connection);
-
-    service.set_status(status.into()).call()?;
+    // Set script status
+    client.set_status(status.into()).call()?;
 
     Ok(())
 }

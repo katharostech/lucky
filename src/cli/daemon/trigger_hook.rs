@@ -1,8 +1,8 @@
 use clap::{App, Arg, ArgMatches};
 
-use crate::cli::daemon::try_connect_daemon;
+use crate::cli::daemon::get_daemon_client;
 use crate::cli::doc;
-use crate::daemon::{self, rpc::VarlinkClientInterface};
+use crate::daemon::rpc::VarlinkClientInterface;
 
 #[rustfmt::skip]
 /// Return the `trigger-hook` subcommand
@@ -26,18 +26,17 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         include_str!("trigger_hook/trigger_hook.md"),
     )?;
 
-    // Connect to lucky daemon
-    let connection = try_connect_daemon(&socket_path)?;
-
     let hook_name = args
         .value_of("hook_name")
         .expect("Missing required argument: hook_name")
         .to_string();
 
+    // Connect to lucky daemon
+    let mut client = get_daemon_client(socket_path)?;
+
     // Connect to service and trigger the hook
     log::info!(r#"Triggering hook "{}""#, &hook_name);
-    let mut service = daemon::get_client(connection);
-    for response in service.trigger_hook(hook_name.clone()).more()? {
+    for response in client.trigger_hook(hook_name.clone()).more()? {
         let response = response?;
         if let Some(output) = response.output {
             log::info!("output: {}", output);
