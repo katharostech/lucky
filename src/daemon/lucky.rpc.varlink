@@ -4,8 +4,20 @@
 # protocol.
 interface lucky.rpc
 
+# General error while running a command on the OS
+error OsError(message: string)
+
 # Trigger a Juju hook
 method TriggerHook(hook_name: String) -> (output: ?string)
 
 # Stops the deamon service
 method StopDaemon() -> ()
+
+# The status of a Lucky script
+type ScriptStatus (
+    state: (Maintenance, Blocked, Waiting, Active),
+    message: ?string
+)
+
+# Sets a script's status
+method SetStatus(status: ScriptStatus) -> ()

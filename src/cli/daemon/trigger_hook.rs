@@ -1,8 +1,8 @@
-use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 
+use crate::cli::daemon::try_connect_daemon;
 use crate::cli::doc;
-use crate::daemon::{self, VarlinkClientInterface};
+use crate::daemon::{self, rpc::VarlinkClientInterface};
 
 #[rustfmt::skip]
 /// Return the `trigger-hook` subcommand
@@ -27,12 +27,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     )?;
 
     // Connect to lucky daemon
-    let connection_address = format!("unix:{}", &socket_path);
-    let connection_result = varlink::Connection::with_address(&connection_address);
-    let connection = connection_result.context(format!(
-        r#"Could not connect to lucky daemon at: "{}""#,
-        connection_address
-    ))?;
+    let connection = try_connect_daemon(&socket_path)?;
 
     let hook_name = args
         .value_of("hook_name")

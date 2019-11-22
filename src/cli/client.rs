@@ -3,6 +3,7 @@ use clap::{App, ArgMatches};
 
 mod set_status;
 
+use crate::cli::daemon::{get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::doc;
 
 #[rustfmt::skip]
@@ -12,7 +13,7 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
         .about("Communicate with the Lucky daemon in charm scripts")
         .subcommand(set_status::get_subcommand())
         .arg(doc::get_arg())
-        .args(&crate::cli::get_daemon_connection_args())
+        .args(&get_daemon_connection_args())
 }
 
 /// Run the `client` subcommand
@@ -27,9 +28,15 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
 
     crate::log::init_default_logger()?;
 
+    let socket_path = get_daemon_socket_path(&args);
+
     // Run a subcommand
     match args.subcommand() {
-        ("set-status", Some(sub_args)) => set_status::run(sub_args).context("Could not set status"),
-        _ => get_subcommand().write_help(&mut std::io::stderr()).map_err(|e| e.into()),
+        ("set-status", Some(sub_args)) => {
+            set_status::run(sub_args, &socket_path).context("Could not set status")
+        }
+        _ => get_subcommand()
+            .write_help(&mut std::io::stderr())
+            .map_err(|e| e.into()),
     }
 }

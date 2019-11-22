@@ -1,6 +1,6 @@
 //! Commandline interface module
 
-use clap::{App, AppSettings, Arg};
+use clap::{App, AppSettings};
 use crossterm::style::{style, Color};
 
 use std::io::Write;
@@ -73,7 +73,9 @@ fn execute() -> anyhow::Result<()> {
         ("charm", Some(sub_args)) => charm::run(sub_args),
         ("daemon", Some(sub_args)) => daemon::run(sub_args),
         ("client", Some(sub_args)) => client::run(sub_args),
-        _ => get_cli()?.write_help(&mut std::io::stderr()).map_err(|e| e.into()),
+        _ => get_cli()?
+            .write_help(&mut std::io::stderr())
+            .map_err(|e| e.into()),
     }
 }
 
@@ -90,35 +92,6 @@ fn new_app<'a>(name: &str) -> App<'a> {
                 .long("help")
                 .help("Show help: --help shows more information")
         })
-}
-
-/// Returns the set of arguments required for any command connecting to the daemon.
-fn get_daemon_connection_args<'a>() -> [Arg<'a>; 2] {
-    [
-        Arg::with_name("unit_name")
-            .long("unit-name")
-            .short('u')
-            .help("The name of the Juju unit that this daemon is running for")
-            .long_help(concat!(
-                "The name of the Juju unit that this daemon is running for. This will be used to ",
-                "determine path to the socket to listen on. For example a unit name of ",
-                r#""mysql/2" would listen on the socket "/run/lucky_mysql_2.sock"."#
-            ))
-            .takes_value(true)
-            .env("JUJU_UNIT_NAME")
-            .required_unless("socket_path"),
-        Arg::with_name("socket_path")
-            .long("socket-path")
-            .short('s')
-            .help("The path to the socket to listen on")
-            .long_help(concat!(
-                "The path to the socket to listen on. This will override the path determined by ",
-                "the unit-name argument."
-            ))
-            .takes_value(true)
-            .required_unless("unit_name")
-            .env("LUCKY_DAEMON_SOCKET"),
-    ]
 }
 
 /// Get the Lucky clap App

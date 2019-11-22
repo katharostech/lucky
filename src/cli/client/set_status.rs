@@ -1,7 +1,9 @@
 use clap::{App, Arg, ArgMatches};
 
+use crate::cli::daemon::try_connect_daemon;
 use crate::cli::doc;
-use crate::juju::{set_status, ScriptState, ScriptStatus};
+use crate::daemon::{self, rpc::VarlinkClientInterface};
+use crate::juju::{ScriptState, ScriptStatus};
 
 #[rustfmt::skip]
 /// Return the subcommand
@@ -30,7 +32,7 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
 }
 
 /// Run the subcommand
-pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
+pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     // Show the docs if necessary
     doc::show_doc(
         &args,
@@ -46,8 +48,20 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         state: state.parse()?,
         message: args.value_of("message").map(|x| x.to_owned()),
     };
+    let script_id = args
+        .value_of("script_id")
+        .expect("Missing required argument: script_id");
+
+    log::trace!("script_id: {}", script_id);
+    log::trace!("Status: {:#?}", status);
+
+    // Connect to lucky daemon
+    let connection = try_connect_daemon(&socket_path)?;
 
     // TODO: Connect to daemon and create an RPC for setting the status.
+    let mut service = daemon::get_client(connection);
+
+    service.set_status(status.into()).call()?;
 
     Ok(())
 }

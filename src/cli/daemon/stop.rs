@@ -2,7 +2,7 @@ use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 
 use crate::cli::doc;
-use crate::daemon::{self, VarlinkClientInterface};
+use crate::daemon::{self, rpc::VarlinkClientInterface};
 
 #[rustfmt::skip]
 /// Return the `stop` subcommand

@@ -103,7 +103,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
             .context("Could not start lucky daemon")?;
 
         // Make sure we can connect to the daemon
-        try_connect_daemon(&listen_address)
+        try_connect_daemon(&socket_path)
             .and_then(|_| {
                 log::info!("Daemon started");
                 Ok(())
