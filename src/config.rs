@@ -1,7 +1,24 @@
-use anyhow::Context;
+use anyhow::{anyhow, Context};
 
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+
+pub(crate) fn get_charm_dir() -> anyhow::Result<PathBuf> {
+    match std::env::var("JUJU_CHARM_DIR") {
+        Ok(charm_dir) => {
+            let path: PathBuf = charm_dir.into();
+
+            if path.exists() {
+                Ok(path)
+            } else {
+                Err(anyhow!("JUJU_CHARM_DIR does not exist: {:?}", path))
+            }
+        }
+        Err(e) => {
+            Err(anyhow!("{}", e).context("Could not read environment variable: JUJU_CHARM_DIR"))
+        }
+    }
+}
 
 /// Loads a yaml file with either a `.yml` or `.yaml` extension into the given type
 pub(crate) fn load_yaml<T>(dir_path: &Path, base_name: &str) -> anyhow::Result<T>

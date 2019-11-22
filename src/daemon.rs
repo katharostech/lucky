@@ -6,6 +6,7 @@
 pub(crate) mod lucky_rpc;
 pub(crate) use lucky_rpc as rpc;
 
+use crate::config;
 use crate::types::{ScriptState, ScriptStatus};
 
 use std::collections::HashMap;
@@ -78,6 +79,17 @@ impl rpc::VarlinkInterface for LuckyDaemon {
     ) -> varlink::Result<()> {
         log::info!("Triggering hook: {}", hook_name);
 
+        let charm_dir = match config::get_charm_dir() {
+            Ok(charm_dir) => charm_dir,
+            Err(e) => {
+                log::error!("{}\n    Did not trigger hook: \"{}\"", e, hook_name);
+                call.reply_os_error(e.to_string())?;
+                return Ok(())
+            }
+        };
+        
+        println!("{:?}", charm_dir);
+
         // Reply and exit
         call.set_continues(true);
         call.reply(Some("Hello fello!".into()))?;
@@ -115,7 +127,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
         // Set the Juju status to the consolidated script statuses
         crate::juju::set_status(self.get_juju_status())
-            .or_else(|e| call.reply_os_error(format!("{}", e)))?;
+            .or_else(|e| call.reply_os_error(e.to_string()))?;
 
         // Reply
         call.reply()?;
