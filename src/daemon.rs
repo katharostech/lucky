@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use std::collections::HashMap;
 use std::fs::OpenOptions;
+use std::io::Write;
 use std::path::PathBuf;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
@@ -96,14 +97,27 @@ impl LuckyDaemon {
     /// Write out the daemon state to fileystem
     fn flush_state(&self) -> anyhow::Result<()> {
         let state_file_path = self.state_dir.join("state.yaml");
-        let state_file = OpenOptions::new()
+        let mut state_file = OpenOptions::new()
             .write(true)
             .truncate(true)
             .create(true)
-            .open(state_file_path)?;
+            .open(&state_file_path)?;
 
-        serde_yaml::to_writer(state_file, &*self.state.read().unwrap())
-            .expect("Failed to serialize daemon state");
+        // Write out comment to file
+        state_file
+            .write_all(
+                b"# The daemon state will be written to this file when the daemon is shutdown\n",
+            )
+            .context(format!(
+                "Failed writing to state file: {:?}",
+                state_file_path
+            ))?;
+
+        // Serialize state to file
+        serde_yaml::to_writer(state_file, &*self.state.read().unwrap()).context(format!(
+            "Failed to serialize daemon state to file: {:?}",
+            state_file_path
+        ))?;
 
         Ok(())
     }
