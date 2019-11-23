@@ -8,7 +8,18 @@ use strum_macros::{AsRefStr, EnumString, EnumVariantNames};
 use crate::daemon::rpc::ScriptStatus as RpcScriptStatus;
 use crate::daemon::rpc::ScriptStatus_state as RpcScriptState;
 
-#[derive(Copy, Clone, Debug, PartialEq, PartialOrd, AsRefStr, EnumString, EnumVariantNames)]
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    PartialEq,
+    PartialOrd,
+    AsRefStr,
+    EnumString,
+    EnumVariantNames,
+    Serialize,
+    Deserialize,
+)]
 #[strum(serialize_all = "snake_case")]
 /// A Lucky script state
 ///
@@ -56,7 +67,7 @@ impl Into<RpcScriptState> for ScriptState {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 /// Encapsulates the scripts state and an optional message
 pub(crate) struct ScriptStatus {
     pub state: ScriptState,
@@ -70,7 +81,6 @@ impl std::fmt::Display for ScriptStatus {
         } else {
             write!(f, "{}", self.state.as_ref())
         }
-        
     }
 }
 
@@ -101,7 +111,6 @@ impl Into<RpcScriptStatus> for ScriptStatus {
 pub(crate) struct LuckyMetadata {
     pub hooks: HashMap<String, Vec<HookScript>>,
 }
-
 
 #[derive(Deserialize, Serialize, Debug)]
 /// A hook script in the `lucky.yaml` definition

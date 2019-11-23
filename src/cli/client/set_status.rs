@@ -56,9 +56,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     let mut client = get_daemon_client(socket_path)?;
 
     // Set script status
-    client
-        .set_status(script_id.into(), status.into())
-        .call()?;
+    client.set_status(script_id.into(), status.into()).call()?;
 
     Ok(())
 }

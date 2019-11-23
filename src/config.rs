@@ -32,7 +32,7 @@ where
     };
     if !file_path.exists() {
         anyhow::bail!(
-            "Could not locate a {}.yaml file in the charm directory: {:?}",
+            "Could not locate a {}.yaml file in the directory: {:?}",
             base_name,
             &dir_path
         );

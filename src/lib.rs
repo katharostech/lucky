@@ -6,8 +6,8 @@
 #![warn(future_incompatible)]
 
 pub mod cli;
+pub(crate) mod config;
 pub(crate) mod daemon;
 pub(crate) mod juju;
 pub(crate) mod log;
-pub(crate) mod config;
 pub(crate) mod types;

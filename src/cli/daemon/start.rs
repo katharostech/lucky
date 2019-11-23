@@ -3,6 +3,7 @@ use clap::{App, Arg, ArgMatches};
 use subprocess::{Exec, Redirection};
 
 use std::io::Read;
+use std::path::PathBuf;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     mpsc::sync_channel,
@@ -11,6 +12,7 @@ use std::sync::{
 
 use crate::cli::daemon::{can_connect_daemon, try_connect_daemon};
 use crate::cli::doc;
+use crate::config;
 
 #[rustfmt::skip]
 /// Return the `start` subcommand
@@ -27,10 +29,22 @@ pub(crate) fn get_subcommand<'a>() -> App<'a> {
             .long("foreground")
             .short('F')
             .help("Run in the foreground"))
+        .arg(Arg::with_name("state_dir")
+            .long("state-dir")
+            .short('S')
+            .takes_value(true)
+            .help("The directory to store the unit state in")
+            .long_help(concat!(
+                "The directory to store the unit state in. If this is left unspecified the ",
+                "state directory will be automatically determined from the unit name. For ",
+                r#"example, for a unit named "mysql/2", the state dir will be "#,
+                r#""/var/lib/lucky/mysql_2_state""#
+            ))
+            .env("LUCKY_STATE_DIR"))
 }
 
 /// Run the `start` subcommand
-pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
+pub(crate) fn run(args: &ArgMatches, unit_name: &str, socket_path: &str) -> anyhow::Result<()> {
     // Show the docs if necessary
     doc::show_doc(
         &args,
@@ -41,8 +55,30 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
 
     // The stop_listening flag is used to shutdown the server by setting it to `false`
     let stop_listening = Arc::new(AtomicBool::new(false));
+
+    // Get and create state dir
+    let state_dir = args
+        .value_of("state_dir")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            PathBuf::from(format!(
+                "/var/lib/lucky/{}_state",
+                unit_name.replace("/", "_")
+            ))
+        });
+    if !state_dir.exists() {
+        std::fs::create_dir_all(&state_dir)
+            .context(format!("Could not create unit state dir: {:?}", state_dir))?;
+    }
+
+    // Get charm dir and lucky metadata
+    let charm_dir = config::get_charm_dir()?;
+    let lucky_metadata = config::load_yaml(&charm_dir, "lucky")?;
+
+    log::trace!("lucky metadata: {:#?}", lucky_metadata);
+
     // Get daemon service
-    let service = crate::daemon::get_service(stop_listening.clone());
+    let service = crate::daemon::get_service(lucky_metadata, state_dir, stop_listening.clone());
     let listen_address = format!("unix:{};mode=700", socket_path);
 
     // Set signal handler for SIGINT/SIGTERM

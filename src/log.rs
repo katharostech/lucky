@@ -59,7 +59,7 @@ impl log::Log for DaemonLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            let message = format!("[{}]: {}", record.level(), record.args());
+            let message = format!("Lucky Daemon: [{}]: {}", record.level(), record.args());
 
             // Log to Juju
             let mut cmd = Command::new("juju-log");

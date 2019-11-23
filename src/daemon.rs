@@ -1,4 +1,16 @@
 //! Contains the Lucky RPC implementaiton used for client->daemon communication.
+use anyhow::Context;
+use serde::{Deserialize, Serialize};
+
+use std::collections::HashMap;
+use std::fs::OpenOptions;
+use std::path::PathBuf;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc, RwLock,
+};
+
+use crate::types::{LuckyMetadata, ScriptState, ScriptStatus};
 
 #[allow(clippy::all)]
 #[allow(bare_trait_objects)]
@@ -6,22 +18,29 @@
 pub(crate) mod lucky_rpc;
 pub(crate) use lucky_rpc as rpc;
 
-use crate::config;
-use crate::types::{ScriptState, ScriptStatus};
+#[derive(Debug, Default, Serialize, Deserialize)]
+/// Contains the daemon state, which can be serialize and deserialized for persistance across
+/// daemon crashes, upgrades, etc.
+struct DaemonState {
+    #[serde(rename = "script-statuses")]
+    /// The statuses of all of the scripts
+    script_statuses: HashMap<String, ScriptStatus>,
+    /// The unit-local key-value store
+    kv: HashMap<String, String>,
+}
 
-use std::collections::HashMap;
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc, RwLock,
-};
-
-#[derive(Default)]
 /// The Lucky Daemon RPC service
 struct LuckyDaemon {
+    /// The directory in which to store the daemon state
+    state_dir: PathBuf,
+    /// The contents of the charm's lucky.yaml config
+    lucky_metadata: LuckyMetadata,
     /// Used to indicate that the server should stop listening.
     /// This will be set to true to indicate that the server should stop.
     stop_listening: Arc<AtomicBool>,
-    script_statuses: Arc<RwLock<HashMap<String, ScriptStatus>>>,
+    /// The daemon state. This will be serialized and written to disc for persistance when the
+    /// daemon crashes or is shutdown.
+    state: Arc<RwLock<DaemonState>>,
 }
 
 impl LuckyDaemon {
@@ -29,11 +48,64 @@ impl LuckyDaemon {
     ///
     /// stop_listening will be set to `true` by the daemon if it recieves a StopDaemon RPC. The
     /// actual stopping of the server itself is not handled by the daemon.
-    fn new(stop_listening: Arc<AtomicBool>) -> Self {
-        LuckyDaemon {
+    fn new(
+        lucky_metadata: LuckyMetadata,
+        state_dir: PathBuf,
+        stop_listening: Arc<AtomicBool>,
+    ) -> Self {
+        let daemon = LuckyDaemon {
+            lucky_metadata,
+            state_dir,
             stop_listening,
-            ..Default::default()
+            state: Default::default(),
+        };
+
+        daemon.load_state().unwrap_or_else(|e| {
+            log::error!(
+                "{:?}",
+                e.context("Could not load daemon state from filesystem")
+            );
+        });
+
+        log::trace!("{:#?}", daemon.state.read().unwrap());
+
+        daemon
+    }
+
+    /// Load the daemon state from the filesystem
+    fn load_state(&self) -> anyhow::Result<()> {
+        let state_file_path = self.state_dir.join("state.yaml");
+        if !state_file_path.exists() {
+            return Ok(());
         }
+
+        let state_file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(&state_file_path)
+            .context(format!("Could not open state file: {:?}", state_file_path))?;
+
+        *self.state.write().unwrap() = serde_yaml::from_reader(state_file).context(format!(
+            "Could not parse state file as yaml: {:?}",
+            state_file_path
+        ))?;
+
+        Ok(())
+    }
+
+    /// Write out the daemon state to fileystem
+    fn flush_state(&self) -> anyhow::Result<()> {
+        let state_file_path = self.state_dir.join("state.yaml");
+        let state_file = OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .create(true)
+            .open(state_file_path)?;
+
+        serde_yaml::to_writer(state_file, &*self.state.read().unwrap())
+            .expect("Failed to serialize daemon state");
+
+        Ok(())
     }
 
     /// Consolidate script statuses into one status that can be used as the global Juju Status
@@ -43,7 +115,7 @@ impl LuckyDaemon {
         // The resulting Juju status message
         let mut juju_message = None;
 
-        for status in self.script_statuses.read().unwrap().values() {
+        for status in self.state.read().unwrap().script_statuses.values() {
             // If this script state has a higher precedence
             if status.state > juju_state {
                 // Set the Juju state to the more precedent state
@@ -70,6 +142,18 @@ impl LuckyDaemon {
     }
 }
 
+impl Drop for LuckyDaemon {
+    /// Persist the daeomon state before it is dropped
+    fn drop(&mut self) {
+        self.flush_state().unwrap_or_else(|e| {
+            log::error!(
+                "{:?}",
+                e.context("Could not persist daemon state to filesystem")
+            );
+        });
+    }
+}
+
 impl rpc::VarlinkInterface for LuckyDaemon {
     /// Trigger a Juju hook
     fn trigger_hook(
@@ -78,17 +162,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         hook_name: String,
     ) -> varlink::Result<()> {
         log::info!("Triggering hook: {}", hook_name);
-
-        let charm_dir = match config::get_charm_dir() {
-            Ok(charm_dir) => charm_dir,
-            Err(e) => {
-                log::error!("{}\n    Did not trigger hook: \"{}\"", e, hook_name);
-                call.reply_os_error(e.to_string())?;
-                return Ok(())
-            }
+        let mut handle_error = |e: anyhow::Error| -> varlink::error::Result<()> {
+            log::error!("{}\nAborting hook execution for: {}", e, hook_name);
+            call.reply_error(e.to_string())?;
+            Ok(())
         };
-        
-        println!("{:?}", charm_dir);
 
         // Reply and exit
         call.set_continues(true);
@@ -120,14 +198,15 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // Add status to script statuses
         let status: ScriptStatus = status.into();
         log::info!(r#"Setting status for script "{}": {}"#, script_id, status);
-        self.script_statuses
+        self.state
             .write()
             .unwrap()
+            .script_statuses
             .insert(script_id, status);
 
         // Set the Juju status to the consolidated script statuses
         crate::juju::set_status(self.get_juju_status())
-            .or_else(|e| call.reply_os_error(e.to_string()))?;
+            .or_else(|e| call.reply_error(e.to_string()))?;
 
         // Reply
         call.reply()?;
@@ -140,9 +219,13 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 //
 
 /// Get the server service
-pub(crate) fn get_service(stop_listening: Arc<AtomicBool>) -> varlink::VarlinkService {
+pub(crate) fn get_service(
+    lucky_metadata: LuckyMetadata,
+    state_dir: PathBuf,
+    stop_listening: Arc<AtomicBool>,
+) -> varlink::VarlinkService {
     // Create a new daemon instance
-    let daemon_instance = LuckyDaemon::new(stop_listening);
+    let daemon_instance = LuckyDaemon::new(lucky_metadata, state_dir, stop_listening);
 
     // Return the varlink service
     varlink::VarlinkService::new(

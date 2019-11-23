@@ -4,8 +4,8 @@
 # protocol.
 interface lucky.rpc
 
-# General error while running a command on the OS
-error OsError(message: string)
+# General catch-all error type
+error Error(message: string)
 
 # Trigger a Juju hook
 method TriggerHook(hook_name: String) -> (output: ?string)
