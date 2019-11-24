@@ -27,6 +27,8 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         include_str!("stop/stop.md"),
     )?;
 
+    crate::log::init_default_logger()?;
+
     // Connect to lucky daemon
     let connection_address = format!("unix:{}", &socket_path);
     let connection = varlink::Connection::with_address(&connection_address).or_else(|e| {

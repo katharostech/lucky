@@ -14,6 +14,7 @@ fn main() {
 
     // Package charm template ZIP for inclusion into the binary
     let charm_template_dir = format!("{}/charm_template", env::var("CARGO_MANIFEST_DIR").unwrap());
+    println!("cargo:rerun-if-changed={}", charm_template_dir);
     let charm_template_zip_path = format!("{}/charm_template.zip", env::var("OUT_DIR").unwrap());
     let prefix = &charm_template_dir;
 
@@ -28,6 +29,7 @@ fn main() {
     for entry in dir_iter {
         let entry = entry.unwrap();
         let path = entry.path();
+        println!("cargo:rerun-if-changed={}", path.to_str().unwrap());
         let name = path.strip_prefix(Path::new(&prefix)).unwrap();
 
         if path.is_file() {

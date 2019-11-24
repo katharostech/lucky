@@ -37,6 +37,8 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
         include_str!("trigger_hook/trigger_hook.md"),
     )?;
 
+    crate::log::init_default_logger()?;
+
     let hook_name = args
         .value_of("hook_name")
         .expect("Missing required argument: hook_name")

@@ -266,7 +266,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                         }
                     }
                     HookScript::ContainerScript(_script_name) => {
-                        call.reply_error("Unimplemented".into())?;
+                        log::warn!("Container scripts not yet implemented");
                     }
                 }
             }

@@ -30,9 +30,6 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         include_str!("daemon/daemon.md"),
     )?;
 
-    // Initialize the logger
-    crate::log::init_daemon_logger()?;
-
     let unit_name = args
         .value_of("unit_name")
         .expect("Missing required argument \"unit_name\"");
@@ -40,7 +37,7 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
     let socket_path = get_daemon_socket_path(&args);
 
     // Run a subcommand
-    let result = match args.subcommand() {
+    match args.subcommand() {
         ("start", Some(sub_args)) => {
             start::run(sub_args, &unit_name, &socket_path).context("Could not start daemon")
         }
@@ -53,15 +50,9 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         _ => get_subcommand()
             .write_help(&mut std::io::stderr())
             .map_err(|e| e.into()),
-    };
+    }?;
 
-    // Log errors and exit
-    if let Err(e) = result {
-        log::error!("{:?}", e);
-        std::process::exit(1);
-    } else {
-        Ok(())
-    }
+    Ok(())
 }
 
 //
