@@ -117,6 +117,15 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
                 "Could not copy file {:?} to {:?}",
                 source_path, &target_path
             ))?;
+
+            // Make scripts executable
+            if let Some(parent) = source_path.parent() {
+                if let Some(name) = parent.file_name() {
+                    if name == "host_scripts" || name == "container_scripts" {
+                        set_file_mode(&target_path, 0o755)?
+                    }
+                }
+            }
         }
     }
 

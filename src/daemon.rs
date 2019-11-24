@@ -177,7 +177,7 @@ impl LuckyDaemon {
     ) -> varlink::Result<u32> {
         // Build command
         let command_path = self.charm_dir.join("host_scripts").join(script_name);
-        let mut command = Exec::cmd(command_path)
+        let mut command = Exec::cmd(&command_path)
             .stdout(Redirection::Pipe)
             .stderr(Redirection::Merge)
             .env("LUCKY_CONTEXT", "client")
@@ -191,8 +191,10 @@ impl LuckyDaemon {
         let mut process = match command.popen() {
             Ok(stream) => stream,
             Err(e) => {
+                let e = anyhow::Error::from(e)
+                    .context(format!("Error executing script: {:?}", command_path));
                 call.reply_error(format!("{:?}", e))?;
-                log_error(e.into());
+                log_error(e);
                 return Ok(1)
             }
         };
