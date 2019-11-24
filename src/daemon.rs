@@ -1,17 +1,18 @@
 //! Contains the Lucky RPC implementaiton used for client->daemon communication.
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
+use subprocess::{Exec, ExitStatus, Redirection};
 
 use std::collections::HashMap;
 use std::fs::OpenOptions;
-use std::io::Write;
+use std::io::{Write, BufReader, BufRead};
 use std::path::PathBuf;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, RwLock,
 };
 
-use crate::types::{LuckyMetadata, ScriptState, ScriptStatus};
+use crate::types::{HookScript, LuckyMetadata, ScriptState, ScriptStatus};
 
 #[allow(clippy::all)]
 #[allow(bare_trait_objects)]
@@ -32,6 +33,8 @@ struct DaemonState {
 
 /// The Lucky Daemon RPC service
 struct LuckyDaemon {
+    /// The charm directory
+    charm_dir: PathBuf,
     /// The directory in which to store the daemon state
     state_dir: PathBuf,
     /// The contents of the charm's lucky.yaml config
@@ -51,16 +54,19 @@ impl LuckyDaemon {
     /// actual stopping of the server itself is not handled by the daemon.
     fn new(
         lucky_metadata: LuckyMetadata,
+        charm_dir: PathBuf,
         state_dir: PathBuf,
         stop_listening: Arc<AtomicBool>,
     ) -> Self {
         let daemon = LuckyDaemon {
             lucky_metadata,
+            charm_dir,
             state_dir,
             stop_listening,
             state: Default::default(),
         };
 
+        // Load daemon state
         daemon.load_state().unwrap_or_else(|e| {
             log::error!(
                 "{:?}",
@@ -68,7 +74,15 @@ impl LuckyDaemon {
             );
         });
 
-        log::trace!("{:#?}", daemon.state.read().unwrap());
+        // Update the Juju status
+        crate::juju::set_status(daemon.get_juju_status()).unwrap_or_else(|e| {
+            log::warn!(
+                "{:?}",
+                e.context("Could not set juju status")
+            );
+        });
+
+        log::trace!("Loaded daemon state: {:#?}", daemon.state.read().unwrap());
 
         daemon
     }
@@ -154,17 +168,78 @@ impl LuckyDaemon {
             message: juju_message,
         }
     }
+
+    fn run_host_script(
+        &self,
+        call: &mut dyn rpc::Call_TriggerHook,
+        script_name: &str,
+        environment: &HashMap<String, String>,
+    ) -> varlink::Result<u32> {
+        // Build command
+        let command_path = self.charm_dir.join("host_scripts").join(script_name);
+        let mut command = Exec::cmd(command_path)
+            .stdout(Redirection::Pipe)
+            .stderr(Redirection::Merge)
+            .env("LUCKY_CONTEXT", "client")
+            .env("LUCKY_SCRIPT_ID", script_name);
+        
+        // Set environment for hook exececution
+        for (k, v) in environment.iter() {
+            command = command.env(k, v);
+        }
+
+        let mut process = match command.popen() {
+            Ok(stream) => stream,
+            Err(e) => {
+                call.reply_error(format!("{:?}", e))?;
+                log_error(e.into());
+                return Ok(1)
+            }
+        };
+
+        let output_buffer = BufReader::new(process.stdout.as_ref().expect("Stdout not opened"));
+
+        if call.wants_more() {
+            call.set_continues(true);
+        }
+
+        for line in output_buffer.lines() {
+            let line = match line {
+                Ok(line) => line,
+                Err(e) => {
+                    call.reply_error(format!("{:?}", e))?;
+                    log_error(e.into());
+                    return Ok(1)
+                }
+            };
+            log::info!("output: {}", line);
+            
+            if call.wants_more() {
+                call.reply(None, Some(line))?;
+            }
+        }
+
+        // Wait for script to exit
+        let exit_status = match process.wait() {
+            Ok(status) => status,
+            Err(e) => {
+                call.reply_error(format!("{:?}", e))?;
+                log_error(e.into());
+                return Ok(1)
+            }
+        };
+
+        match exit_status {
+            ExitStatus::Exited(n) => Ok(n),
+            _ => Ok(1),
+        }
+    }
 }
 
 impl Drop for LuckyDaemon {
     /// Persist the daeomon state before it is dropped
     fn drop(&mut self) {
-        self.flush_state().unwrap_or_else(|e| {
-            log::error!(
-                "{:?}",
-                e.context("Could not persist daemon state to filesystem")
-            );
-        });
+        self.flush_state().unwrap_or_else(log_error);
     }
 }
 
@@ -174,20 +249,35 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         &self,
         call: &mut dyn rpc::Call_TriggerHook,
         hook_name: String,
+        environment: HashMap<String, String>
     ) -> varlink::Result<()> {
         log::info!("Triggering hook: {}", hook_name);
-        let mut handle_error = |e: anyhow::Error| -> varlink::error::Result<()> {
-            log::error!("{}\nAborting hook execution for: {}", e, hook_name);
-            call.reply_error(e.to_string())?;
-            Ok(())
-        };
 
-        // Reply and exit
-        call.set_continues(true);
-        call.reply(Some("Hello fello!".into()))?;
-        call.reply(Some("Goodbye dude!".into()))?;
-        call.set_continues(false);
-        call.reply(None)?;
+        let mut exit_code = 0;
+        if let Some(hook_scripts) = self.lucky_metadata.hooks.get(&hook_name) {
+            for hook_script in hook_scripts {
+                match hook_script {
+                    HookScript::HostScript(script_name) => {
+                        let code = self.run_host_script(call, script_name, &environment)?;
+                        if code != 0 {
+                            exit_code = 1;
+                        }
+                    }
+                    HookScript::ContainerScript(_script_name) => {
+                        call.reply_error("Unimplemented".into())?;
+                    }
+                }
+            }
+
+            call.set_continues(false);
+            call.reply(Some(exit_code), None)?;
+
+        // If the hook is not handled by the charm
+        } else {
+            // Just reply without doing anything
+            call.reply(None, None)?;
+        }
+
         Ok(())
     }
 
@@ -232,14 +322,20 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 // Helpers
 //
 
+/// Convenience for handling errors in Results
+fn log_error(e: anyhow::Error) {
+    log::error!("{:?}", e);
+}
+
 /// Get the server service
 pub(crate) fn get_service(
     lucky_metadata: LuckyMetadata,
+    charm_dir: PathBuf,
     state_dir: PathBuf,
     stop_listening: Arc<AtomicBool>,
 ) -> varlink::VarlinkService {
     // Create a new daemon instance
-    let daemon_instance = LuckyDaemon::new(lucky_metadata, state_dir, stop_listening);
+    let daemon_instance = LuckyDaemon::new(lucky_metadata, charm_dir, state_dir, stop_listening);
 
     // Return the varlink service
     varlink::VarlinkService::new(

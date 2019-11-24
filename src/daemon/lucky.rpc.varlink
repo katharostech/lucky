@@ -7,8 +7,17 @@ interface lucky.rpc
 # General catch-all error type
 error Error(message: string)
 
+# Returned when the given hook doesn't exist
+error HookDoesNotExist()
+
 # Trigger a Juju hook
-method TriggerHook(hook_name: String) -> (output: ?string)
+# 
+# If this hook is called with --more it will return once for each line of output from the hook
+# execution with exit code being null until last response when the hook is done executing. If the
+# hook is not called with --more, it will return only once and with output=null and exit_code equal
+# to the exit code of the hook.
+method TriggerHook(hook_name: String, environment: [string]string)
+    -> (exit_code: ?int, output: ?string)
 
 # Stops the deamon service
 method StopDaemon() -> ()
