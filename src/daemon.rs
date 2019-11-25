@@ -5,7 +5,7 @@ use subprocess::{Exec, ExitStatus, Redirection};
 
 use std::collections::HashMap;
 use std::fs::OpenOptions;
-use std::io::{Write, BufReader, BufRead};
+use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
@@ -75,11 +75,8 @@ impl LuckyDaemon {
         });
 
         // Update the Juju status
-        crate::juju::set_status(daemon.get_juju_status()).unwrap_or_else(|e| {
-            log::warn!(
-                "{:?}",
-                e.context("Could not set juju status")
-            );
+        crate::juju::set_status(daemon.get_juju_status(), None).unwrap_or_else(|e| {
+            log::warn!("{:?}", e.context("Could not set juju status"));
         });
 
         log::trace!("Loaded daemon state: {:#?}", daemon.state.read().unwrap());
@@ -191,8 +188,10 @@ impl LuckyDaemon {
             .stderr(Redirection::Merge)
             .env("PATH", path_env)
             .env("LUCKY_CONTEXT", "client")
-            .env("LUCKY_SCRIPT_ID", script_name);
-        
+            .env("LUCKY_SCRIPT_ID", script_name)
+            // Set the log level to "off" to avoid duplicating log messages from client and daemon
+            .env("LUCKY_LOG_LEVEL", "off");
+
         // Set environment for hook exececution
         for (k, v) in environment.iter() {
             command = command.env(k, v);
@@ -205,7 +204,7 @@ impl LuckyDaemon {
                     .context(format!("Error executing script: {:?}", command_path));
                 call.reply_error(format!("{:?}", e))?;
                 log_error(e);
-                return Ok(1)
+                return Ok(1);
             }
         };
 
@@ -221,11 +220,11 @@ impl LuckyDaemon {
                 Err(e) => {
                     call.reply_error(format!("{:?}", e))?;
                     log_error(e.into());
-                    return Ok(1)
+                    return Ok(1);
                 }
             };
             log::info!("output: {}", line);
-            
+
             if call.wants_more() {
                 call.reply(None, Some(line))?;
             }
@@ -237,7 +236,7 @@ impl LuckyDaemon {
             Err(e) => {
                 call.reply_error(format!("{:?}", e))?;
                 log_error(e.into());
-                return Ok(1)
+                return Ok(1);
             }
         };
 
@@ -261,7 +260,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         &self,
         call: &mut dyn rpc::Call_TriggerHook,
         hook_name: String,
-        environment: HashMap<String, String>
+        environment: HashMap<String, String>,
     ) -> varlink::Result<()> {
         log::info!("Triggering hook: {}", hook_name);
 
@@ -281,11 +280,20 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 }
             }
 
+            // Update the Juju status as Juju will clear it if we don't re-set it after hook
+            // execution
+            crate::juju::set_status(self.get_juju_status(), Some(&environment))
+                .or_else(|e| call.reply_error(e.to_string()))?;
+
             call.set_continues(false);
             call.reply(Some(exit_code), None)?;
 
         // If the hook is not handled by the charm
         } else {
+            // Update the Juju status
+            crate::juju::set_status(self.get_juju_status(), Some(&environment))
+                .or_else(|e| call.reply_error(e.to_string()))?;
+
             // Just reply without doing anything
             call.reply(None, None)?;
         }
@@ -310,6 +318,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         call: &mut dyn rpc::Call_SetStatus,
         script_id: String,
         status: rpc::ScriptStatus,
+        environment: HashMap<String, String>
     ) -> varlink::Result<()> {
         // Add status to script statuses
         let status: ScriptStatus = status.into();
@@ -321,7 +330,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             .insert(script_id, status);
 
         // Set the Juju status to the consolidated script statuses
-        crate::juju::set_status(self.get_juju_status())
+        crate::juju::set_status(self.get_juju_status(), Some(&environment))
             .or_else(|e| call.reply_error(e.to_string()))?;
 
         // Reply

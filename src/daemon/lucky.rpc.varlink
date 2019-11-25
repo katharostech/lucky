@@ -29,4 +29,4 @@ type ScriptStatus (
 )
 
 # Sets a script's status
-method SetStatus(script_id: string, status: ScriptStatus) -> ()
+method SetStatus(script_id: string, status: ScriptStatus, environment: [string]string) -> ()

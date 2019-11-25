@@ -46,7 +46,7 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
 
     // Populate environment variables the Lucky daemon may need for executing the hook
     let mut environment: HashMap<String, String> = HashMap::new();
-    for &var in &["JUJU_RELATION", "JUJU_RELATION_ID", "JUJU_REMOTE_UNIT"] {
+    for &var in &["JUJU_RELATION", "JUJU_RELATION_ID", "JUJU_REMOTE_UNIT", "JUJU_CONTEXT_ID"] {
         if let Ok(value) = std::env::var(var) {
             environment.insert(var.into(), value);
         }
