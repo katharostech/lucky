@@ -160,12 +160,17 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         let install_hook_path = hook_dir.join("install");
         write_file(&install_hook_path, include_str!("build/install-hook.sh"))?;
         set_file_mode(&install_hook_path, 0o755)?;
+
+        // Create stop hook
+        let stop_hook_path = hook_dir.join("stop");
+        write_file(&stop_hook_path, include_str!("build/stop-hook.sh"))?;
+        set_file_mode(&stop_hook_path, 0o755)?;
     }
 
     // Create normal Juju hooks ( those not specific to a relation or storage )
     for hook in JUJU_NORMAL_HOOKS {
-        // Skip the install hook because we have already created it
-        if hook == &"install" {
+        // Skip the install and stop hooks because we have already created them
+        if hook == &"install" || hook == &"stop" {
             continue;
         }
         let new_hook_path = hook_dir.join(hook);
