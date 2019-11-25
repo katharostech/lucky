@@ -169,17 +169,27 @@ impl LuckyDaemon {
         }
     }
 
+    // Run one of the charm's host scripts
     fn run_host_script(
         &self,
         call: &mut dyn rpc::Call_TriggerHook,
         script_name: &str,
         environment: &HashMap<String, String>,
     ) -> varlink::Result<u32> {
+        // Add bin dir to the PATH
+        let path_env = std::env::var_os("PATH")
+            .map(|mut p| {
+                p.push(":");
+                p.push(self.charm_dir.join("bin").as_os_str());
+                p
+            })
+            .unwrap_or(self.charm_dir.join("bin").as_os_str().to_owned());
         // Build command
         let command_path = self.charm_dir.join("host_scripts").join(script_name);
         let mut command = Exec::cmd(&command_path)
             .stdout(Redirection::Pipe)
             .stderr(Redirection::Merge)
+            .env("PATH", path_env)
             .env("LUCKY_CONTEXT", "client")
             .env("LUCKY_SCRIPT_ID", script_name);
         
