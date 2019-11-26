@@ -25,8 +25,6 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         include_str!("charm/charm.md"),
     )?;
 
-    crate::log::init_default_logger()?;
-
     // Run a subcommand
     match args.subcommand() {
         ("create", Some(sub_args)) => create::run(sub_args).context("Could not create charm"),

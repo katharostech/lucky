@@ -58,14 +58,21 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
     let mut client = get_daemon_client(socket_path)?;
 
     let mut environment = HashMap::<String, String>::new();
-    for &var in &["JUJU_RELATION", "JUJU_RELATION_ID", "JUJU_REMOTE_UNIT", "JUJU_CONTEXT_ID"] {
+    for &var in &[
+        "JUJU_RELATION",
+        "JUJU_RELATION_ID",
+        "JUJU_REMOTE_UNIT",
+        "JUJU_CONTEXT_ID",
+    ] {
         if let Ok(value) = std::env::var(var) {
             environment.insert(var.into(), value);
         }
     }
 
     // Set script status
-    client.set_status(script_id.into(), status.into(), environment).call()?;
+    client
+        .set_status(script_id.into(), status.into(), environment)
+        .call()?;
 
     Ok(())
 }

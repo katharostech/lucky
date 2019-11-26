@@ -1,8 +1,6 @@
 //! Commandline interface module
 
 use clap::{App, AppSettings};
-use crossterm::style::{style, Color};
-
 use std::io::Write;
 
 // Help utility
@@ -15,38 +13,55 @@ mod daemon;
 
 /// Run the application
 pub fn run() {
+    // Initialize logger
+    crate::log::init_logger();
+
     std::panic::catch_unwind(|| {
         // run program and report any errors
         if let Err(e) = execute() {
-            writeln!(
-                std::io::stderr(),
-                "\n{} {:?}",
-                style("Error:").with(Color::Red),
-                e
-            )
-            .ok();
+            log::error!("{:?}", e);
             std::process::exit(1);
         }
     })
     // Catch any panics and print an error message. This will appear after the message given by
     // colored backtrace.
     .or_else(|_| -> Result<(), ()> {
-        writeln!(
-            std::io::stderr(),
-            concat!(
-                "\n {} The program has encountered a critical internal error and will now exit.\n",
-                "This is a bug. TODO: Setup Taiga project for reporting errors!!\n"
-            ),
-            style("Error:").with(Color::Red)
-        )
-        .ok();
+        log::error!(concat!(
+            "The program has encountered a critical internal error and will now exit.\n",
+            "This is a bug. TODO: Setup Taiga project for reporting errors!!\n"
+        ));
 
         Ok(())
     })
     .expect("Panic while handling panic");
 }
 
+#[macro_use]
+mod test {
+    /// Convenience macros for logging to the daemon target
+    #[macro_export]
+    macro_rules! daemon_info {
+        ( $e:expr ) => {
+            log::info!(target: "daemon", $e)
+        }
+    }
+}
+
 fn execute() -> anyhow::Result<()> {
+    log::info!("Some info!!");
+    log::debug!("Debug info!");
+    log::trace!("Trace log");
+    log::warn!("Uh, oh, warning here.");
+    log::error!("Noooo!!! Sendak is back!");
+
+    log::info!(target: "daemon", "Some info!!");
+    log::debug!(target: "daemon", "Debug info!");
+    log::trace!(target: "daemon", "Trace log");
+    log::warn!(target: "daemon", "Uh, oh, warning here.");
+    log::error!(target: "daemon", "Noooo!!! Sendak is back!");
+
+    std::process::exit(0);
+
     // Enable colored backtraces
     #[cfg(feature = "color-backtrace")]
     color_backtrace::install();

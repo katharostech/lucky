@@ -13,14 +13,17 @@ pub(crate) use types::*;
 /// Set the Juju status
 ///
 /// Returns the command output
-pub(crate) fn set_status(status: ScriptStatus, environment: Option<&HashMap<String, String>>) -> anyhow::Result<()> {
+pub(crate) fn set_status(
+    status: ScriptStatus,
+    environment: Option<&HashMap<String, String>>,
+) -> anyhow::Result<()> {
     run_command(
         "status-set",
         &[
             status.state.as_ref(),
             &status.message.unwrap_or_else(|| "".into()),
         ],
-        environment
+        environment,
     )?;
 
     Ok(())
@@ -32,12 +35,16 @@ pub(crate) fn set_status(status: ScriptStatus, environment: Option<&HashMap<Stri
 
 /// This function encapsulates all of the common execution and error handling that is used when
 /// execting Juju commands.
-fn run_command(cmd: &str, args: &[&str], environment: Option<&HashMap<String, String>>) -> anyhow::Result<String> {
+fn run_command(
+    cmd: &str,
+    args: &[&str],
+    environment: Option<&HashMap<String, String>>,
+) -> anyhow::Result<String> {
     let mut command = Exec::cmd(cmd)
         .stdout(Redirection::Pipe)
         .stderr(Redirection::Merge)
         .args(args);
-    
+
     if let Some(env) = environment {
         for (k, v) in env {
             command = command.env(k, v);

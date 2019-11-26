@@ -26,8 +26,6 @@ pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
         include_str!("client/client.md"),
     )?;
 
-    crate::log::init_default_logger()?;
-
     let socket_path = get_daemon_socket_path(&args);
 
     // Run a subcommand

@@ -53,8 +53,6 @@ pub(crate) fn run(args: &ArgMatches, unit_name: &str, socket_path: &str) -> anyh
         include_str!("start/start.md"),
     )?;
 
-    crate::log::init_daemon_logger()?;
-
     // The stop_listening flag is used to shutdown the server by setting it to `false`
     let stop_listening = Arc::new(AtomicBool::new(false));
 

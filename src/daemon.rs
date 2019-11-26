@@ -318,7 +318,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         call: &mut dyn rpc::Call_SetStatus,
         script_id: String,
         status: rpc::ScriptStatus,
-        environment: HashMap<String, String>
+        environment: HashMap<String, String>,
     ) -> varlink::Result<()> {
         // Add status to script statuses
         let status: ScriptStatus = status.into();
