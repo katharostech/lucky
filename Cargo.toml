@@ -32,6 +32,7 @@ log = "0.4"
 strum = "0.16"
 strum_macros = "0.16.0"
 subprocess = "0.1"
+git-version = "0.3"
 
 [features]
 default = ["color-backtrace"]

@@ -109,7 +109,7 @@ fn get_cli() -> anyhow::Result<App<'static>> {
 
     // Return full CLI
     Ok(new_app("lucky")
-        .version(clap::crate_version!())
+        .version(crate::GIT_VERSION)
         .about("The Lucky charm framework for Juju.")
         .arg(doc::get_arg())
         .subcommand(charm::get_subcommand())
