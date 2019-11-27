@@ -1,7 +1,6 @@
 //! Commandline interface module
 
 use clap::{App, AppSettings};
-use std::io::Write;
 
 // Help utility
 pub(crate) mod doc;
@@ -48,20 +47,6 @@ mod test {
 }
 
 fn execute() -> anyhow::Result<()> {
-    log::info!("Some info!!");
-    log::debug!("Debug info!");
-    log::trace!("Trace log");
-    log::warn!("Uh, oh, warning here.");
-    log::error!("Noooo!!! Sendak is back!");
-
-    log::info!(target: "daemon", "Some info!!");
-    log::debug!(target: "daemon", "Debug info!");
-    log::trace!(target: "daemon", "Trace log");
-    log::warn!(target: "daemon", "Uh, oh, warning here.");
-    log::error!(target: "daemon", "Noooo!!! Sendak is back!");
-
-    std::process::exit(0);
-
     // Enable colored backtraces
     #[cfg(feature = "color-backtrace")]
     color_backtrace::install();
