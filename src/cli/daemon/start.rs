@@ -53,42 +53,7 @@ pub(crate) fn run(args: &ArgMatches, unit_name: &str, socket_path: &str) -> anyh
         include_str!("start/start.md"),
     )?;
 
-    // The stop_listening flag is used to shutdown the server by setting it to `false`
-    let stop_listening = Arc::new(AtomicBool::new(false));
-
-    // Get and create state dir
-    let state_dir = args
-        .value_of("state_dir")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| {
-            PathBuf::from(format!(
-                "/var/lib/lucky/{}_state",
-                unit_name.replace("/", "_")
-            ))
-        });
-    if !state_dir.exists() {
-        std::fs::create_dir_all(&state_dir)
-            .context(format!("Could not create unit state dir: {:?}", state_dir))?;
-    }
-
-    // Get charm dir and lucky metadata
-    let charm_dir = config::get_charm_dir()?;
-    let lucky_metadata = config::load_yaml(&charm_dir, "lucky")?;
-
-    log::trace!("lucky metadata: {:#?}", lucky_metadata);
-
-    // Get daemon service
-    let service =
-        crate::daemon::get_service(lucky_metadata, charm_dir, state_dir, stop_listening.clone());
     let listen_address = format!("unix:{};mode=700", socket_path);
-
-    // Set signal handler for SIGINT/SIGTERM
-    let stop = stop_listening.clone();
-    ctrlc::set_handler(move || {
-        log::info!("Shutting down server");
-        stop.store(true, Ordering::Relaxed);
-    })
-    .context("Error setting signal handler for SIGINT/SIGTERM")?;
 
     // Make sure a daemon is not already running
     if can_connect_daemon(&listen_address) {
@@ -102,6 +67,42 @@ pub(crate) fn run(args: &ArgMatches, unit_name: &str, socket_path: &str) -> anyh
     // If we are running in the forground
     if args.is_present("foreground") {
         log::info!("Starting daemon in foreground");
+
+        // The stop_listening flag is used to shutdown the server by setting it to `false`
+        let stop_listening = Arc::new(AtomicBool::new(false));
+
+        // Get and create state dir
+        let state_dir = args
+            .value_of("state_dir")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| {
+                PathBuf::from(format!(
+                    "/var/lib/lucky/{}_state",
+                    unit_name.replace("/", "_")
+                ))
+            });
+        if !state_dir.exists() {
+            std::fs::create_dir_all(&state_dir)
+                .context(format!("Could not create unit state dir: {:?}", state_dir))?;
+        }
+
+        // Get charm dir and lucky metadata
+        let charm_dir = config::get_charm_dir()?;
+        let lucky_metadata = config::load_yaml(&charm_dir, "lucky")?;
+
+        log::trace!("loaded lucky.yml: {:#?}", lucky_metadata);
+
+        // Get daemon service
+        let service =
+            crate::daemon::get_service(lucky_metadata, charm_dir, state_dir, stop_listening.clone());
+
+        // Set signal handler for SIGINT/SIGTERM
+        let stop = stop_listening.clone();
+        ctrlc::set_handler(move || {
+            log::info!("Shutting down server");
+            stop.store(true, Ordering::Relaxed);
+        })
+        .context("Error setting signal handler for SIGINT/SIGTERM")?;
 
         // Start varlink server in its own thread
         let (sender, reciever) = sync_channel(0);

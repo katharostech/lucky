@@ -2,6 +2,7 @@
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use subprocess::{Exec, ExitStatus, Redirection};
+use log::*;
 
 use std::collections::HashMap;
 use std::fs::OpenOptions;
@@ -107,6 +108,7 @@ impl LuckyDaemon {
 
     /// Write out the daemon state to fileystem
     fn flush_state(&self) -> anyhow::Result<()> {
+        debug!("Flushing daemon state to disk");
         let state_file_path = self.state_dir.join("state.yaml");
         let mut state_file = OpenOptions::new()
             .write(true)
@@ -125,7 +127,9 @@ impl LuckyDaemon {
             ))?;
 
         // Serialize state to file
-        serde_yaml::to_writer(state_file, &*self.state.read().unwrap()).context(format!(
+        let state = &*self.state.read().unwrap();
+        trace!("{:#?}", state);
+        serde_yaml::to_writer(state_file, state).context(format!(
             "Failed to serialize daemon state to file: {:?}",
             state_file_path
         ))?;
