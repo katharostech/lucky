@@ -15,7 +15,8 @@ color-backtrace = { version = "0.2", optional = true }
 # This is a very small lib that could be removed if we wanted to implement it ourselves for some
 # reason.
 rprompt = "1.0"
-termimad = "0.7"
+termimad = "0.8"
+minimad = "0.5"
 crossterm = "0.13"
 atty = "0.2"
 anyhow = "1.0"
@@ -33,6 +34,7 @@ strum = "0.16"
 strum_macros = "0.16.0"
 subprocess = "0.1"
 git-version = "0.3"
+term_size = "0.3"
 
 [features]
 default = ["color-backtrace"]

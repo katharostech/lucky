@@ -2,7 +2,7 @@
 
 Build a charm and make it ready for deployment.
 
-{{help_message}}
+${help_message}
 
 ## Getting Started
 

@@ -2,7 +2,7 @@
 
 Create and build Lucky charms.
 
-{{help_message}}
+${help_message}
 
 ## Getting Started
 

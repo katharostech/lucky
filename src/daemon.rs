@@ -1,8 +1,8 @@
 //! Contains the Lucky RPC implementaiton used for client->daemon communication.
 use anyhow::Context;
+use log::*;
 use serde::{Deserialize, Serialize};
 use subprocess::{Exec, ExitStatus, Redirection};
-use log::*;
 
 use std::collections::HashMap;
 use std::fs::OpenOptions;

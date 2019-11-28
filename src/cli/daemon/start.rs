@@ -93,8 +93,12 @@ pub(crate) fn run(args: &ArgMatches, unit_name: &str, socket_path: &str) -> anyh
         log::trace!("loaded lucky.yml: {:#?}", lucky_metadata);
 
         // Get daemon service
-        let service =
-            crate::daemon::get_service(lucky_metadata, charm_dir, state_dir, stop_listening.clone());
+        let service = crate::daemon::get_service(
+            lucky_metadata,
+            charm_dir,
+            state_dir,
+            stop_listening.clone(),
+        );
 
         // Set signal handler for SIGINT/SIGTERM
         let stop = stop_listening.clone();

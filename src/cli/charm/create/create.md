@@ -2,7 +2,7 @@
 
 Create a new Lucky charm from the template.
 
-{{help_message}}
+${help_message}
 
 ## Getting Started
 

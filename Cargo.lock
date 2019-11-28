@@ -15,15 +15,6 @@ dependencies = [
 
 [[package]]
 name = "ansi_term"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee49baf6cb617b853aa8d93bf420db2383fab46d314482ca2803b40d5fde979b"
-dependencies = [
- "winapi 0.3.8",
-]
-
-[[package]]
-name = "ansi_term"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d52a9bb7ec0cf484c551830a7ce27bd20d67eac647e1befb56b0be4ee39a55d2"
@@ -33,9 +24,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.19"
+version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57114fc2a6cc374bce195d3482057c846e706d252ff3604363449695684d7a0d"
+checksum = "b412394828b7ca486b362f300b762d8e43dafd6f0d727b63f1cd2ade207c6cef"
 
 [[package]]
 name = "arrayref"
@@ -211,7 +202,7 @@ name = "clap"
 version = "3.0.0-beta.1"
 source = "git+https://github.com/clap-rs/clap.git?rev=92c2b5d#92c2b5df3f3da1b74eea9612e7357bdb2c16be95"
 dependencies = [
- "ansi_term 0.12.1",
+ "ansi_term",
  "atty",
  "bitflags",
  "clap_derive",
@@ -694,6 +685,7 @@ dependencies = [
  "handlebars",
  "lazy_static",
  "log",
+ "minimad",
  "num_cpus",
  "rprompt",
  "serde",
@@ -703,6 +695,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "subprocess",
+ "term_size 0.3.1",
  "termimad",
  "termsize",
  "varlink",
@@ -744,16 +737,20 @@ dependencies = [
 
 [[package]]
 name = "minimad"
-version = "0.4.1"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4da5ff0a9879ad10f42d176deaf82f43e4102d04d9658faf19854d933f236f7c"
+checksum = "239a9899175151e1ac2d5a99c42848001998ef46ff3bb46236b9173c4e8f65d3"
+dependencies = [
+ "lazy_static",
+]
 
 [[package]]
 name = "mio"
-version = "0.6.19"
+version = "0.6.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83f51996a3ed004ef184e16818edc51fadffe8e7ca68be67f9dee67d84d0ff23"
+checksum = "302dec22bcf6bae6dfb69c647187f4b4d0fb6f535521f7bc022430ce8e12008f"
 dependencies = [
+ "cfg-if",
  "fuchsia-zircon",
  "fuchsia-zircon-sys",
  "iovec",
@@ -1163,18 +1160,18 @@ checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 
 [[package]]
 name = "serde"
-version = "1.0.102"
+version = "1.0.103"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c4b39bd9b0b087684013a792c59e3e07a46a01d2322518d8a1104641a0b1be0"
+checksum = "1217f97ab8e8904b57dd22eb61cde455fa7446a9c1cf43966066da047c1f3702"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.102"
+version = "1.0.103"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca13fc1a832f793322228923fbb3aba9f3f44444898f835d31ad1b74fa0a2bf8"
+checksum = "a8c6faef9a2e64b0064f48570289b4bf8823b7581f1d6157c1b52152306651d0"
 dependencies = [
  "proc-macro2 1.0.6",
  "quote 1.0.2",
@@ -1183,9 +1180,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.41"
+version = "1.0.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f72eb2a68a7dc3f9a691bfda9305a1c017a6215e5a4545c258500d2099a37c2"
+checksum = "1a3351dcbc1f067e2c92ab7c3c1f288ad1a4cffc470b5aaddb4c2e0a3ae80043"
 dependencies = [
  "itoa",
  "ryu",
@@ -1296,9 +1293,9 @@ dependencies = [
 
 [[package]]
 name = "synstructure"
-version = "0.12.2"
+version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "575be94ccb86e8da37efb894a87e2b660be299b41d8ef347f9d6d79fbe61b1ba"
+checksum = "67656ea1dc1b41b1451851562ea232ec2e5a80242139f7e679ceccfb5d61f545"
 dependencies = [
  "proc-macro2 1.0.6",
  "quote 1.0.2",
@@ -1364,9 +1361,9 @@ dependencies = [
 
 [[package]]
 name = "termimad"
-version = "0.7.3"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd40c6e6698be878ade0804a687e5048147d74426c42f779d138395ceee651da"
+checksum = "6413a6129d509b86617526ecfc72a4c67b178e4f78cda3d1b49d3c6c64877eff"
 dependencies = [
  "crossbeam",
  "crossterm",
@@ -1412,18 +1409,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.4"
+version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fe148fa0fc3363a27092d48f7787363ded15bb8623c5d5dd4e2e9f23e4b21bc"
+checksum = "cc6b305ec0e323c7b6cfff6098a22516e0063d0bb7c3d88660a890217dca099a"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.4"
+version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "258da67e99e590650fa541ac6be764313d23e80cefb6846b516deb8de6b6d921"
+checksum = "45ba8d810d9c48fc456b7ad54574e8bfb7c7918a57ad7a6e6a0985d7959e8597"
 dependencies = [
  "proc-macro2 1.0.6",
  "quote 1.0.2",
@@ -1519,11 +1516,11 @@ dependencies = [
 
 [[package]]
 name = "varlink_parser"
-version = "4.0.2"
+version = "4.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8200c81ba45a6b6e64d1add46b97087ed95dfba8e15cad1755f48bf12dfc95f6"
+checksum = "1ff17c8d8648a28912404008d4b01c5c197755210c5ed03006fdd348f7c83a06"
 dependencies = [
- "ansi_term 0.11.0",
+ "ansi_term",
  "chainerror",
 ]
 

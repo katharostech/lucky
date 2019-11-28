@@ -6,8 +6,10 @@ use crossterm::{
     input::{input, InputEvent::*, KeyEvent::*},
     queue,
     screen::{EnterAlternateScreen, LeaveAlternateScreen, RawScreen},
-    style::{style, Attribute::*, Color, Color::*},
+    style::{style, Attribute::*, Color::*},
+    terminal::{Clear, ClearType::All},
 };
+use minimad::TextTemplate;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::{stdout, Read, Seek, SeekFrom, Write};
@@ -24,15 +26,10 @@ lazy_static::lazy_static! {
 /// Get the markdown renderer skin
 pub(crate) fn get_markdown_skin() -> MadSkin {
     let mut skin = MadSkin::default();
+    skin.headers[0].set_fg(DarkYellow);
     skin.set_headers_fg(DarkYellow);
     skin.bold.set_fg(Magenta);
     skin.italic.add_attr(Underlined);
-    // Clear code block formatting for now because we are inlining the help and it gets its
-    // styling messed up. See: https://github.com/Canop/termimad/issues/8.
-    // TODO: Fix that so that we can use inline code styling again.
-    skin.inline_code.set_bg(Color::Reset);
-    skin.code_block.set_bg(Color::Reset);
-    skin.code_block.align = Alignment::Left;
 
     skin
 }
@@ -42,20 +39,30 @@ pub(crate) fn get_markdown_skin() -> MadSkin {
 /// @param doc_name     Used to save the position that the user has scrolled to for that doc
 /// @param document     The markdown document to render
 fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result<()> {
-    // Hide the help, doc, and version flags in the command help message
+    // Hide the help, doc, and version flags in the command help message.
+    // TODO: The command width is not recalculated on resize. We might want to do that, but it is
+    // not a huge deal.
     command = command
         .mut_arg("help", |arg| arg.hidden_long_help(true))
         .mut_arg("doc", |arg| arg.hidden_long_help(true))
         .mut_arg("version", |arg| arg.hidden_long_help(true));
 
-    // Insert help message into document
-    let mut help_message = String::new();
+    // Set the help message template
     command.template = Some(&USAGE_TEMPLATE);
-    unsafe {
-        // This unsafe code is OK because we know that `write_long_help` will produce valid UTF-8
-        command.write_long_help(help_message.as_mut_vec())?;
-    }
-    let document = document.replace("{{help_message}}", &help_message);
+
+    // Create Termimad template from document
+    let doc_template = TextTemplate::from(document);
+    let mut doc_expander = doc_template.expander();
+    let mut help_message = vec![];
+    command
+        .write_long_help(&mut help_message)
+        .expect("Could not write to internal string buffer");
+    let help_message =
+        &String::from_utf8(help_message).expect("Could not parse command help as utf8");
+    doc_expander.set_lines("help_message", help_message);
+
+    // Expand document template
+    let doc = doc_expander.expand();
 
     // Create a doc skin
     let skin = get_markdown_skin();
@@ -102,33 +109,65 @@ fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result
         // Create a scrollable area for the markdown renderer
         let mut area = Area::full_screen();
         area.pad(1, 1);
-        let mut view = MadView::from(document.to_owned(), area, skin);
+        let mut fmt_text = FmtText::from_text(&skin, doc.clone(), Some((area.width - 1) as usize));
+        let mut view = TextView::from(&area, &fmt_text);
+        let mut scroll = 0;
 
         // Scroll to the last viewed position
         if let Some(&pos) = scrolled_positions.get(doc_name) {
             view.write_on(&mut w)?;
             view.try_scroll_lines(pos);
+            scroll = view.scroll;
         }
 
         // Listen for events and redraw screen
         let mut events = input().read_sync();
+        let doc = doc.clone();
         loop {
-            view.write_on(&mut w)?;
+            // TODO: For now we clear the screen on every key-press. This is slower, but wihtout it
+            // we have some problems on small screens with the clap help. There might be a more
+            // efficient way to fix this.
+            queue!(w, Clear(All))?;
 
+            // Prepare and write to scroll area
+            area = Area::full_screen();
+            area.pad(1, 1);
+            fmt_text = FmtText::from_text(&skin, doc.clone(), Some((area.width - 1) as usize));
+            view = TextView::from(&area, &fmt_text);
+            view.scroll = scroll;
+            view.write_on(&mut w)?;
+            w.flush()?;
+
+            // Respond to keyboard events
             if let Some(Keyboard(key)) = events.next() {
                 match key {
-                    Home | Char('g') => view.scroll = 0,
+                    Home | Char('g') => {
+                        view.scroll = 0;
+                    }
                     // TODO: find be a better way to scroll to end of page
-                    End | Char('G') => view.try_scroll_pages(90000),
-                    Up | Char('k') => view.try_scroll_lines(-1),
-                    Down | Char('j') => view.try_scroll_lines(1),
-                    PageUp | Backspace => view.try_scroll_pages(-1),
-                    PageDown | Char(' ') => view.try_scroll_pages(1),
+                    End | Char('G') => {
+                        view.try_scroll_pages(90000);
+                    }
+                    Up | Char('k') => {
+                        view.try_scroll_lines(-1);
+                    }
+                    Down | Char('j') => {
+                        view.try_scroll_lines(1);
+                    }
+                    PageUp | Backspace => {
+                        view.try_scroll_pages(-1);
+                    }
+                    PageDown | Char(' ') => {
+                        view.try_scroll_pages(1);
+                    }
                     Esc | Enter | Char('q') => break,
                     _ => (),
                 }
                 w.flush()?;
             }
+
+            // Update our tracked scroll position
+            scroll = view.scroll;
         }
 
         // Set our new latest scroll position for this document

@@ -68,7 +68,7 @@ pub(crate) fn get_daemon_connection_args<'a>() -> [Arg<'a>; 2] {
             .help("The name of the Juju unit that this daemon is running for")
             .takes_value(true)
             .env("JUJU_UNIT_NAME")
-            .required(true),
+            .required_unless("doc"),
         Arg::with_name("socket_path")
             .long("socket-path")
             .short('s')
