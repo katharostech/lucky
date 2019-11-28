@@ -33,3 +33,187 @@ trigger:
   branch:
     exclude:
       - feature/*
+
+---
+kind: pipeline
+name: linux-build
+
+steps:
+  - name: build
+    image: rust:1.39.0
+    commands:
+      - apt-get update
+      - >
+        apt-get install -y gcc pkg-config openssl libasound2-dev cmake
+        build-essential libfreetype6-dev libexpat1-dev
+        libxcb-composite0-dev libssl-dev
+      - cargo build --release
+      - mkdir -p build/lucky
+      - mv target/release/lucky build/lucky
+      - cd build/
+      - tar -czf lucky-linux-x86_64.tgz lucky
+
+  # Publish pre-release to GitHub releases
+  - name: publish-pre-release
+    image: plugins/github-release
+    depends_on:
+      - build
+    settings:
+      title: pre-release
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-linux-x86_64.tgz
+    when:
+      ref:
+        - refs/tags/pre-release
+
+  # Publish release to GitHub releases
+  - name: publish-release
+    image: plugins/github-release
+    depends_on:
+      - build
+    settings:
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-linux-x86_64.tgz
+    when:
+      ref:
+        - refs/tags/v*
+
+trigger:
+  branch:
+    exclude:
+      - feature/*
+
+---
+kind: pipeline
+name: windows-build
+
+steps:
+  # Build Arsenal runtime for Windows
+  - name: build
+    image: rust:1.39.0
+    commands:
+      - apt-get update
+      - >
+        apt-get install -y gcc gcc-mingw-w64 pkg-config openssl libasound2-dev
+        cmake build-essential libfreetype6-dev libexpat1-dev
+        libxcb-composite0-dev libssl-dev zip
+      - rustup target install x86_64-pc-windows-gnu
+      # Patch Some MingW Libs. See https://github.com/rust-lang/rust/issues/47048#issuecomment-474118132
+      - cp -f /usr/x86_64-w64-mingw32/lib/dllcrt2.o /usr/local/rustup/toolchains/1.39.0-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/dllcrt2.o
+      - cp -f /usr/x86_64-w64-mingw32/lib/crt2.o /usr/local/rustup/toolchains/1.39.0-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/crt2.o
+      - mkdir -p .cargo
+      - |
+        echo '[target.x86_64-pc-windows-gnu]
+        linker = "x86_64-w64-mingw32-gcc"' >> .cargo/config
+      - cargo build --target x86_64-pc-windows-gnu --release
+      - mkdir -p build/lucky
+      - mv target/x86_64-pc-windows-gnu/release/lucky.exe build/lucky
+      - cd build/
+      - zip -r lucky-windows-x86_64.zip lucky
+
+  # Publish pre-release to GitHub releases
+  - name: publish-pre-release
+    image: plugins/github-release
+    depends_on:
+      - build
+    settings:
+      title: pre-release
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-windows-x86_64.zip
+    when:
+      ref:
+        - refs/tags/pre-release
+
+  # Publish release to GitHub releases
+  - name: publish-release
+    image: plugins/github-release
+    depends_on:
+      - build
+    settings:
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-windows-x86_64.zip
+    when:
+      ref:
+        - refs/tags/v*
+
+trigger:
+  branch:
+    exclude:
+      - feature/*
+
+---
+kind: pipeline
+name: macos-build
+
+steps:
+  - name: build
+    image: rust:1.39.0
+    commands:
+      # Install Cross-compiler toolchain
+      - apt-get update
+      - apt-get install -y clang cmake cpio make libssl-dev lzma-dev libxml2-dev
+      - rustup target add x86_64-apple-darwin
+      - mkdir -p /build
+      - cd /build
+      - git clone --depth 1 https://github.com/tpoechtrager/osxcross.git
+      - cd /build/osxcross/tarballs
+      - wget https://s3.dockerproject.org/darwin/v2/MacOSX10.11.sdk.tar.xz
+      - cd /build/osxcross
+      - UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh
+      - export PATH="$PATH:/build/osxcross/target/bin"
+      - ln -s /build/osxcross/target/SDK/MacOSX10.11.sdk/System/ /System
+      # Configure build to use Mac linker and libraries
+      - mkdir -p /drone/src/.cargo
+      - |
+        echo '[target.x86_64-apple-darwin]
+        linker = "x86_64-apple-darwin15-clang"' >> /drone/src/.cargo/config
+      - cd /drone/src
+      - export COREAUDIO_FRAMEWORKS_PATH='/System/Library/Frameworks'
+      - export CC=x86_64-apple-darwin15-clang
+      - cargo build --target x86_64-apple-darwin --release
+      - mkdir -p build/lucky
+      - mv target/x86_64-apple-darwin/release/lucky build/lucky
+      - cd build/
+      - tar -czf lucky-mac-x86_64.tgz lucky
+
+  # Publish pre-release to GitHub releases
+  - name: publish-pre-release
+    image: plugins/github-release
+    depends_on:
+      - build
+    settings:
+      title: pre-release
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-mac-x86_64.tgz
+    when:
+      ref:
+        - refs/tags/pre-release
+
+  # Publish release to GitHub releases
+  - name: publish-release
+    image: plugins/github-release
+    depends_on:
+      - build
+    settings:
+      api_key:
+        from_secret: github_access_key
+      files:
+        - build/lucky-mac-x86_64.tgz
+    when:
+      ref:
+        - refs/tags/v*
+
+trigger:
+  branch:
+    exclude:
+      - feature/*
