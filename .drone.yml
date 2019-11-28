@@ -43,6 +43,7 @@ steps:
     image: rust:1.39.0
     commands:
       - apt-get update
+      # TODO: Remove unnecessary installs
       - >
         apt-get install -y gcc pkg-config openssl libasound2-dev cmake
         build-essential libfreetype6-dev libexpat1-dev
@@ -97,6 +98,7 @@ steps:
     image: rust:1.39.0
     commands:
       - apt-get update
+      # TODO: Remove unnecessary installs
       - >
         apt-get install -y gcc gcc-mingw-w64 pkg-config openssl libasound2-dev
         cmake build-essential libfreetype6-dev libexpat1-dev
@@ -159,6 +161,7 @@ steps:
     commands:
       # Install Cross-compiler toolchain
       - apt-get update
+      # TODO: Remove unnecessary installs
       - apt-get install -y clang cmake cpio make libssl-dev lzma-dev libxml2-dev
       - rustup target add x86_64-apple-darwin
       - mkdir -p /build
