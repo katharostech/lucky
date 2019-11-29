@@ -112,7 +112,10 @@ fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result
         area.pad(1, 1);
         let mut fmt_text = FmtText::from_text(&skin, doc.clone(), Some((area.width - 1) as usize));
         let mut view = TextView::from(&area, &fmt_text);
+        
+        // Keep track of changes to scroll and screensize
         let mut scroll = 0;
+        let mut screen_size = (area.width, area.height);
 
         // Scroll to the last viewed position
         if let Some(&pos) = scrolled_positions.get(doc_name) {
@@ -125,13 +128,13 @@ fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result
         let mut events = input().read_sync();
         let doc = doc.clone();
         loop {
-            // TODO: For now we clear the screen on every key-press. This is slower, but wihtout it
-            // we have some problems on small screens with the clap help. There might be a more
-            // efficient way to fix this.
-            queue!(w, Clear(All))?;
-
             // Prepare and write to scroll area
             area = Area::full_screen();
+            // Clear the screen if screen was resized
+            if screen_size != (area.width, area.height) {
+                queue!(w, Clear(All))?;
+                screen_size = (area.width, area.height);
+            }
             area.pad(1, 1);
             fmt_text = FmtText::from_text(&skin, doc.clone(), Some((area.width - 1) as usize));
             view = TextView::from(&area, &fmt_text);

@@ -99,7 +99,7 @@ fn new_app<'a>(name: &str) -> App<'a> {
         // Set the max term width the 3 short of  the actual width so that we don't wrap on the
         // help pager. Width is 3 shorter because of 1 char for the scrollbar and 1 char padding on
         // each side.
-        .max_term_width(term_size::dimensions().map(|size| size.0 - 3).unwrap_or(0))
+        .max_term_width(crossterm::terminal::size().map(|size| size.0 - 3).unwrap_or(0) as usize)
         .setting(AppSettings::ColoredHelp)
         .setting(AppSettings::VersionlessSubcommands)
         .setting(AppSettings::ArgRequiredElseHelp)

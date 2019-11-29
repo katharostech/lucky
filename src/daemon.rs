@@ -184,7 +184,7 @@ impl LuckyDaemon {
                 p.push(self.charm_dir.join("bin").as_os_str());
                 p
             })
-            .unwrap_or(self.charm_dir.join("bin").as_os_str().to_owned());
+            .unwrap_or_else(|| self.charm_dir.join("bin").as_os_str().to_owned());
         // Build command
         let command_path = self.charm_dir.join("host_scripts").join(script_name);
         let mut command = Exec::cmd(&command_path)
