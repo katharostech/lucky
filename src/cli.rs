@@ -2,6 +2,9 @@
 
 use clap::{App, AppSettings};
 
+mod types;
+use types::*;
+
 // Help utility
 pub(crate) mod doc;
 
@@ -18,8 +21,18 @@ pub fn run() {
     std::panic::catch_unwind(|| {
         // run program and report any errors
         if let Err(e) = execute() {
-            log::error!("{:?}", e);
-            std::process::exit(1);
+            if let Some(cli_error) = e.downcast_ref::<CliError>() {
+                match cli_error {
+                    CliError::Exit(0) => std::process::exit(0),
+                    CliError::Exit(code) => {
+                        log::error!("{:?}", e);
+                        std::process::exit(*code);
+                    }
+                }
+            } else {
+                log::error!("{:?}", e);
+                std::process::exit(1);
+            }
         }
     })
     // Catch any panics and print an error message. This will appear after the message given by

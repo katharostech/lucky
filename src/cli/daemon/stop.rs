@@ -2,6 +2,7 @@ use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 
 use crate::cli::doc;
+use crate::cli::CliError;
 use crate::daemon::{self, rpc::VarlinkClientInterface};
 
 #[rustfmt::skip]
@@ -29,16 +30,19 @@ pub(crate) fn run(args: &ArgMatches, socket_path: &str) -> anyhow::Result<()> {
 
     // Connect to lucky daemon
     let connection_address = format!("unix:{}", &socket_path);
-    let connection = varlink::Connection::with_address(&connection_address).or_else(|e| {
-        if args.is_present("ignore_already_stopped") {
-            std::process::exit(0);
-        } else {
-            Err(e).context(format!(
-                r#"Could not connect to lucky daemon at: "{}""#,
-                connection_address
-            ))
+    let connection = match varlink::Connection::with_address(&connection_address) {
+        Ok(conn) => Ok(conn),
+        Err(e) => {
+            if args.is_present("ignore_already_stopped") {
+                Err(CliError::Exit(0).into())
+            } else {
+                Err(e).context(format!(
+                    r#"Could not connect to lucky daemon at: "{}""#,
+                    connection_address
+                ))
+            }
         }
-    })?;
+    }?;
     let mut service = daemon::get_client(connection);
 
     // Stop the daemon

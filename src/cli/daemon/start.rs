@@ -11,7 +11,7 @@ use std::sync::{
 };
 
 use crate::cli::daemon::{can_connect_daemon, try_connect_daemon};
-use crate::cli::doc;
+use crate::cli::{CliError, doc};
 use crate::config;
 
 #[rustfmt::skip]
@@ -58,7 +58,7 @@ pub(crate) fn run(args: &ArgMatches, unit_name: &str, socket_path: &str) -> anyh
     // Make sure a daemon is not already running
     if can_connect_daemon(&listen_address) {
         if args.is_present("ignore_already_running") {
-            std::process::exit(0);
+            return Err(CliError::Exit(0).into());
         } else {
             anyhow::bail!("Daemon is already running");
         }

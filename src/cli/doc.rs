@@ -14,6 +14,7 @@ use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::{stdout, Read, Seek, SeekFrom, Write};
 use termimad::*;
+use crate::cli::CliError;
 
 lazy_static::lazy_static! {
     /// Creates a colored `USAGE: ` + args template for use in the do pages
@@ -198,7 +199,7 @@ fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result
     }
 
     // Exit process
-    std::process::exit(0);
+    Err(CliError::Exit(0).into())
 }
 
 /// Return the `doc` argument

@@ -698,6 +698,7 @@ dependencies = [
  "term_size 0.3.1",
  "termimad",
  "termsize",
+ "thiserror",
  "varlink",
  "varlink_generator",
  "walkdir",
