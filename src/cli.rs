@@ -48,17 +48,6 @@ pub fn run() {
     .expect("Panic while handling panic");
 }
 
-#[macro_use]
-mod test {
-    /// Convenience macros for logging to the daemon target
-    #[macro_export]
-    macro_rules! daemon_info {
-        ( $e:expr ) => {
-            log::info!(target: "daemon", $e)
-        }
-    }
-}
-
 fn execute() -> anyhow::Result<()> {
     // Enable colored backtraces
     #[cfg(feature = "color-backtrace")]
