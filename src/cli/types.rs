@@ -5,5 +5,5 @@ use thiserror::Error;
 pub(crate) enum CliError {
     #[error("Process exiting with code: {0}")]
     /// Indicates that the process should exit with the given code
-    Exit(i32)
+    Exit(i32),
 }

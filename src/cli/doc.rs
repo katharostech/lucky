@@ -1,5 +1,6 @@
 //! Handles printing doc pages
 
+use crate::cli::CliError;
 use anyhow::Context;
 use crossterm::{
     cursor::{Hide, Show},
@@ -14,7 +15,6 @@ use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::{stdout, Read, Seek, SeekFrom, Write};
 use termimad::*;
-use crate::cli::CliError;
 
 lazy_static::lazy_static! {
     /// Creates a colored `USAGE: ` + args template for use in the do pages
@@ -112,7 +112,7 @@ fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result
         area.pad(1, 1);
         let mut fmt_text = FmtText::from_text(&skin, doc.clone(), Some((area.width - 1) as usize));
         let mut view = TextView::from(&area, &fmt_text);
-        
+
         // Keep track of changes to scroll and screensize
         let mut scroll = 0;
         let mut screen_size = (area.width, area.height);

@@ -11,7 +11,7 @@ use std::sync::{
 };
 
 use crate::cli::daemon::{can_connect_daemon, try_connect_daemon};
-use crate::cli::{CliError, doc};
+use crate::cli::{doc, CliError};
 use crate::config;
 
 #[rustfmt::skip]
@@ -64,6 +64,17 @@ pub(crate) fn run(args: &ArgMatches, unit_name: &str, socket_path: &str) -> anyh
         }
     }
 
+    // Get the state dir
+    let state_dir = args
+        .value_of("state_dir")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            PathBuf::from(format!(
+                "/var/lib/lucky/{}_state",
+                unit_name.replace("/", "_")
+            ))
+        });
+
     // If we are running in the forground
     if args.is_present("foreground") {
         log::info!("Starting daemon in foreground");
@@ -71,16 +82,7 @@ pub(crate) fn run(args: &ArgMatches, unit_name: &str, socket_path: &str) -> anyh
         // The stop_listening flag is used to shutdown the server by setting it to `false`
         let stop_listening = Arc::new(AtomicBool::new(false));
 
-        // Get and create state dir
-        let state_dir = args
-            .value_of("state_dir")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| {
-                PathBuf::from(format!(
-                    "/var/lib/lucky/{}_state",
-                    unit_name.replace("/", "_")
-                ))
-            });
+        // Create state dir
         if !state_dir.exists() {
             std::fs::create_dir_all(&state_dir)
                 .context(format!("Could not create unit state dir: {:?}", state_dir))?;
@@ -137,7 +139,17 @@ pub(crate) fn run(args: &ArgMatches, unit_name: &str, socket_path: &str) -> anyh
 
         // Spawn another process for running the daemon in the background
         let mut output: Box<dyn Read> = Exec::cmd(std::env::current_exe()?)
-            .args(&["daemon", "--socket-path", &socket_path, "start", "-F"])
+            .args(&[
+                "daemon",
+                "--socket-path",
+                &socket_path,
+                "--unit-name",
+                &unit_name,
+                "start",
+                "--state-dir",
+                &state_dir.to_string_lossy(),
+                "-F",
+            ])
             .stdout(Redirection::Pipe)
             .stderr(Redirection::Merge)
             .detached()
