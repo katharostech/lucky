@@ -92,11 +92,6 @@ steps:
     commands:
       - apt-get update
       - apt-get install -y gcc-mingw-w64-x86-64 zip
-      # TODO: Remove unnecessary installs
-      # - >
-      #   apt-get install -y gcc gcc-mingw-w64 pkg-config openssl libasound2-dev
-      #   cmake build-essential libfreetype6-dev libexpat1-dev
-      #   libxcb-composite0-dev libssl-dev zip
       - rustup default nightly-2019-11-24
       - rustup target install x86_64-pc-windows-gnu
       # Patch Some MingW Libs. See https://github.com/rust-lang/rust/issues/47048#issuecomment-474118132
