@@ -40,17 +40,11 @@ name: linux-build
 
 steps:
   - name: build
-    image: rust:1.39.0
+    image: clux/muslrust:nightly-2019-11-24
     commands:
-      - apt-get update
-      # TODO: Remove unnecessary installs
-      - >
-        apt-get install -y gcc pkg-config openssl libasound2-dev cmake
-        build-essential libfreetype6-dev libexpat1-dev
-        libxcb-composite0-dev libssl-dev
       - cargo build --release
       - mkdir -p build/lucky
-      - mv target/release/lucky build/lucky
+      - mv target/x86_64-unknown-linux-musl/release/lucky build/lucky
       - cd build/
       - tar -czf lucky-linux-x86_64.tgz lucky
 
@@ -93,20 +87,21 @@ kind: pipeline
 name: windows-build
 
 steps:
-  # Build Arsenal runtime for Windows
   - name: build
-    image: rust:1.39.0
+    image: rust:latest
     commands:
       - apt-get update
+      - apt-get install -y gcc-mingw-w64-x86-64 zip
       # TODO: Remove unnecessary installs
-      - >
-        apt-get install -y gcc gcc-mingw-w64 pkg-config openssl libasound2-dev
-        cmake build-essential libfreetype6-dev libexpat1-dev
-        libxcb-composite0-dev libssl-dev zip
+      # - >
+      #   apt-get install -y gcc gcc-mingw-w64 pkg-config openssl libasound2-dev
+      #   cmake build-essential libfreetype6-dev libexpat1-dev
+      #   libxcb-composite0-dev libssl-dev zip
+      - rustup default nightly-2019-11-24
       - rustup target install x86_64-pc-windows-gnu
       # Patch Some MingW Libs. See https://github.com/rust-lang/rust/issues/47048#issuecomment-474118132
-      - cp -f /usr/x86_64-w64-mingw32/lib/dllcrt2.o /usr/local/rustup/toolchains/1.39.0-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/dllcrt2.o
-      - cp -f /usr/x86_64-w64-mingw32/lib/crt2.o /usr/local/rustup/toolchains/1.39.0-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/crt2.o
+      - cp -f /usr/x86_64-w64-mingw32/lib/dllcrt2.o /usr/local/rustup/toolchains/nightly-2019-11-24-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/dllcrt2.o
+      - cp -f /usr/x86_64-w64-mingw32/lib/crt2.o /usr/local/rustup/toolchains/nightly-2019-11-24-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/crt2.o
       - mkdir -p .cargo
       - |
         echo '[target.x86_64-pc-windows-gnu]
@@ -157,12 +152,12 @@ name: macos-build
 
 steps:
   - name: build
-    image: rust:1.39.0
+    image: rust:latest
     commands:
       # Install Cross-compiler toolchain
       - apt-get update
-      # TODO: Remove unnecessary installs
       - apt-get install -y clang cmake cpio make libssl-dev lzma-dev libxml2-dev
+      - rustup default nightly-2019-11-24
       - rustup target add x86_64-apple-darwin
       - mkdir -p /build
       - cd /build
