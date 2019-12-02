@@ -1,5 +1,8 @@
+use anyhow::Context;
 use clap::{App, AppSettings, Arg, ArgMatches};
 use thiserror::Error;
+
+use crate::cli::doc::cmdln_pager::show_doc_page;
 
 #[derive(Error, Debug)]
 /// Lucky CLI error variants
@@ -14,7 +17,7 @@ pub(crate) enum CliError {
 /// This trait will automatically implement `get_cli()` and `run()`, setting up default
 /// functionality that is the same for every command.
 pub(crate) trait CliCommand<'a> {
-    // This should return the name of the subcommand
+    /// This should return the name of the subcommand
     fn get_name(&self) -> &'static str;
     /// This should use `get_base_app("command_name")` to create a clap app and then use the
     /// builder to modify it. Subcommands should not be added to the app. To add subcommands
@@ -46,7 +49,8 @@ pub(crate) trait CliCommand<'a> {
         // Check for the --doc flag and show the doc page if present
         if args.is_present("doc") {
             if let Some(doc) = self.get_doc() {
-                crate::cli::doc::show_doc(self.get_cli(), doc.name, doc.content)?;
+                show_doc_page(|| self.get_cli(), doc)
+                    .context("Could not show doc page")?;
             } else {
                 anyhow::bail!("This command does not have a doc page yet");
             }
@@ -87,7 +91,7 @@ pub(crate) trait CliCommand<'a> {
             .mut_arg("help", |arg| {
                 arg.short('h')
                     .long("help")
-                    .help("-h: show short help | --help: show long help")
+                    .help("-h: show short help, --help: show long help")
             })
             .arg(Arg::with_name("doc")
                 .help(match self.get_doc() {
@@ -95,9 +99,10 @@ pub(crate) trait CliCommand<'a> {
                     None => "Does nothing for this command: this command does not have a doc page"
                 })
                 .long("doc")
-                .short('H')
-                .long_help(include_str!("doc/long_help.txt")))
-    }
+                .short('H'))
+                // TODO: Put help in the pager instead
+                //.long_help(include_str!("doc/long_help.txt")))
+    }    
 }
 
 #[derive(Debug)]
