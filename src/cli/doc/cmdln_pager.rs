@@ -38,8 +38,7 @@ pub(crate) fn get_markdown_skin() -> MadSkin {
 /// Show the commandline pager with documentation for the given command
 pub(crate) fn show_doc_page<'a>(get_cli: impl Fn() -> clap::App<'a>, cli_doc: CliDoc) -> anyhow::Result<()> {
     // Hide the help, doc, and version flags in the command help message.
-    // TODO: The command width is not recalculated on resize. We might want to do that, but it is
-    // not a huge deal.
+    // TODO: Clean up this code a bit: it is duplicated in the update loop.
     let mut cli = get_cli()
         .mut_arg("help", |arg| arg.hidden_long_help(true))
         .mut_arg("doc", |arg| arg.hidden_long_help(true))
