@@ -6,7 +6,7 @@ mod types;
 use types::*;
 
 // Help utility
-pub(crate) mod doc;
+pub mod doc;
 
 // Subcommands
 mod charm;
@@ -74,7 +74,7 @@ fn execute() -> anyhow::Result<()> {
     Ok(())
 }
 
-struct LuckyCli;
+pub(crate) struct LuckyCli;
 
 impl<'a> CliCommand<'a> for LuckyCli {
     fn get_name(&self) -> &'static str {

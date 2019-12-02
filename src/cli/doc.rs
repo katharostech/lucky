@@ -16,6 +16,8 @@ use std::fs::OpenOptions;
 use std::io::{stdout, Read, Seek, SeekFrom, Write};
 use termimad::*;
 
+use crate::cli::CliCommand;
+
 lazy_static::lazy_static! {
     /// Creates a colored `USAGE: ` + args template for use in the do pages
     static ref USAGE_TEMPLATE: String = {
@@ -207,4 +209,23 @@ pub(crate) fn show_doc(
 
     // Exit process
     Err(CliError::Exit(0).into())
+}
+
+/// WIP: Print CLI doc structure to commandline
+pub fn print_full_cli_doc() {
+    let command = Box::new(crate::cli::LuckyCli);
+
+    fn print_doc(command: Box<dyn CliCommand>, depth: usize) {
+        println!("{}Command Name: {}", " ".repeat(depth*4), command.get_name());
+        println!("{}Has doc: {}", " ".repeat(depth*4), match command.get_doc() {
+            Some(_) => "yes",
+            None => "no",
+        });
+
+        for subcommand in command.get_subcommands() {
+            print_doc(subcommand, depth+1);
+        }
+    }
+
+    print_doc(command, 0);
 }

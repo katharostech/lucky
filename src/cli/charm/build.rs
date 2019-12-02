@@ -14,7 +14,7 @@ pub(crate) struct BuildSubcommand;
 
 impl<'a> CliCommand<'a> for BuildSubcommand {
     fn get_name(&self) -> &'static str {
-        "charm"
+        "build"
     }
 
     #[rustfmt::skip]

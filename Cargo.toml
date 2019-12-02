@@ -37,6 +37,7 @@ thiserror = "1.0"
 
 [features]
 default = ["color-backtrace"]
+doc-gen = []
 
 [build-dependencies]
 zip = { version = "0.5", features = ["bzip2"], default-features = false }

@@ -100,6 +100,7 @@ pub(crate) trait CliCommand<'a> {
     }
 }
 
+#[derive(Debug)]
 /// The documentation for a CLI command
 pub struct CliDoc {
     /// The name of the doc page, used to store the scrolled location in the doc
