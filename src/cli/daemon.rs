@@ -5,54 +5,36 @@ mod start;
 mod stop;
 mod trigger_hook;
 
-use crate::cli::doc;
+use crate::cli::*;
 use std::sync::{Arc, RwLock};
 
-#[rustfmt::skip]
-/// Return the `daemon` subcommand
-pub(crate) fn get_subcommand<'a>() -> App<'a> {
-    crate::cli::new_app("daemon")
-        .about("Start, stop, and trigger the Lucky daemon")
-        .subcommand(start::get_subcommand())
-        .subcommand(trigger_hook::get_subcommand())
-        .subcommand(stop::get_subcommand())
-        .arg(doc::get_arg())
-        .args(&crate::cli::daemon::get_daemon_connection_args())
-}
+pub(crate) struct DaemonSubcommand;
 
-/// Run the `daemon` subcommand
-pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
-    // Show the docs if necessary
-    doc::show_doc(
-        &args,
-        get_subcommand(),
-        "lucky_daemon",
-        include_str!("daemon/daemon.md"),
-    )?;
+impl<'a> CliCommand<'a> for DaemonSubcommand {
+    fn get_name(&self) -> &'static str {
+        "daemon"
+    }
 
-    let unit_name = args
-        .value_of("unit_name")
-        .expect("Missing required argument \"unit_name\"");
-    // Determine the socket path
-    let socket_path = get_daemon_socket_path(&args);
+    fn get_command(&self) -> App<'a> {
+        self.get_base_app()
+            .about("Start, stop, and trigger the Lucky daemon")
+    }
 
-    // Run a subcommand
-    match args.subcommand() {
-        ("start", Some(sub_args)) => {
-            start::run(sub_args, &unit_name, &socket_path).context("Could not start daemon")
-        }
-        ("trigger-hook", Some(sub_args)) => {
-            trigger_hook::run(sub_args, &socket_path).context("Could not trigger hook")
-        }
-        ("stop", Some(sub_args)) => {
-            stop::run(sub_args, &socket_path).context("Could not stop daemon")
-        }
-        _ => get_subcommand()
-            .write_help(&mut std::io::stderr())
-            .map_err(|e| e.into()),
-    }?;
+    fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
+        vec![
+            Box::new(start::StartSubcommand),
+            Box::new(stop::StopSubcommand),
+            Box::new(trigger_hook::TriggerHookSubcommand),
+        ]
+    }
 
-    Ok(())
+    fn get_doc(&self) -> Option<CliDoc> {
+        None
+    }
+
+    fn execute_command(&self, _args: &ArgMatches) -> anyhow::Result<()> {
+        Ok(())
+    }
 }
 
 //

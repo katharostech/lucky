@@ -6,6 +6,7 @@
 #![warn(future_incompatible)]
 
 use git_version::git_version;
+// TODO: Not working right with drone to use the tag as the version
 const GIT_VERSION: &str = git_version!();
 
 pub mod cli;

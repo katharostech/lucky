@@ -1,40 +1,30 @@
-use anyhow::Context;
 use clap::{App, ArgMatches};
 
 mod set_status;
 
-use crate::cli::daemon::{get_daemon_connection_args, get_daemon_socket_path};
-use crate::cli::doc;
+use crate::cli::*;
 
-#[rustfmt::skip]
-/// Return the `client` subcommand
-pub(crate) fn get_subcommand<'a>() -> App<'a> {
-    crate::cli::new_app("client")
-        .about("Communicate with the Lucky daemon in charm scripts")
-        .subcommand(set_status::get_subcommand())
-        .arg(doc::get_arg())
-        .args(&get_daemon_connection_args())
-}
+pub(crate) struct ClientSubcommand;
 
-/// Run the `client` subcommand
-pub(crate) fn run(args: &ArgMatches) -> anyhow::Result<()> {
-    // Show the docs if necessary
-    doc::show_doc(
-        &args,
-        get_subcommand(),
-        "lucky_clent",
-        include_str!("client/client.md"),
-    )?;
+impl<'a> CliCommand<'a> for ClientSubcommand {
+    fn get_name(&self) -> &'static str {
+        "client"
+    }
 
-    let socket_path = get_daemon_socket_path(&args);
+    fn get_command(&self) -> App<'a> {
+        self.get_base_app()
+            .about("Communicate with the Lucky daemon in charm scripts")
+    }
 
-    // Run a subcommand
-    match args.subcommand() {
-        ("set-status", Some(sub_args)) => {
-            set_status::run(sub_args, &socket_path).context("Could not set status")
-        }
-        _ => get_subcommand()
-            .write_help(&mut std::io::stderr())
-            .map_err(|e| e.into()),
+    fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
+        vec![Box::new(set_status::SetStatusSubcommand)]
+    }
+
+    fn get_doc(&self) -> Option<CliDoc> {
+        None
+    }
+
+    fn execute_command(&self, _args: &ArgMatches) -> anyhow::Result<()> {
+        Ok(())
     }
 }

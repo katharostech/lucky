@@ -39,7 +39,11 @@ pub(crate) fn get_markdown_skin() -> MadSkin {
 /// @param command      The clap App that you are printing help for. Used to print help info in doc
 /// @param doc_name     Used to save the position that the user has scrolled to for that doc
 /// @param document     The markdown document to render
-fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result<()> {
+pub(crate) fn show_doc(
+    mut command: clap::App,
+    doc_name: &str,
+    document: &str,
+) -> anyhow::Result<()> {
     // Hide the help, doc, and version flags in the command help message.
     // TODO: The command width is not recalculated on resize. We might want to do that, but it is
     // not a huge deal.
@@ -203,27 +207,4 @@ fn run(mut command: clap::App, doc_name: &str, document: &str) -> anyhow::Result
 
     // Exit process
     Err(CliError::Exit(0).into())
-}
-
-/// Return the `doc` argument
-pub(crate) fn get_arg<'a>() -> clap::Arg<'a> {
-    clap::Arg::with_name("doc")
-        .help("Show the detailed command documentation ( similar to a man page )")
-        .long("doc")
-        .short('H')
-        .long_help(include_str!("doc/long_help.txt"))
-}
-
-/// Show the documentation if the doc flag is present
-pub(crate) fn show_doc(
-    args: &clap::ArgMatches,
-    app: clap::App,
-    doc_name: &str,
-    document: &str,
-) -> anyhow::Result<()> {
-    if args.is_present("doc") {
-        run(app, doc_name, document).context("Could not show documentation")?;
-    }
-
-    Ok(())
 }
