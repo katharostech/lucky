@@ -14,9 +14,8 @@ pub(crate) enum CliError {
 
 /// Trait for Lucky commands and subcommands
 ///
-/// This trait will automatically implement `get_cli()` and `run()`, setting up default
-/// functionality that is the same for every command.
-pub(crate) trait CliCommand<'a> {
+/// Commands in the Lucky CLI should implement this trait
+pub(crate) trait CliCommand<'a>: CliCommandExt<'a> {
     /// This should return the name of the subcommand
     fn get_name(&self) -> &'static str;
     /// This should use `get_base_app("command_name")` to create a clap app and then use the
@@ -32,8 +31,23 @@ pub(crate) trait CliCommand<'a> {
     /// command has subcommands, then, most often, this will not need to do anything. The
     /// selected subcommand will be automatically run by the `run()` function if one is selected.
     fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()>;
+}
 
-    /// Return the clap app for this command.
+/// Extension trait to the `CliCommand` trait
+/// 
+/// This trait has a blanket implementation on top of all `CliCommands`, providing implementations
+/// of extra functions required by the CLI.
+pub(crate) trait CliCommandExt<'a> {
+    /// Return the clap app for this command
+    fn get_cli(&self) -> App<'a>;
+    /// Run the command
+    fn run(&self, args: &ArgMatches) -> anyhow::Result<()>;
+    /// Creates a clap app with our default settings. This should be used by implementors to
+    /// create a base app when implementing `get_command()`.
+    fn get_base_app(&self) -> App<'a>;
+}
+
+impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
     fn get_cli(&self) -> App<'a> {
         let mut cmd = self.get_command();
 
@@ -44,16 +58,10 @@ pub(crate) trait CliCommand<'a> {
         cmd
     }
 
-    /// Run the command
     fn run(&self, args: &ArgMatches) -> anyhow::Result<()> {
         // Check for the --doc flag and show the doc page if present
         if args.is_present("doc") {
-            if let Some(doc) = self.get_doc() {
-                show_doc_page(|| self.get_cli(), doc)
-                    .context("Could not show doc page")?;
-            } else {
-                anyhow::bail!("This command does not have a doc page yet");
-            }
+                show_doc_page(self).context("Could not show doc page")?;
         }
 
         // Run the command
@@ -72,8 +80,6 @@ pub(crate) trait CliCommand<'a> {
     }
 
     #[rustfmt::skip]
-    /// Creates a clap app with our default settings. This should be used by implementors to
-    /// create a base app when implementing `get_command()`.
     fn get_base_app(&self) -> App<'a> {
         App::new(self.get_name())
             // Set the max term width the 3 short of  the actual width so that we don't wrap
@@ -102,7 +108,7 @@ pub(crate) trait CliCommand<'a> {
                 .short('H'))
                 // TODO: Put help in the pager instead
                 //.long_help(include_str!("doc/long_help.txt")))
-    }    
+    }
 }
 
 #[derive(Debug)]

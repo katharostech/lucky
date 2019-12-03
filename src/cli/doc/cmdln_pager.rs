@@ -14,7 +14,7 @@ use std::fs::OpenOptions;
 use std::io::{stdout, Read, Seek, SeekFrom, Write};
 use termimad::*;
 
-use crate::cli::CliDoc;
+use crate::cli::CliCommand;
 
 lazy_static::lazy_static! {
     /// Creates a colored `USAGE: ` + args template for use in the doc pages
@@ -36,9 +36,18 @@ pub(crate) fn get_markdown_skin() -> MadSkin {
 }
 
 /// Show the commandline pager with documentation for the given command
-pub(crate) fn show_doc_page<'a>(get_cli: impl Fn() -> clap::App<'a>, cli_doc: CliDoc) -> anyhow::Result<()> {
+pub(crate) fn show_doc_page<'a>(command: &dyn CliCommand) -> anyhow::Result<()> {
     // Hide the help, doc, and version flags in the command help message.
     // TODO: Clean up this code a bit: it is duplicated in the update loop.
+    let get_cli = || {
+        command.get_cli()
+    };
+
+    let cli_doc = match command.get_doc() {
+        Some(doc) => doc,
+        None => anyhow::bail!("This command does not have a doc page yet"),
+    };
+
     let mut cli = get_cli()
         .mut_arg("help", |arg| arg.hidden_long_help(true))
         .mut_arg("doc", |arg| arg.hidden_long_help(true))
