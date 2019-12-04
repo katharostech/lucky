@@ -39,7 +39,7 @@ lazy_static! {
 }
 
 /// Show the commandline pager with documentation for the given command
-pub(crate) fn show_doc_page(command: &dyn CliCommand) -> anyhow::Result<()> {
+pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result<()> {
     // Hide the help, doc, and version flags in the command help message.
     let cli_doc = match command.get_doc() {
         Some(doc) => doc,
