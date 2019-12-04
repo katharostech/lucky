@@ -300,11 +300,12 @@ fn show_pager_help(mut w: &mut impl Write, events: &mut SyncReader) -> anyhow::R
 }
 
 lazy_static! {
-    /// The markdown link regex
+    /// Matches a markdown link that starts with `http(s)://`
     static ref EXTERNAL_LINKS: Regex =
         Regex::new(r"(?m)\[(?P<link_text>.*?)\]\((?P<link_ref>http(s)?://.*?)\)")
             .expect("Coud not compile regex");
 
+    /// Matches any markdown link
     static ref ALL_LINKS: Regex =
         Regex::new(r"(?m)\[(?P<link_text>.*?)\]\((?P<link_ref>.*?)\)")
             .expect("Coud not compile regex");
@@ -321,5 +322,6 @@ fn preprocess_markdown(markdown: &str) -> String {
     // terminal.
     let second_pass = ALL_LINKS.replace_all(&first_pass, "$link_text");
 
+    // Return result
     second_pass.into()
 }
