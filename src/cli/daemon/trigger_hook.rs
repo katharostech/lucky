@@ -13,7 +13,7 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
         "trigger-hook"
     }
 
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Run a hook through the Lucky daemon")
             .unset_setting(clap::AppSettings::ArgRequiredElseHelp)

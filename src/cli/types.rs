@@ -21,7 +21,7 @@ pub(crate) trait CliCommand<'a>: CliCommandExt<'a> {
     /// This should use `get_base_app("command_name")` to create a clap app and then use the
     /// builder to modify it. Subcommands should not be added to the app. To add subcommands
     /// you should return boxed `CliCommand`'s from `get_subcommands()`.
-    fn get_command(&self) -> App<'a>;
+    fn get_app(&self) -> App<'a>;
     /// This should return a `Vec` of boxed `CliCommand`'s. `get_cli()` will automatically add
     /// these to the app returned by `get_command()`.
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>>;
@@ -49,7 +49,7 @@ pub(crate) trait CliCommandExt<'a> {
 
 impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
     fn get_cli(&self) -> App<'a> {
-        let mut cmd = self.get_command();
+        let mut cmd = self.get_app();
 
         for subcommand in Self::get_subcommands(self) {
             cmd = cmd.subcommand(subcommand.get_cli());

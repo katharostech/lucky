@@ -12,7 +12,7 @@ impl<'a> CliCommand<'a> for CharmSubcommand {
         "charm"
     }
 
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app().about("Build and create Lucky charms")
     }
 

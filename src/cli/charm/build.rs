@@ -18,7 +18,7 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
     }
 
     #[rustfmt::skip]
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Build a Lucky charm and make it ready for deployment")
             .long_about(concat!(

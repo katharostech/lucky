@@ -12,7 +12,7 @@ impl<'a> CliCommand<'a> for StopSubcommand {
         "stop"
     }
 
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
             .about("Stop the Lucky daemon")

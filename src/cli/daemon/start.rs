@@ -24,7 +24,7 @@ impl<'a> CliCommand<'a> for StartSubcommand {
     }
 
     #[rustfmt::skip]
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app()
                 .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
             .about("Start the Lucky daemon")

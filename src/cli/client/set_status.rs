@@ -16,7 +16,7 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
     }
 
     #[rustfmt::skip]
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Set the status of the current script")
             .arg(Arg::with_name("script_id")

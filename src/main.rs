@@ -9,5 +9,5 @@ pub fn main() {
 
 #[cfg(feature = "doc-gen")]
 pub fn main() {
-    cli::doc::print_full_cli_doc();
+    cli::doc_gen();
 }

@@ -13,42 +13,12 @@ mod charm;
 mod client;
 mod daemon;
 
-/// Run the application
+/// Run the CLI
 pub fn run() {
-    // Initialize logger
-    crate::log::init_logger();
-
-    std::panic::catch_unwind(|| {
-        // run program and report any errors
-        if let Err(e) = execute() {
-            if let Some(cli_error) = e.downcast_ref::<CliError>() {
-                match cli_error {
-                    CliError::Exit(0) => std::process::exit(0),
-                    CliError::Exit(code) => {
-                        log::error!("{:?}", e);
-                        std::process::exit(*code);
-                    }
-                }
-            } else {
-                log::error!("{:?}", e);
-                std::process::exit(1);
-            }
-        }
-    })
-    // Catch any panics and print an error message. This will appear after the message given by
-    // colored backtrace.
-    .or_else(|_| -> Result<(), ()> {
-        log::error!(concat!(
-            "The program has encountered a critical internal error and will now exit.\n",
-            "This is a bug. TODO: Setup Taiga project for reporting errors!!\n"
-        ));
-
-        Ok(())
-    })
-    .expect("Panic while handling panic");
+    run_with_error_handler(run_cli);
 }
 
-fn execute() -> anyhow::Result<()> {
+fn run_cli() -> anyhow::Result<()> {
     let cli: Box<dyn CliCommand>;
 
     // If there is a specified Lucky context
@@ -81,7 +51,7 @@ impl<'a> CliCommand<'a> for LuckyCli {
         "lucky"
     }
 
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .version(crate::GIT_VERSION)
             .about("The Lucky charm framework for Juju.")
@@ -109,4 +79,56 @@ impl<'a> CliCommand<'a> for LuckyCli {
 
         Ok(())
     }
+}
+
+/// Run the documentation generator
+pub fn doc_gen() {
+    run_with_error_handler(run_doc_gen);
+}
+
+/// Generate CLI documentation
+pub fn run_doc_gen() -> anyhow::Result<()> {
+    println!("Starting doc gen");
+
+    println!("Testing clap->markdown gen");
+
+    let cli = LuckyCli;
+    doc::mdbook::print_doc(&cli)?;
+
+    Ok(())
+}
+
+/// Run the given function with error handling and logging initialized
+pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
+    // Initialize logger
+    crate::log::init_logger();
+
+    std::panic::catch_unwind(|| {
+        // run program and report any errors
+        if let Err(e) = f() {
+            if let Some(cli_error) = e.downcast_ref::<CliError>() {
+                match cli_error {
+                    CliError::Exit(0) => std::process::exit(0),
+                    CliError::Exit(code) => {
+                        log::error!("{:?}", e);
+                        std::process::exit(*code);
+                    }
+                }
+            } else {
+                log::error!("{:?}", e);
+                std::process::exit(1);
+            }
+        }
+    })
+    // Catch any panics and print an error message. This will appear after the message given by
+    // colored backtrace.
+    .or_else(|_| -> Result<(), ()> {
+        log::error!(concat!(
+            "The program has encountered a critical internal error and will now exit.\n",
+            "This is a bug. TODO: Setup Taiga project for reporting errors!!\n"
+        ));
+
+        Ok(())
+    })
+    .expect("Panic while handling panic");
 }

@@ -42,7 +42,7 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
     }
 
     #[rustfmt::skip]
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Create a new lucky charm")
             .arg(Arg::with_name("target_dir")

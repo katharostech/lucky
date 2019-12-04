@@ -11,7 +11,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
         "client"
     }
 
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Communicate with the Lucky daemon in charm scripts")
     }

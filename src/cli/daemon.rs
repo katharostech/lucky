@@ -15,7 +15,7 @@ impl<'a> CliCommand<'a> for DaemonSubcommand {
         "daemon"
     }
 
-    fn get_command(&self) -> App<'a> {
+    fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Start, stop, and trigger the Lucky daemon")
     }
