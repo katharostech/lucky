@@ -36,7 +36,7 @@ lazy_static::lazy_static! {
 }
 
 /// Show the commandline pager with documentation for the given command
-pub(crate) fn show_doc_page<'a>(command: &dyn CliCommand) -> anyhow::Result<()> {
+pub(crate) fn show_doc_page(command: &dyn CliCommand) -> anyhow::Result<()> {
     // Hide the help, doc, and version flags in the command help message.
     let cli_doc = match command.get_doc() {
         Some(doc) => doc,
@@ -57,7 +57,7 @@ pub(crate) fn show_doc_page<'a>(command: &dyn CliCommand) -> anyhow::Result<()> 
     let mut config_file: Option<std::fs::File> = None;
     if let Some(config_dir) = dirs::config_dir() {
         // Open config file
-        let mut config_path = config_dir.clone();
+        let mut config_path = config_dir;
         std::fs::create_dir_all(&config_path).context(format!(
             "Couldn't create config directory: {:?}",
             &config_path
@@ -130,7 +130,7 @@ pub(crate) fn show_doc_page<'a>(command: &dyn CliCommand) -> anyhow::Result<()> 
 
         // Pad text area and give room for help bar at bottom
         area.pad(1, 1);
-        area.height = area.height - 1;
+        area.height -= 1;
 
         // Create text view
         let fmt_text = FmtText::from_text(&MD_SKIN, doc.clone(), Some((area.width - 1) as usize));
@@ -244,7 +244,7 @@ fn show_pager_help(mut w: &mut impl Write, events: &mut SyncReader) -> anyhow::R
         // Create screen area
         let mut area = Area::full_screen();
         area.pad(1, 1);
-        area.height = area.height - 1;
+        area.height -= 1;
 
         // Create text view
         let fmt_text = FmtText::from_text(
