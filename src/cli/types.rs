@@ -34,7 +34,7 @@ pub(crate) trait CliCommand<'a>: CliCommandExt<'a> {
 }
 
 /// Extension trait to the `CliCommand` trait
-/// 
+///
 /// This trait has a blanket implementation on top of all `CliCommands`, providing implementations
 /// of extra functions required by the CLI.
 pub(crate) trait CliCommandExt<'a> {
@@ -61,7 +61,7 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
     fn run(&self, args: &ArgMatches) -> anyhow::Result<()> {
         // Check for the --doc flag and show the doc page if present
         if args.is_present("doc") {
-                show_doc_page(self).context("Could not show doc page")?;
+            show_doc_page(self).context("Could not show doc page")?;
         }
 
         // Run the command

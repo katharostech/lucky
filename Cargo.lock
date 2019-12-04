@@ -429,7 +429,7 @@ checksum = "0bc225b78e0391e4b8683440bf2e63c2deeeb2ce5189eab46e2b68c6d3725d08"
 dependencies = [
  "proc-macro2 1.0.6",
  "quote 1.0.2",
- "syn 1.0.9",
+ "syn 1.0.11",
  "synstructure",
 ]
 
@@ -537,7 +537,7 @@ dependencies = [
  "proc-macro-hack",
  "proc-macro2 1.0.6",
  "quote 1.0.2",
- "syn 1.0.9",
+ "syn 1.0.11",
 ]
 
 [[package]]
@@ -849,7 +849,7 @@ dependencies = [
  "pest_meta",
  "proc-macro2 1.0.6",
  "quote 1.0.2",
- "syn 1.0.9",
+ "syn 1.0.11",
 ]
 
 [[package]]
@@ -889,7 +889,7 @@ checksum = "ecd45702f76d6d3c75a80564378ae228a85f0b59d2f3ed43c91b4a69eb2ebfc5"
 dependencies = [
  "proc-macro2 1.0.6",
  "quote 1.0.2",
- "syn 1.0.9",
+ "syn 1.0.11",
 ]
 
 [[package]]
@@ -1159,7 +1159,7 @@ checksum = "a8c6faef9a2e64b0064f48570289b4bf8823b7581f1d6157c1b52152306651d0"
 dependencies = [
  "proc-macro2 1.0.6",
  "quote 1.0.2",
- "syn 1.0.9",
+ "syn 1.0.11",
 ]
 
 [[package]]
@@ -1239,7 +1239,7 @@ dependencies = [
  "heck",
  "proc-macro2 1.0.6",
  "quote 1.0.2",
- "syn 1.0.9",
+ "syn 1.0.11",
 ]
 
 [[package]]
@@ -1266,9 +1266,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.9"
+version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f89693ae015201f8de93fd96bde2d065f8bfc3f97ce006d5bc9f900b97c0c7c0"
+checksum = "dff0acdb207ae2fe6d5976617f887eb1e35a2ba52c13c7234c790960cdad9238"
 dependencies = [
  "proc-macro2 1.0.6",
  "quote 1.0.2",
@@ -1283,7 +1283,7 @@ checksum = "67656ea1dc1b41b1451851562ea232ec2e5a80242139f7e679ceccfb5d61f545"
 dependencies = [
  "proc-macro2 1.0.6",
  "quote 1.0.2",
- "syn 1.0.9",
+ "syn 1.0.11",
  "unicode-xid 0.2.0",
 ]
 
@@ -1368,22 +1368,22 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.6"
+version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc6b305ec0e323c7b6cfff6098a22516e0063d0bb7c3d88660a890217dca099a"
+checksum = "f432d035a6b1cac335a6be59688cab5e752d098917d666a19d30b97f576eb732"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.6"
+version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45ba8d810d9c48fc456b7ad54574e8bfb7c7918a57ad7a6e6a0985d7959e8597"
+checksum = "75c13db8c8b4cbea8e9cc75d2deb0ad2d48861be61ff2cd8dc0a6e505953fc07"
 dependencies = [
  "proc-macro2 1.0.6",
  "quote 1.0.2",
- "syn 1.0.9",
+ "syn 1.0.11",
 ]
 
 [[package]]
@@ -1469,7 +1469,7 @@ dependencies = [
  "getopts",
  "proc-macro2 1.0.6",
  "quote 1.0.2",
- "syn 1.0.9",
+ "syn 1.0.11",
  "varlink_parser",
 ]
 
