@@ -4,7 +4,7 @@
 
 [bb]: https://cloud.drone.io/api/badges/katharostech/lucky/status.svg
 [bl]: https://cloud.drone.io/katharostech/lucky
-[lc]: https://tokei.rs/b1/github/crossterm-rs/crossterm?category=code
+[lc]: https://tokei.rs/b1/github/katharostech/lucky?category=code
 
 This is the home of a work-in-progress charm writing framework for [Juju]. The framework will seek to provide a well-documented and easy-to-use experience for writing charms that run Docker containers. While currently we are focusing on Docker containers, as development progresses, this framework could very well end up being useful for writing non-Docker charms as well.
 
