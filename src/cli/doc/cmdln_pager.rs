@@ -8,15 +8,18 @@ use crossterm::{
     style::{style, Attribute::*, Color::*, ResetColor, SetBackgroundColor, SetForegroundColor},
     terminal::{size, Clear, ClearType::All},
 };
+use lazy_static::lazy_static;
 use minimad::TextTemplate;
+use regex::Regex;
+use termimad::*;
+
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::{stdout, Read, Seek, SeekFrom, Write};
-use termimad::*;
 
 use crate::cli::{CliCommand, CliDoc};
 
-lazy_static::lazy_static! {
+lazy_static! {
     /// Creates a colored `USAGE: ` + args template for use in the doc pages
     static ref USAGE_TEMPLATE: String = {
         let usage_header = style("USAGE:").with(DarkYellow);
@@ -107,7 +110,8 @@ pub(crate) fn show_doc_page(command: &dyn CliCommand) -> anyhow::Result<()> {
         cli.template = Some(&USAGE_TEMPLATE);
 
         // Create Termimad template from document
-        let doc_template = TextTemplate::from(cli_doc.content);
+        let content = preprocess_markdown(cli_doc.content);
+        let doc_template = TextTemplate::from(content.as_ref());
         let mut doc_expander = doc_template.expander();
         let mut help_message = vec![];
         cli.write_long_help(&mut help_message)
@@ -284,7 +288,7 @@ fn show_pager_help(mut w: &mut impl Write, events: &mut SyncReader) -> anyhow::R
                 Esc | Enter | Char('q') => break,
                 _ => (),
             }
-            
+
             scroll = view.scroll;
         }
     }
@@ -293,4 +297,29 @@ fn show_pager_help(mut w: &mut impl Write, events: &mut SyncReader) -> anyhow::R
     queue!(w, Clear(All))?;
 
     Ok(())
+}
+
+lazy_static! {
+    /// The markdown link regex
+    static ref EXTERNAL_LINKS: Regex =
+        Regex::new(r"(?m)\[(?P<link_text>.*?)\]\((?P<link_ref>http(s)?://.*?)\)")
+            .expect("Coud not compile regex");
+
+    static ref ALL_LINKS: Regex =
+        Regex::new(r"(?m)\[(?P<link_text>.*?)\]\((?P<link_ref>.*?)\)")
+            .expect("Coud not compile regex");
+}
+
+/// Pre-process the markdown doc
+///
+/// Reformats links look nicer in the terminal
+fn preprocess_markdown(markdown: &str) -> String {
+    // Reformat external links to make them prettier in terminal
+    let first_pass = EXTERNAL_LINKS.replace_all(markdown, "$link_text ( *$link_ref* )");
+
+    // Remove any links that don't start with `http(s)://` because they will not work in the
+    // terminal.
+    let second_pass = ALL_LINKS.replace_all(&first_pass, "$link_text");
+
+    second_pass.into()
 }

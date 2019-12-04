@@ -8,7 +8,7 @@ ${help_message}
 
 If you are reading this now, you probably know that Lucky is under heavy development and is currently incomplete. This will hopefully change soon! Please pardon the missing features and documentation as we work to get out our first release.
 
-If you have any thoughts don't be afraid to leave feedback on GitHub ( *https://github.com/katharostech/lucky* ) or ping/private message @zicklag on the Juju forum ( *https://discourse.jujucharms.com* ).
+If you have any thoughts don't be afraid to leave feedback on [GitHub](https://github.com/katharostech/lucky) or ping/private message @zicklag on the [Juju forum](https://discourse.jujucharms.com).
 
 ## The Doc Pages and Help
 
