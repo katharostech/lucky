@@ -2,7 +2,7 @@ use crate::cli::CliError;
 use anyhow::Context;
 use crossterm::{
     cursor::{Hide, MoveTo, Show},
-    input::{input, InputEvent::*, KeyEvent::*},
+    input::{input, InputEvent::*, KeyEvent::*, SyncReader},
     queue,
     screen::{EnterAlternateScreen, LeaveAlternateScreen, RawScreen},
     style::{style, Attribute::*, Color::*, ResetColor, SetBackgroundColor, SetForegroundColor},
@@ -42,7 +42,7 @@ pub(crate) fn show_doc_page<'a>(command: &dyn CliCommand) -> anyhow::Result<()> 
         Some(doc) => doc,
         None => anyhow::bail!("This command does not have a doc page yet"),
     };
-    
+
     // Get stdout writer
     let mut w = stdout();
 
@@ -121,7 +121,7 @@ pub(crate) fn show_doc_page<'a>(command: &dyn CliCommand) -> anyhow::Result<()> 
 
         // Prepare and write to scroll area
         let mut area = Area::full_screen();
-        
+
         // Clear the screen if screen was resized
         if screen_size != (area.width, area.height) {
             queue!(w, Clear(All))?;
@@ -135,7 +135,7 @@ pub(crate) fn show_doc_page<'a>(command: &dyn CliCommand) -> anyhow::Result<()> 
         // Create text view
         let fmt_text = FmtText::from_text(&MD_SKIN, doc.clone(), Some((area.width - 1) as usize));
         let mut view = TextView::from(&area, &fmt_text);
-        
+
         // Scroll to the last viewed position
         if first_view {
             if let Some(&pos) = scrolled_positions.get(cli_doc.name) {
@@ -149,10 +149,10 @@ pub(crate) fn show_doc_page<'a>(command: &dyn CliCommand) -> anyhow::Result<()> 
 
         // Write out the document view
         view.write_on(&mut w)?;
-        
+
         // Write out help bar
         write_help_bar(&mut w, r#" Type "h" for help "#)?;
-        
+
         // Flush output
         w.flush()?;
 
@@ -178,9 +178,10 @@ pub(crate) fn show_doc_page<'a>(command: &dyn CliCommand) -> anyhow::Result<()> 
                 PageDown | Char(' ') => {
                     view.try_scroll_pages(1);
                 }
-                // Char('h') | Char('?') => {
-                //     show_pager_help(&mut w)?;
-                // },
+                Char('h') | Char('?') => {
+                    show_pager_help(&mut w, &mut events)?;
+                    continue;
+                }
                 Esc | Enter | Char('q') => break,
                 _ => (),
             }
@@ -234,22 +235,62 @@ fn print_raw_doc(w: &mut impl Write, cli_doc: CliDoc) -> anyhow::Result<()> {
 }
 
 /// Show the pager controls help page
-fn show_pager_help(w: &mut impl Write) -> anyhow::Result<()> {
-    queue!(w, EnterAlternateScreen)?;
+fn show_pager_help(mut w: &mut impl Write, events: &mut SyncReader) -> anyhow::Result<()> {
+    // Clear screen
     queue!(w, Clear(All))?;
-    let _raw = RawScreen::into_raw_mode()?;
 
-    queue!(w, MoveTo(0, 0))?;
-    write!(w, "Hello World")?;
-    w.flush()?;
+    let mut scroll = 0;
+    loop {
+        // Create screen area
+        let mut area = Area::full_screen();
+        area.pad(1, 1);
+        area.height = area.height - 1;
 
-    let mut events = input().read_sync();
-    events.next();
+        // Create text view
+        let fmt_text = FmtText::from_text(
+            &MD_SKIN,
+            include_str!("cmdln_pager/pager_help.md").into(),
+            Some((area.width - 1) as usize),
+        );
+        let mut view = TextView::from(&area, &fmt_text);
+        view.scroll = scroll;
 
-    // Clean up and revert screen
-    queue!(w, Show)?;
-    queue!(w, LeaveAlternateScreen)?;
-    w.flush()?;
+        // Handle keyboard events
+        write_help_bar(&mut w, r#" Type "Esc" to go back "#)?;
+        view.write_on(&mut w)?;
+        w.flush()?;
+
+        if let Some(Keyboard(key)) = events.next() {
+            match key {
+                Home | Char('g') => {
+                    view.scroll = 0;
+                }
+                // TODO: find be a better way to scroll to end of page
+                End | Char('G') => {
+                    view.try_scroll_pages(90000);
+                }
+                Up | Char('k') => {
+                    view.try_scroll_lines(-1);
+                }
+                Down | Char('j') => {
+                    view.try_scroll_lines(1);
+                }
+                PageUp | Backspace => {
+                    view.try_scroll_pages(-1);
+                }
+                PageDown | Char(' ') => {
+                    view.try_scroll_pages(1);
+                }
+                Esc | Enter | Char('q') => break,
+                _ => (),
+            }
+            
+            scroll = view.scroll;
+        }
+    }
+
+    // Clear screen
+    queue!(w, Clear(All))?;
 
     Ok(())
 }

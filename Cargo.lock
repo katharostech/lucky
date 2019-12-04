@@ -1055,9 +1055,9 @@ dependencies = [
 
 [[package]]
 name = "rprompt"
-version = "1.0.3"
+version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1601f32bc5858aae3cbfa1c645c96c4d820cc5c16be0194f089560c00b6eb625"
+checksum = "0c23d2631221b859cf159015b973516ff554d7736ee88a5ef2b9faf6de4fdd64"
 
 [[package]]
 name = "rust-argon2"

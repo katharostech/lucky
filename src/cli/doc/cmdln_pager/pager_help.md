@@ -1,4 +1,4 @@
-# Pager controls
+## Pager controls
 
 |:-:            |:-:                    |
 | **Action**    | **Key bindings**      |
