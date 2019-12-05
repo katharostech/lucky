@@ -58,7 +58,7 @@ pub(crate) fn get_daemon_connection_args<'a>() -> [Arg<'a>; 2] {
             .long_help(concat!(
                 "The path of the socket to listen on. If this is left unspecified the socket path ",
                 "will be automatically determined from the unit name. For example, for a unit ",
-                r#"named "mysql/2", the socket path will be "/run/lucky_mysql_2.sock""#
+                "named `mysql/2`, the socket path will be `/run/lucky_mysql_2.sock`"
             ))
             .takes_value(true)
             .env("LUCKY_DAEMON_SOCKET"),

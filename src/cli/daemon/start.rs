@@ -44,8 +44,8 @@ impl<'a> CliCommand<'a> for StartSubcommand {
                 .long_help(concat!(
                     "The directory to store the unit state in. If this is left unspecified the ",
                     "state directory will be automatically determined from the unit name. For ",
-                    r#"example, for a unit named "mysql/2", the state dir will be "#,
-                    r#""/var/lib/lucky/mysql_2_state""#
+                    "example, for a unit named `mysql/2`, the state dir will be ",
+                    "`/var/lib/lucky/mysql_2_state`"
                 ))
                 .env("LUCKY_STATE_DIR"))
             .args(&get_daemon_connection_args())
