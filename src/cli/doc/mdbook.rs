@@ -50,6 +50,11 @@ pub(crate) fn print_doc<'a>(command: &dyn CliCommand<'a>) -> anyhow::Result<()> 
 
     let arg_map = cli.args;
     for arg in arg_map.args {
+        // Skip help args
+        if arg.name == "version" || arg.name == "help" || arg.name == "doc" {
+            continue;
+        }
+
         let mut arg_type = ArgType::Flag;
         let mut arg_buffer = String::new();
         write!(arg_buffer, "<tr><td>").expect(write_err);
@@ -72,7 +77,10 @@ pub(crate) fn print_doc<'a>(command: &dyn CliCommand<'a>) -> anyhow::Result<()> 
                     .map(|x| {
                         format!(
                             "<code>&lt;{}&gt;</code>",
-                            x.values().map(|&x| x).collect::<Vec<&str>>().join("&gt; &lt;")
+                            x.values()
+                                .map(|&x| x)
+                                .collect::<Vec<&str>>()
+                                .join("&gt; &lt;")
                         )
                     })
                     .unwrap_or_else(|| format!("<code>&lt;{}&gt;</code>", arg.name));
@@ -98,7 +106,10 @@ pub(crate) fn print_doc<'a>(command: &dyn CliCommand<'a>) -> anyhow::Result<()> 
         write!(
             arg_buffer,
             "<td>{}</td></tr>\n",
-            INLINE_CODE.replace_all(arg.long_help.unwrap_or(arg.help.unwrap_or("")), "<code>$text</code>")
+            INLINE_CODE.replace_all(
+                arg.long_help.unwrap_or(arg.help.unwrap_or("")),
+                "<code>$text</code>"
+            )
         )
         .expect(write_err);
 
