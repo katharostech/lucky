@@ -1,10 +1,12 @@
 # Lucky - A charming framework for Juju
 
-[![Build Status][bb]](bl) ![Lines of code][lc]
+[![Build Status][bb]][bl] ![Lines of code][lc] [![lucky on snapcraft][sb]][sl]
 
 [bb]: https://cloud.drone.io/api/badges/katharostech/lucky/status.svg
 [bl]: https://cloud.drone.io/katharostech/lucky
 [lc]: https://tokei.rs/b1/github/katharostech/lucky?category=code
+[sb]: https://snapcraft.io//lucky/badge.svg
+[sl]: https://snapcraft.io/lucky
 
 This is the home of a work-in-progress charm writing framework for [Juju]. The framework will seek to provide a well-documented and easy-to-use experience for writing charms that run Docker containers. While currently we are focusing on Docker containers, as development progresses, this framework could very well end up being useful for writing non-Docker charms as well.
 

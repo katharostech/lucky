@@ -1,0 +1,16 @@
+name: lucky
+version: pre-release
+summary: The Lucky charm writing framework for Juju.
+description: |
+  Lucky is a charm writing framework for Juju focused on providing an easy, well-documented solution for writing Docker powered charms.
+confinement: devmode
+base: core18
+parts:
+  lucky:
+    plugin: rust
+    rust-revision: 'nightly-2019-11-24'
+    source: .
+
+apps:
+  lucky:
+    command: bin/lucky
