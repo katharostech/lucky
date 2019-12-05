@@ -18,3 +18,16 @@ The documentation is hosted at [katharostech.github.io/lucky].
 [discussion]: https://discourse.jujucharms.com/t/is-the-reactive-framework-making-juju-slow-my-experiences-with-juju-so-far/2282/9?u=zicklag
 [forums]: https://discourse.jujucharms.com/
 [katharostech.github.io/lucky]: https://katharostech.github.io/lucky
+
+## Installation
+
+Currently there isn't much to try yet, but you can test the latest builds of Lucky by downloading the build for your platform from the [releases] page.
+
+We also have a [snap] which can be installed on supported linux distros from the commandline:
+
+```
+sudo snap install --edge --devmode lucky
+```
+
+[releases]: https://github.com/katharostech/lucky/releases
+[snap]: https://snapcraft.io/lucky
