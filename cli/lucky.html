@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Overview - Lucky - A charming framework for Juju</title>
+        <title>Lucky CLI - Lucky - A charming framework for Juju</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -11,21 +11,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         
@@ -35,7 +35,7 @@
     <body class="rust">
         <!-- Provide site root to javascript -->
         <script type="text/javascript">
-            var path_to_root = "";
+            var path_to_root = "../";
             var default_theme = "rust";
         </script>
 
@@ -78,7 +78,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="affix"><a href="overview.html" class="active">Overview</a></li><li class="spacer"></li><li><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="cli/lucky.html"><strong aria-hidden="true">2.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="cli/lucky/charm.html"><strong aria-hidden="true">2.1.</strong> charm</a></li><li><ol class="section"><li><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">2.1.1.</strong> build</a></li><li><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">2.1.2.</strong> create</a></li></ol></li><li><a href="cli/lucky/daemon.html"><strong aria-hidden="true">2.2.</strong> daemon</a></li><li><ol class="section"><li><a href="cli/lucky/daemon/start.html"><strong aria-hidden="true">2.2.1.</strong> start</a></li><li><a href="cli/lucky/daemon/stop.html"><strong aria-hidden="true">2.2.2.</strong> stop</a></li><li><a href="cli/lucky/daemon/trigger-hook.html"><strong aria-hidden="true">2.2.3.</strong> trigger-hook</a></li></ol></li><li><a href="cli/lucky/client.html"><strong aria-hidden="true">2.3.</strong> client</a></li><li><ol class="section"><li><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">2.3.1.</strong> set-status</a></li></ol></li></ol></li></ol>
+                <ol class="chapter"><li class="affix"><a href="../overview.html">Overview</a></li><li class="spacer"></li><li><a href="../design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="../cli/lucky.html" class="active"><strong aria-hidden="true">2.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="../cli/lucky/charm.html"><strong aria-hidden="true">2.1.</strong> charm</a></li><li><ol class="section"><li><a href="../cli/lucky/charm/build.html"><strong aria-hidden="true">2.1.1.</strong> build</a></li><li><a href="../cli/lucky/charm/create.html"><strong aria-hidden="true">2.1.2.</strong> create</a></li></ol></li><li><a href="../cli/lucky/daemon.html"><strong aria-hidden="true">2.2.</strong> daemon</a></li><li><ol class="section"><li><a href="../cli/lucky/daemon/start.html"><strong aria-hidden="true">2.2.1.</strong> start</a></li><li><a href="../cli/lucky/daemon/stop.html"><strong aria-hidden="true">2.2.2.</strong> stop</a></li><li><a href="../cli/lucky/daemon/trigger-hook.html"><strong aria-hidden="true">2.2.3.</strong> trigger-hook</a></li></ol></li><li><a href="../cli/lucky/client.html"><strong aria-hidden="true">2.3.</strong> client</a></li><li><ol class="section"><li><a href="../cli/lucky/client/set-status.html"><strong aria-hidden="true">2.3.1.</strong> set-status</a></li></ol></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -113,7 +113,7 @@
                         <h1 class="menu-title">Lucky - A charming framework for Juju</h1>
 
                         <div class="right-buttons">
-                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <a href="../print.html" title="Print this book" aria-label="Print this book">
                                 <i id="print-button" class="fa fa-print"></i>
                             </a>
                             
@@ -149,23 +149,45 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#overview" id="overview">Overview</a></h1>
-<p>Lucky is a work-in-progress framework for writing <a href="https://jaas.ai/">Juju</a> charms. It is being designed specifically to support writing Docker-powered charms easily. In the future the framework could be useful for more than Docker charms, but development is currently focused on providing facilities to run and configure Docker containers.</p>
-<p>We want Lucky to as easy to use as possible and be very well documented. We will focus on putting the developer's experience first, starting small and adding features as they become necessary or useful.</p>
-<h2><a class="header" href="#developer-experience" id="developer-experience">Developer Experience</a></h2>
-<p>The Lucky framework will provide a charm template that will contain the boilerplate necessary to get started writing a charm with the framework, and it will provide a CLI that will be used by the charm code to interact with Docker and with the Juju controller.</p>
-<p>We will be focusing on making it easy to write charms in bash or any other shell language, but, because the framework itself provides a CLI for interacting with it, it is possible to write charm code in Python or any other executable format.</p>
+                        <h1><a class="header" href="#lucky---the-lucky-charm-framwork-for-juju" id="lucky---the-lucky-charm-framwork-for-juju">Lucky - The Lucky charm framwork for Juju</a></h1>
+<p>Welcome to the Lucky CLI. Lucky is a framework for creating Juju charms. The Lucky framework is designed to make it <em><strong>easy</strong></em> and <em><strong>fun</strong></em> to write charms that are powered by Docker containers.</p>
+<h2><a class="header" href="#usage" id="usage">Usage</a></h2>
+<p><code>lucky [FLAGS]</code></p>
+<h3><a class="header" href="#subcommands" id="subcommands">Subcommands</a></h3>
+<ul>
+<li><a href="./lucky/charm.html">charm</a>: Build and create Lucky charms</li>
+<li><a href="./lucky/daemon.html">daemon</a>: Start, stop, and trigger the Lucky daemon</li>
+<li><a href="./lucky/client.html">client</a>: Communicate with the Lucky daemon in charm scripts</li>
+</ul>
 <h2><a class="header" href="#development" id="development">Development</a></h2>
-<p>We are very early in development. We have just started work on the proof of concept. We have a <a href="./design.html">design</a> document outlining our current plan for the framework. This may change as we get into development. If you have any questions or thoughts don't hesitate to open an issue.</p>
+<p>If you are reading this now, you probably know that Lucky is under heavy development and is currently incomplete. This will hopefully change soon! Please pardon the missing features and documentation as we work to get out our first release.</p>
+<p>If you have any thoughts don't be afraid to leave feedback on <a href="https://github.com/katharostech/lucky">GitHub</a> or ping/private message @zicklag on the <a href="https://discourse.jujucharms.com">Juju forum</a>.</p>
+<h2><a class="header" href="#the-doc-pages-and-help" id="the-doc-pages-and-help">The Doc Pages and Help</a></h2>
+<p>Most of the commands in the Lucky CLI have an extra doc page, like this one, that can be accessed with the <code>--doc</code> or <code>-H</code> flag. We will strive to make these built-in docs sufficient enough to learn to use Lucky without even using the internet!</p>
+<p>Another useful thing to know is that you will get different output by using the <code>-h</code> and <code>--help</code> flags. The <code>-h</code> flag will give you more compact help output while the <code>--help</code> flag will give you more details on the available options.</p>
+<h2><a class="header" href="#getting-started" id="getting-started">Getting Started</a></h2>
+<p>The first step to getting started with Lucky is to create your charm using the built-in charm template.</p>
+<pre><code>$ lucky charm create [target_directory]
+</code></pre>
+<p>You will be prompted for some basic fields that it will fill out for you in the charm metadata. The doc page for <code>lucky charm create</code> has more information about what the different files in the charm are for.</p>
+<p>Once you have tweak your new charm and added your own scripts you must build the charm. Building the charm packages it so that it can be deployed to a Juju server or the charm store.</p>
+<pre><code>$ lucky charm build
+</code></pre>
+<p>That should complete almost immediately and you can then deploy the charm to a Juju controller:</p>
+<pre><code>$ juju deploy build/charm_name</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
+                            <a rel="prev" href="../design.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
 
                         
-                            <a rel="next" href="design.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../cli/lucky/charm.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -177,9 +199,13 @@
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
+                    <a href="../design.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
 
                 
-                    <a href="design.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a href="../cli/lucky/charm.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
@@ -194,14 +220,14 @@
         
 
         
-        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
         
 
-        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
         
