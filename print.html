@@ -209,7 +209,7 @@
 <h1><a class="header" href="#lucky---the-lucky-charm-framwork-for-juju" id="lucky---the-lucky-charm-framwork-for-juju">Lucky - The Lucky charm framwork for Juju</a></h1>
 <p>Welcome to the Lucky CLI. Lucky is a framework for creating Juju charms. The Lucky framework is designed to make it <em><strong>easy</strong></em> and <em><strong>fun</strong></em> to write charms that are powered by Docker containers.</p>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
-<p><code>lucky [FLAGS]</code></p>
+<p><code>lucky [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands" id="subcommands">Subcommands</a></h3>
 <ul>
 <li><a href="cli/./lucky/charm.html">charm</a>: Build and create Lucky charms</li>
@@ -232,14 +232,27 @@
 </code></pre>
 <p>That should complete almost immediately and you can then deploy the charm to a Juju controller:</p>
 <pre><code>$ juju deploy build/charm_name</code></pre>
-<h1><a class="header" href="#charm" id="charm">charm</a></h1>
+<h1><a class="header" href="#lucky-charm" id="lucky-charm">Lucky Charm</a></h1>
+<p>The Lucky <code>charm</code> command contains the tools you will need for charm development.</p>
 <h2><a class="header" href="#usage-1" id="usage-1">Usage</a></h2>
-<p><code>charm [FLAGS]</code></p>
+<p><code>charm [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands-1" id="subcommands-1">Subcommands</a></h3>
 <ul>
 <li><a href="cli/lucky/./charm/build.html">build</a>: Build a Lucky charm and make it ready for deployment to the Juju server or charm store</li>
 <li><a href="cli/lucky/./charm/create.html">create</a>: Create a new lucky charm</li>
 </ul>
+<h2><a class="header" href="#getting-started-1" id="getting-started-1">Getting Started</a></h2>
+<p>The <code>lucky charm</code> command contains tools for creating and building your charms. These are the minimal essential tools for Lucky charm developers. You can see the doc pages for the <a href="cli/lucky/./charm/create.html"><code>create</code></a> and <a href="cli/lucky/./charm/build.html"><code>build</code></a> subcommands to learn more.</p>
+<h2><a class="header" href="#publishing-charms" id="publishing-charms">Publishing Charms</a></h2>
+<p>In order to publish your charms to the charm store you will need the sepparate Juju <a href="https://github.com/juju/charm-tools">charm tools</a>. After you have the charm tools installed, you can push your charm to the charm store:</p>
+<pre><code># Build the charm using Lucky
+$ lucky charm build
+# Login to the charm store
+$ charm login
+# Push the charm to the charm store
+$ charm push build/charm_name
+</code></pre>
+<p>See the Juju <a href="https://jaas.ai/docs/charm-writing/store">documentation</a> for more information about publishing charms.</p>
 <h1><a class="header" href="#build" id="build">build</a></h1>
 <h2><a class="header" href="#usage-2" id="usage-2">Usage</a></h2>
 <p><code>build [FLAGS] [OPTIONS] [charm_dir]</code></p>
@@ -292,9 +305,10 @@
 <tr><td><code>&lt;target_dir&gt;</code></td><td></td><td>The directory to create the charm in</td></tr>
 </tbody>
 </table>
-<h1><a class="header" href="#daemon" id="daemon">daemon</a></h1>
+<h1><a class="header" href="#lucky-daemon" id="lucky-daemon">Lucky Daemon</a></h1>
+<p>The Lucky daemon runs alongside your charm and executes your charm's scripts at the proper times. Users of Lucky will not need to manually run the Lucky daemon as it will be automatically run when the charm is installed.</p>
 <h2><a class="header" href="#usage-4" id="usage-4">Usage</a></h2>
-<p><code>daemon [FLAGS]</code></p>
+<p><code>daemon [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands-2" id="subcommands-2">Subcommands</a></h3>
 <ul>
 <li><a href="cli/lucky/./daemon/start.html">start</a>: Start the Lucky daemon</li>
@@ -366,7 +380,7 @@
 </table>
 <h1><a class="header" href="#client" id="client">client</a></h1>
 <h2><a class="header" href="#usage-8" id="usage-8">Usage</a></h2>
-<p><code>client [FLAGS]</code></p>
+<p><code>client [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands-3" id="subcommands-3">Subcommands</a></h3>
 <ul>
 <li><a href="cli/lucky/./client/set-status.html">set-status</a>: Set the status of the current script</li>

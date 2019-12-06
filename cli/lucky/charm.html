@@ -149,14 +149,27 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#charm" id="charm">charm</a></h1>
+                        <h1><a class="header" href="#lucky-charm" id="lucky-charm">Lucky Charm</a></h1>
+<p>The Lucky <code>charm</code> command contains the tools you will need for charm development.</p>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
-<p><code>charm [FLAGS]</code></p>
+<p><code>charm [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands" id="subcommands">Subcommands</a></h3>
 <ul>
 <li><a href="./charm/build.html">build</a>: Build a Lucky charm and make it ready for deployment to the Juju server or charm store</li>
 <li><a href="./charm/create.html">create</a>: Create a new lucky charm</li>
 </ul>
+<h2><a class="header" href="#getting-started" id="getting-started">Getting Started</a></h2>
+<p>The <code>lucky charm</code> command contains tools for creating and building your charms. These are the minimal essential tools for Lucky charm developers. You can see the doc pages for the <a href="./charm/create.html"><code>create</code></a> and <a href="./charm/build.html"><code>build</code></a> subcommands to learn more.</p>
+<h2><a class="header" href="#publishing-charms" id="publishing-charms">Publishing Charms</a></h2>
+<p>In order to publish your charms to the charm store you will need the sepparate Juju <a href="https://github.com/juju/charm-tools">charm tools</a>. After you have the charm tools installed, you can push your charm to the charm store:</p>
+<pre><code># Build the charm using Lucky
+$ lucky charm build
+# Login to the charm store
+$ charm login
+# Push the charm to the charm store
+$ charm push build/charm_name
+</code></pre>
+<p>See the Juju <a href="https://jaas.ai/docs/charm-writing/store">documentation</a> for more information about publishing charms.</p>
 
                     </main>
 
