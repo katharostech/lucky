@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>start - Lucky - A charming framework for Juju</title>
+        <title>Development - Lucky - A charming framework for Juju</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -11,21 +11,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
-        <link rel="shortcut icon" href="../../../favicon.png">
-        <link rel="stylesheet" href="../../../css/variables.css">
-        <link rel="stylesheet" href="../../../css/general.css">
-        <link rel="stylesheet" href="../../../css/chrome.css">
-        <link rel="stylesheet" href="../../../css/print.css" media="print">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../../../highlight.css">
-        <link rel="stylesheet" href="../../../tomorrow-night.css">
-        <link rel="stylesheet" href="../../../ayu-highlight.css">
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         
@@ -35,7 +35,7 @@
     <body class="rust">
         <!-- Provide site root to javascript -->
         <script type="text/javascript">
-            var path_to_root = "../../../";
+            var path_to_root = "";
             var default_theme = "rust";
         </script>
 
@@ -78,7 +78,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="affix"><a href="../../../overview.html">Overview</a></li><li class="spacer"></li><li><a href="../../../design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="../../../development.html"><strong aria-hidden="true">2.</strong> Development</a></li><li class="spacer"></li><li><a href="../../../cli/lucky.html"><strong aria-hidden="true">3.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="../../../cli/lucky/charm.html"><strong aria-hidden="true">3.1.</strong> charm</a></li><li><ol class="section"><li><a href="../../../cli/lucky/charm/build.html"><strong aria-hidden="true">3.1.1.</strong> build</a></li><li><a href="../../../cli/lucky/charm/create.html"><strong aria-hidden="true">3.1.2.</strong> create</a></li></ol></li><li><a href="../../../cli/lucky/daemon.html"><strong aria-hidden="true">3.2.</strong> daemon</a></li><li><ol class="section"><li><a href="../../../cli/lucky/daemon/start.html" class="active"><strong aria-hidden="true">3.2.1.</strong> start</a></li><li><a href="../../../cli/lucky/daemon/stop.html"><strong aria-hidden="true">3.2.2.</strong> stop</a></li><li><a href="../../../cli/lucky/daemon/trigger-hook.html"><strong aria-hidden="true">3.2.3.</strong> trigger-hook</a></li></ol></li><li><a href="../../../cli/lucky/client.html"><strong aria-hidden="true">3.3.</strong> client</a></li><li><ol class="section"><li><a href="../../../cli/lucky/client/set-status.html"><strong aria-hidden="true">3.3.1.</strong> set-status</a></li></ol></li></ol></li></ol>
+                <ol class="chapter"><li class="affix"><a href="overview.html">Overview</a></li><li class="spacer"></li><li><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="development.html" class="active"><strong aria-hidden="true">2.</strong> Development</a></li><li class="spacer"></li><li><a href="cli/lucky.html"><strong aria-hidden="true">3.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="cli/lucky/charm.html"><strong aria-hidden="true">3.1.</strong> charm</a></li><li><ol class="section"><li><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">3.1.1.</strong> build</a></li><li><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">3.1.2.</strong> create</a></li></ol></li><li><a href="cli/lucky/daemon.html"><strong aria-hidden="true">3.2.</strong> daemon</a></li><li><ol class="section"><li><a href="cli/lucky/daemon/start.html"><strong aria-hidden="true">3.2.1.</strong> start</a></li><li><a href="cli/lucky/daemon/stop.html"><strong aria-hidden="true">3.2.2.</strong> stop</a></li><li><a href="cli/lucky/daemon/trigger-hook.html"><strong aria-hidden="true">3.2.3.</strong> trigger-hook</a></li></ol></li><li><a href="cli/lucky/client.html"><strong aria-hidden="true">3.3.</strong> client</a></li><li><ol class="section"><li><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">3.3.1.</strong> set-status</a></li></ol></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -113,7 +113,7 @@
                         <h1 class="menu-title">Lucky - A charming framework for Juju</h1>
 
                         <div class="right-buttons">
-                            <a href="../../../print.html" title="Print this book" aria-label="Print this book">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
                                 <i id="print-button" class="fa fa-print"></i>
                             </a>
                             
@@ -149,39 +149,34 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#start" id="start">start</a></h1>
-<h2><a class="header" href="#usage" id="usage">Usage</a></h2>
-<p><code>start [FLAGS] [OPTIONS]</code></p>
-<h3><a class="header" href="#flags" id="flags">Flags</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-i</code>, <code>--ignore-already-running</code></td><td></td><td>Don't complain if the daemon is already running</td></tr>
-<tr><td><code>-F</code>, <code>--foreground</code></td><td></td><td>Run in the foreground</td></tr>
-</tbody>
-</table>
-<h3><a class="header" href="#options" id="options">Options</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-S</code>, <code>--state-dir</code><code>&lt;state_dir&gt;</code></td><td><code>LUCKY_STATE_DIR</code></td><td>The directory to store the unit state in. If this is left unspecified the state directory will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the state dir will be <code>/var/lib/lucky/mysql_2_state</code></td></tr>
-<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
-<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
-</tbody>
-</table>
+                        <h1><a class="header" href="#development" id="development">Development</a></h1>
+<h2><a class="header" href="#building-lucky" id="building-lucky">Building Lucky</a></h2>
+<p>Lucky is written in Rust and can be built with cargo by running</p>
+<pre><code>cargo build --release
+</code></pre>
+<p>The resulting binary named <code>lucky</code> will be in <code>target/release</code>. </p>
+<h2><a class="header" href="#building-documentation" id="building-documentation">Building Documentation</a></h2>
+<p>The documentation is built with <a href="https://github.com/rust-lang/mdBook/">mdbook</a>. The documentation is located in the <code>docs/book</code> folder. To host the docs locally you can navigate to the <code>docs/book</code> dir and run <code>mdbook serve</code>.</p>
+<h3><a class="header" href="#cli-documentation" id="cli-documentation">CLI Documentation</a></h3>
+<p>In addition to the book content in <code>docs/book</code>, the CLI documentation is automatically built by Lucky and can be built by running the doc generator in the root of the project:</p>
+<pre><code>cargo run --features doc-gen docs/book/src/
+</code></pre>
+<blockquote>
+<p><strong>Warning</strong> The <code>SUMMARY.md</code> file in <code>docs/book/src</code> will be automatically updated with the CLI documentation links when the doc generator is run. Do not put any links after the <code>Lucky CLI</code> link section or it will be overwritten.</p>
+</blockquote>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-                            <a rel="prev" href="../../../cli/lucky/daemon.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="design.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
 
                         
-                            <a rel="next" href="../../../cli/lucky/daemon/stop.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="cli/lucky.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -193,13 +188,13 @@
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a href="../../../cli/lucky/daemon.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a href="design.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
                 
-                    <a href="../../../cli/lucky/daemon/stop.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a href="cli/lucky.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
@@ -214,14 +209,14 @@
         
 
         
-        <script src="../../../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../../../mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../../../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
         
 
-        <script src="../../../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../../../highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../../../book.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
         

@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="affix"><a href="overview.html">Overview</a></li><li class="spacer"></li><li><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li class="spacer"></li><li><a href="cli/lucky.html"><strong aria-hidden="true">2.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="cli/lucky/charm.html"><strong aria-hidden="true">2.1.</strong> charm</a></li><li><ol class="section"><li><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">2.1.1.</strong> build</a></li><li><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">2.1.2.</strong> create</a></li></ol></li><li><a href="cli/lucky/daemon.html"><strong aria-hidden="true">2.2.</strong> daemon</a></li><li><ol class="section"><li><a href="cli/lucky/daemon/start.html"><strong aria-hidden="true">2.2.1.</strong> start</a></li><li><a href="cli/lucky/daemon/stop.html"><strong aria-hidden="true">2.2.2.</strong> stop</a></li><li><a href="cli/lucky/daemon/trigger-hook.html"><strong aria-hidden="true">2.2.3.</strong> trigger-hook</a></li></ol></li><li><a href="cli/lucky/client.html"><strong aria-hidden="true">2.3.</strong> client</a></li><li><ol class="section"><li><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">2.3.1.</strong> set-status</a></li></ol></li></ol></li></ol>
+                <ol class="chapter"><li class="affix"><a href="overview.html">Overview</a></li><li class="spacer"></li><li><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="development.html"><strong aria-hidden="true">2.</strong> Development</a></li><li class="spacer"></li><li><a href="cli/lucky.html"><strong aria-hidden="true">3.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="cli/lucky/charm.html"><strong aria-hidden="true">3.1.</strong> charm</a></li><li><ol class="section"><li><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">3.1.1.</strong> build</a></li><li><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">3.1.2.</strong> create</a></li></ol></li><li><a href="cli/lucky/daemon.html"><strong aria-hidden="true">3.2.</strong> daemon</a></li><li><ol class="section"><li><a href="cli/lucky/daemon/start.html"><strong aria-hidden="true">3.2.1.</strong> start</a></li><li><a href="cli/lucky/daemon/stop.html"><strong aria-hidden="true">3.2.2.</strong> stop</a></li><li><a href="cli/lucky/daemon/trigger-hook.html"><strong aria-hidden="true">3.2.3.</strong> trigger-hook</a></li></ol></li><li><a href="cli/lucky/client.html"><strong aria-hidden="true">3.3.</strong> client</a></li><li><ol class="section"><li><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">3.3.1.</strong> set-status</a></li></ol></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -191,6 +191,21 @@
     - container_script: update-application-config.sh
 </code></pre>
 <p>The scripts will be executed by the Lucky daemon in the order that they are defined in the YAML.</p>
+<h1><a class="header" href="#development-1" id="development-1">Development</a></h1>
+<h2><a class="header" href="#building-lucky" id="building-lucky">Building Lucky</a></h2>
+<p>Lucky is written in Rust and can be built with cargo by running</p>
+<pre><code>cargo build --release
+</code></pre>
+<p>The resulting binary named <code>lucky</code> will be in <code>target/release</code>. </p>
+<h2><a class="header" href="#building-documentation" id="building-documentation">Building Documentation</a></h2>
+<p>The documentation is built with <a href="https://github.com/rust-lang/mdBook/">mdbook</a>. The documentation is located in the <code>docs/book</code> folder. To host the docs locally you can navigate to the <code>docs/book</code> dir and run <code>mdbook serve</code>.</p>
+<h3><a class="header" href="#cli-documentation" id="cli-documentation">CLI Documentation</a></h3>
+<p>In addition to the book content in <code>docs/book</code>, the CLI documentation is automatically built by Lucky and can be built by running the doc generator in the root of the project:</p>
+<pre><code>cargo run --features doc-gen docs/book/src/
+</code></pre>
+<blockquote>
+<p><strong>Warning</strong> The <code>SUMMARY.md</code> file in <code>docs/book/src</code> will be automatically updated with the CLI documentation links when the doc generator is run. Do not put any links after the <code>Lucky CLI</code> link section or it will be overwritten.</p>
+</blockquote>
 <h1><a class="header" href="#lucky---the-lucky-charm-framwork-for-juju" id="lucky---the-lucky-charm-framwork-for-juju">Lucky - The Lucky charm framwork for Juju</a></h1>
 <p>Welcome to the Lucky CLI. Lucky is a framework for creating Juju charms. The Lucky framework is designed to make it <em><strong>easy</strong></em> and <em><strong>fun</strong></em> to write charms that are powered by Docker containers.</p>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
@@ -201,7 +216,7 @@
 <li><a href="cli/./lucky/daemon.html">daemon</a>: Start, stop, and trigger the Lucky daemon</li>
 <li><a href="cli/./lucky/client.html">client</a>: Communicate with the Lucky daemon in charm scripts</li>
 </ul>
-<h2><a class="header" href="#development-1" id="development-1">Development</a></h2>
+<h2><a class="header" href="#development-2" id="development-2">Development</a></h2>
 <p>If you are reading this now, you probably know that Lucky is under heavy development and is currently incomplete. This will hopefully change soon! Please pardon the missing features and documentation as we work to get out our first release.</p>
 <p>If you have any thoughts don't be afraid to leave feedback on <a href="https://github.com/katharostech/lucky">GitHub</a> or ping/private message @zicklag on the <a href="https://discourse.jujucharms.com">Juju forum</a>.</p>
 <h2><a class="header" href="#the-doc-pages-and-help" id="the-doc-pages-and-help">The Doc Pages and Help</a></h2>
