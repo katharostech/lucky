@@ -147,22 +147,9 @@ name: macos-build
 
 steps:
   - name: build
-    image: rust:latest
+    image: katharostech/rust-osxcross:rust-latest_v0.1.0
     commands:
-      # Install Cross-compiler toolchain
-      - apt-get update
-      - apt-get install -y clang cmake cpio make libssl-dev lzma-dev libxml2-dev
-      - rustup default nightly-2019-11-24
-      - rustup target add x86_64-apple-darwin
-      - mkdir -p /build
-      - cd /build
-      - git clone --depth 1 https://github.com/tpoechtrager/osxcross.git
-      - cd /build/osxcross/tarballs
-      - wget https://s3.dockerproject.org/darwin/v2/MacOSX10.11.sdk.tar.xz
-      - cd /build/osxcross
-      - UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh
-      - export PATH="$PATH:/build/osxcross/target/bin"
-      - ln -s /build/osxcross/target/SDK/MacOSX10.11.sdk/System/ /System
+      - PATH="$PATH:/build/osxcross/target/bin"
       # Configure build to use Mac linker and libraries
       - mkdir -p /drone/src/.cargo
       - |
@@ -175,8 +162,8 @@ steps:
       - mkdir -p build
       - mv target/x86_64-apple-darwin/release/lucky build
       - cd build/
-      - cat lucky-mac-x86_64.tgz | sha256sum | awk -F ' ' '{print $1}' > sha256.txt
       - tar -czf lucky-mac-x86_64.tgz lucky
+      - sha256sum lucky-mac-x86_64.tgz | awk -F ' ' '{print $1}' > sha256.txt
 
   # Publish pre-release to GitHub releases
   - name: publish-pre-release
