@@ -117,7 +117,7 @@ steps:
         from_secret: github_access_key
       files:
         - build/lucky-windows-x86_64.zip
-        - katharostech.lucky*.nupkg
+        - lucky*.nupkg
     when:
       ref:
         - refs/tags/pre-release
