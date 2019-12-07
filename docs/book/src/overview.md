@@ -8,9 +8,7 @@ We want Lucky to as easy to use as possible and be very well documented. We will
 
 ## Developer Experience
 
-The Lucky framework will provide a charm template that will contain the boilerplate necessary to get started writing a charm with the framework, and it will provide a CLI that will be used by the charm code to interact with Docker and with the Juju controller.
-
-We will be focusing on making it easy to write charms in bash or any other shell language, but, because the framework itself provides a CLI for interacting with it, it is possible to write charm code in Python or any other executable format.
+The Lucky framework will provide a CLI that will be installed on the developers workstation that will be used to create and build Lucky charms. We will be focusing on making it easy to write charms in bash or any other shell language, but, through the Lucky commandline interface, any programming language could be used.
 
 ## Development
 
