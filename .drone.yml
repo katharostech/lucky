@@ -175,6 +175,7 @@ steps:
       - mkdir -p build
       - mv target/x86_64-apple-darwin/release/lucky build
       - cd build/
+      - cat lucky-mac-x86_64.tgz | sha256sum | awk -F ' ' '{print $1}' > sha256.txt
       - tar -czf lucky-mac-x86_64.tgz lucky
 
   # Publish pre-release to GitHub releases
@@ -188,6 +189,29 @@ steps:
         from_secret: github_access_key
       files:
         - build/lucky-mac-x86_64.tgz
+    when:
+      ref:
+        - refs/tags/pre-release
+
+  # Update the Homebrew cask
+  - name: publish-pre-release-cask
+    image: alpine/git
+    depends_on:
+      - publish-pre-release
+    environment:
+      USER:
+        from_secret: github_username
+      PASSWORD:
+        from_secret: github_access_key
+    commands:
+      - git config --global user.email "zicklag@katharostech.com"
+      - git config --global user.name "Zicklag"
+      - git clone https://$${USER}:$${PASSWORD}@github.com/katharostech/homebrew-tap.git
+      - sed -i "/\w*sha256/s/\'[a-z0-9]*\'/\'$(cat build/sha256.txt)\'/" homebrew-tap/Casks/lucky-pre-release.rb
+      - cd homebrew-tap
+      - git add .
+      - git commit -m 'Update Lucky Pre-Release'
+      - git push
     when:
       ref:
         - refs/tags/pre-release
