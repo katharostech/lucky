@@ -27,11 +27,15 @@ Currently there isn't much to try yet, but you can test the latest builds of Luc
 
 We also support the following package managers.
 
+[releases]: https://github.com/katharostech/lucky/releases
+
 ### Chocolatey ( Windows )
 
 You can install Lucky with the [Chocolatey] package manager for Windows. Until we add the package to the community repo you have to download the package from the [releases] page. You can then install it from the commandline.
 
     choco install .\lucky.0.1.0-pre-release.nupkg
+
+[chocolatey]: https://chocolatey.org/
 
 ### Snap ( Linux )
 
@@ -39,14 +43,12 @@ We have a [snap] which can be installed on supported linux distros from the comm
 
     sudo snap install --edge --devmode lucky
 
+[snap]: https://snapcraft.io/lucky
+
 ### Homebrew ( MacOS )
 
-We have a Homebrew cask:
+We have a [Homebrew] cask:
 
-    brew tap katharostech/tap
-    brew cask install lucky-pre-release
+    brew cask install katharostech/tap/lucky-pre-release
 
-
-[releases]: https://github.com/katharostech/lucky/releases
-[snap]: https://snapcraft.io/lucky
-[chocolatey]: https://chocolatey.org/
+[homebrew]: https://brew.sh/
