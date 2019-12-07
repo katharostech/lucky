@@ -25,13 +25,13 @@ The documentation is hosted at [katharostech.github.io/lucky].
 
 Currently there isn't much to try yet, but you can test the latest builds of Lucky by downloading the build for your platform from the [releases] page.
 
-## Chocolatey
+### Chocolatey
 
 You can install Lucky with the [Chocolatey] package manager for Windows. Until we add the package to the community repo you have to download the package from the [releases] page. You can then install it from the commandline.
 
     choco install .\lucky.0.1.0-pre-release.nupkg
 
-## Snap
+### Snap
 
 We have a [snap] which can be installed on supported linux distros from the commandline:
 
