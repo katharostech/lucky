@@ -52,3 +52,9 @@ We have a [Homebrew] cask:
     brew cask install katharostech/tap/lucky-pre-release
 
 [homebrew]: https://brew.sh/
+
+## Bugs, Features, and Questions
+
+If you have any questions, bug reports, feature requests, or anything else that you want to discuss about the project, you can create a [Taiga issue][ti] and we'll see what we can do. You can use your GitHub to log into Taiga and create the issue.
+
+[ti]: https://tree.taiga.io/project/zicklag-lucky/issues
