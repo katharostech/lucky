@@ -1,22 +1,30 @@
 ---
 kind: pipeline
-name: book
-  
-steps:
-  - name: test
-    image: hrektts/mdbook
-    commands:
-      - cd docs/book
-      - mdbook test
+name: linux-build
 
-  - name: build
+steps:
+  - name: build-lucky
+    image: clux/muslrust:nightly-2019-11-24
+    commands:
+      - cargo build --release
+      - cargo run --release --features doc-gen docs/book/src/
+      - mkdir -p build/lucky
+      - mv target/x86_64-unknown-linux-musl/release/lucky build/lucky
+      - cd build/
+      - tar -czf lucky-linux-x86_64.tgz lucky
+
+  - name: build-book
     image: hrektts/mdbook
+    depends_on:
+      - build-lucky
     commands:
       - cd docs/book
       - mdbook build
-    
-  - name: publish
+
+  - name: publish-book
     image: plugins/gh-pages
+    depends_on:
+      - build-book
     settings:
       pages_directory: docs/book/build
       username:
@@ -29,30 +37,11 @@ steps:
       branch:
         - master
 
-trigger:
-  branch:
-    exclude:
-      - feature/*
-
----
-kind: pipeline
-name: linux-build
-
-steps:
-  - name: build
-    image: clux/muslrust:nightly-2019-11-24
-    commands:
-      - cargo build --release
-      - mkdir -p build/lucky
-      - mv target/x86_64-unknown-linux-musl/release/lucky build/lucky
-      - cd build/
-      - tar -czf lucky-linux-x86_64.tgz lucky
-
   # Publish pre-release to GitHub releases
   - name: publish-pre-release
     image: plugins/github-release
     depends_on:
-      - build
+      - build-lucky
     settings:
       title: pre-release
       api_key:
@@ -67,7 +56,7 @@ steps:
   - name: publish-release
     image: plugins/github-release
     depends_on:
-      - build
+      - build-lucky
     settings:
       api_key:
         from_secret: github_access_key
