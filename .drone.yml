@@ -6,8 +6,10 @@ steps:
   - name: build-lucky
     image: clux/muslrust:nightly-2019-11-24
     commands:
-      - cargo build --release
+      # Generate CLI docs
       - cargo run --release --features doc-gen docs/book/src/
+      # Build Lucky CLI
+      - cargo build --release
       - mkdir -p build
       - mv target/x86_64-unknown-linux-musl/release/lucky build
       - cd build/
