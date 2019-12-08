@@ -33,7 +33,7 @@ pub(crate) fn generate_docs<'a>(
     outpath: &Path,
 ) -> anyhow::Result<()> {
     // The mdbook index for all of the CLI commands. Goes in the SUMMARY.md file
-    let mut summary_index = String::from("---\n");
+    let mut summary_index = String::from("\n\n---\n");
 
     // Generate the CLI doc files
     recurse_gen_cli_doc(command, &mut summary_index, outpath, outpath, 0)?;
