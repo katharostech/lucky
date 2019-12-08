@@ -41,12 +41,7 @@ lazy_static! {
 /// Show the commandline pager with documentation for the given command
 pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result<()> {
     // Hide the help, doc, and version flags in the command help message.
-    let cli_doc = match command.get_doc() {
-        Some(doc) => doc,
-        // TODO: Instead of bailing we should show the long help inside of the pager ( and the
-        // scrolled position will not be saved )
-        None => anyhow::bail!("This command does not have a doc page yet"),
-    };
+    let cli_doc = command.get_doc();
 
     // Get stdout writer
     let mut w = stdout();
@@ -60,33 +55,36 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
     // Load the last position the user was scrolled to on this doc
     let mut scrolled_positions: HashMap<String, i32> = HashMap::new();
     let mut config_file: Option<std::fs::File> = None;
-    if let Some(config_dir) = dirs::config_dir() {
-        // Open config file
-        let mut config_path = config_dir;
-        std::fs::create_dir_all(&config_path).context(format!(
-            "Couldn't create config directory: {:?}",
-            &config_path
-        ))?;
-        config_path.push("lucky_doc_positions.json");
-        let mut file = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .open(&config_path)
-            .context(format!("Couldn't open config file: {:?}", &config_path))?;
-        let mut config_content = String::new();
-        file.read_to_string(&mut config_content)?;
+    // Only keep track of scrolled positions for commands with documentation
+    if let Some(_) = &cli_doc {
+        if let Some(config_dir) = dirs::config_dir() {
+            // Open config file
+            let mut config_path = config_dir;
+            std::fs::create_dir_all(&config_path).context(format!(
+                "Couldn't create config directory: {:?}",
+                &config_path
+            ))?;
+            config_path.push("lucky_doc_positions.json");
+            let mut file = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create(true)
+                .open(&config_path)
+                .context(format!("Couldn't open config file: {:?}", &config_path))?;
+            let mut config_content = String::new();
+            file.read_to_string(&mut config_content)?;
 
-        // If the config file contains readable JSON
-        if let Ok(positions) = serde_json::from_str(&config_content) {
-            scrolled_positions = positions;
+            // If the config file contains readable JSON
+            if let Ok(positions) = serde_json::from_str(&config_content) {
+                scrolled_positions = positions;
 
-            // If we can't parse the config, we just leave it initialized as an empty HashMap
+                // If we can't parse the config, we just leave it initialized as an empty HashMap
+            }
+
+            // Set config file for use later
+            config_file = Some(file);
         }
-
-        // Set config file for use later
-        config_file = Some(file);
-    }
+    } // if let Some(cli_doc)
 
     // Switch to the Pager Screen
     queue!(w, EnterAlternateScreen)?;
@@ -111,19 +109,36 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
         // Set the help message template
         cli.template = Some(&USAGE_TEMPLATE);
 
-        // Create Termimad template from document
-        let content = preprocess_markdown(cli_doc.content);
-        let doc_template = TextTemplate::from(content.as_ref());
-        let mut doc_expander = doc_template.expander();
+        // Get clap help message
         let mut help_message = vec![];
         cli.write_long_help(&mut help_message)
             .expect("Could not write to internal string buffer");
         let help_message =
-            &String::from_utf8(help_message).expect("Could not parse command help as utf8");
-        doc_expander.set_lines("help_message", help_message);
+            String::from_utf8(help_message).expect("Could not parse command help as utf8");
 
-        // Expand document template
-        let doc = doc_expander.expand();
+        let content;
+        let doc = match &cli_doc {
+            // If there is a help document for this command
+            Some(cli_doc) => {
+                // Create text template from cli doc
+                content = preprocess_markdown(cli_doc.content);
+                let doc_template = TextTemplate::from(content.as_ref());
+                let mut doc_expander = doc_template.expander();
+                doc_expander.set_lines("help_message", &help_message);
+
+                // Expand document template
+                doc_expander.expand()
+            }
+            // If there is no help document
+            None => {
+                // Create a template just to print the help message
+                content = format!("# {}\n\n${{help_message}}", command.get_name());
+                let doc_template = TextTemplate::from(content.as_ref());
+                let mut doc_expander = doc_template.expander();
+                doc_expander.set_lines("help_message", &help_message);
+                doc_expander.expand()
+            }
+        };
 
         // Prepare and write to scroll area
         let mut area = Area::full_screen();
@@ -142,13 +157,17 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
         let fmt_text = FmtText::from_text(&MD_SKIN, doc.clone(), Some((area.width - 1) as usize));
         let mut view = TextView::from(&area, &fmt_text);
 
-        // Scroll to the last viewed position
-        if first_view {
-            if let Some(&pos) = scrolled_positions.get(cli_doc.name) {
-                view.try_scroll_lines(pos);
-                scroll = view.scroll;
+        // Scroll to the last viewed position if this command has a doc page
+        if let Some(cli_doc) = &cli_doc {
+            if first_view {
+                if let Some(&pos) = scrolled_positions.get(cli_doc.name) {
+                    view.try_scroll_lines(pos);
+                    scroll = view.scroll;
+                }
+                first_view = false;
+            } else {
+                view.scroll = scroll;
             }
-            first_view = false;
         } else {
             view.scroll = scroll;
         }
@@ -168,7 +187,8 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
                 Home | Char('g') => {
                     view.scroll = 0;
                 }
-                // TODO: find be a better way to scroll to end of page
+                // TODO: find be a better way to scroll to end of page:
+                // https://github.com/Canop/termimad/issues/10
                 End | Char('G') => {
                     view.try_scroll_pages(90000);
                 }
@@ -197,8 +217,10 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
         scroll = view.scroll;
     }
 
-    // Set our new latest scroll position for this document
-    scrolled_positions.insert(cli_doc.name.to_owned(), scroll);
+    if let Some(cli_doc) = &cli_doc {
+        // Set our new latest scroll position for this document
+        scrolled_positions.insert(cli_doc.name.to_owned(), scroll);
+    }
 
     // Save scrolled positions to config file
     if let Some(mut file) = config_file {
@@ -234,8 +256,12 @@ fn write_help_bar(w: &mut impl Write, message: &str) -> anyhow::Result<()> {
 }
 
 /// Prints out the raw documentation content without any formatting or colors
-fn print_raw_doc(w: &mut impl Write, cli_doc: CliDoc) -> anyhow::Result<()> {
-    write!(w, "{}", cli_doc.content)?;
+fn print_raw_doc(w: &mut impl Write, cli_doc: Option<CliDoc>) -> anyhow::Result<()> {
+    if let Some(cli_doc) = cli_doc {
+        write!(w, "{}", cli_doc.content)?;
+    } else {
+        write!(w, "No doc page for this command")?;
+    }
 
     Ok(())
 }
