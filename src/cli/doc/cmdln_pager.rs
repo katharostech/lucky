@@ -43,6 +43,8 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
     // Hide the help, doc, and version flags in the command help message.
     let cli_doc = match command.get_doc() {
         Some(doc) => doc,
+        // TODO: Instead of bailing we should show the long help inside of the pager ( and the
+        // scrolled position will not be saved )
         None => anyhow::bail!("This command does not have a doc page yet"),
     };
 
