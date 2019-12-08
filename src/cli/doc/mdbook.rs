@@ -24,7 +24,7 @@ lazy_static::lazy_static! {
 
     /// Matches the doc-gen automatically generated section of the mdbook's SUMMARY.md
     static ref CLI_DOC_INDEX: Regex =
-        Regex::new(r"(?ms)---\s*- \[Lucky CLI\].*")
+        Regex::new(r"(?ms)\s*---\s*- \[Lucky CLI\].*")
             .expect("Coud not compile regex");
 }
 
