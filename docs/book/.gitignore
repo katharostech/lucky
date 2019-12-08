@@ -1,1 +1,3 @@
 build
+# The CLI dir is auto-generated with `cargo run --features doc-gen docs/book/src`
+src/cli

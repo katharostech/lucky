@@ -73,10 +73,6 @@ impl<'a> CliCommand<'a> for LuckyCli {
     }
 
     fn execute_command(&self, _args: &ArgMatches) -> anyhow::Result<()> {
-        // Enable colored backtraces
-        #[cfg(feature = "color-backtrace")]
-        color_backtrace::install();
-
         Ok(())
     }
 }
@@ -90,16 +86,29 @@ pub fn doc_gen() {
 pub fn run_doc_gen() -> anyhow::Result<()> {
     println!("Starting doc gen");
 
-    println!("Testing clap->markdown gen");
-
     let cli = LuckyCli;
-    doc::mdbook::print_doc(&cli)?;
+    doc::mdbook::generate_docs(
+        &cli,
+        match std::env::args().nth(1) {
+            Some(arg) => arg,
+            None => {
+                anyhow::bail!("Out path argument required as first and only positional argument")
+            }
+        }
+        .as_ref(),
+    )?;
+
+    println!("Doc gen finished");
 
     Ok(())
 }
 
 /// Run the given function with error handling and logging initialized
 pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
+    // Enable colored backtraces
+    #[cfg(feature = "color-backtrace")]
+    color_backtrace::install();
+
     // Initialize logger
     crate::log::init_logger();
 
