@@ -31,9 +31,9 @@ We also support the following package managers.
 
 ### Chocolatey ( Windows )
 
-You can install Lucky with the [Chocolatey] package manager for Windows. Until we add the package to the community repo you have to download the package from the [releases] page. You can then install it from the commandline.
+You can install Lucky with the [Chocolatey] package manager for Windows:
 
-    choco install .\lucky.0.1.0-pre-release.nupkg
+    choco install lucky --pre
 
 [chocolatey]: https://chocolatey.org/
 

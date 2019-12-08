@@ -10,12 +10,12 @@
     <projectUrl>https://katharostech.github.io/lucky/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>The Lucky charm framework for Juju</summary>
-    <description>Lucky is a framework designed to make it easy to write [Juju] charms powered by Docker containers.
+    <description>Lucky is a work-in-progress framework for writing [Juju] charms. The Lucky framework is designed to make it easy and fun to write charms that are powered by Docker containers.
 
-More information can be found in the [Lucky documentation][ld]
+You can find more information in the [documentation].
 
 [juju]: https://jaas.ai/
-[ld]: katharostech.github.io/lucky/
+[documentation]: https://katharostech.github.io/lucky/
 </description>
     <releaseNotes>https://github.com/katharostech/lucky/releases/tag/pre-release</releaseNotes>
     <copyright>Copyright © 2019 Katharos Technology</copyright>
