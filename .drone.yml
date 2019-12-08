@@ -8,8 +8,8 @@ steps:
     commands:
       - cargo build --release
       - cargo run --release --features doc-gen docs/book/src/
-      - mkdir -p build/lucky
-      - mv target/x86_64-unknown-linux-musl/release/lucky build/lucky
+      - mkdir -p build
+      - mv target/x86_64-unknown-linux-musl/release/lucky build
       - cd build/
       - tar -czf lucky-linux-x86_64.tgz lucky
 
@@ -91,10 +91,10 @@ steps:
         echo '[target.x86_64-pc-windows-gnu]
         linker = "x86_64-w64-mingw32-gcc"' >> .cargo/config
       - cargo build --target x86_64-pc-windows-gnu --release
-      - mkdir -p build/lucky
-      - mv target/x86_64-pc-windows-gnu/release/lucky.exe build/lucky
+      - mkdir -p build
+      - mv target/x86_64-pc-windows-gnu/release/lucky.exe build
       - cd build/
-      - zip -r lucky-windows-x86_64.zip lucky
+      - zip -r lucky-windows-x86_64.zip lucky.exe
 
   # Publish pre-release to GitHub releases
   - name: publish-pre-release
@@ -161,8 +161,8 @@ steps:
       - export COREAUDIO_FRAMEWORKS_PATH='/System/Library/Frameworks'
       - export CC=x86_64-apple-darwin15-clang
       - cargo build --target x86_64-apple-darwin --release
-      - mkdir -p build/lucky
-      - mv target/x86_64-apple-darwin/release/lucky build/lucky
+      - mkdir -p build
+      - mv target/x86_64-apple-darwin/release/lucky build
       - cd build/
       - tar -czf lucky-mac-x86_64.tgz lucky
 
