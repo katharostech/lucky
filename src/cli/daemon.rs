@@ -29,7 +29,10 @@ impl<'a> CliCommand<'a> for DaemonSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_daemon",
+            content: include_str!("daemon/daemon.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches) -> anyhow::Result<()> {

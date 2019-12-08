@@ -155,7 +155,7 @@ fn recurse_gen_cli_doc<'a>(
 
 // Get the app usage markdown
 fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
-    let mut app = command.get_app();
+    let mut app = command.get_cli();
     let mut command_help = String::new();
 
     // Print command usage
