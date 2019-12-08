@@ -3,6 +3,7 @@ version: pre-release
 summary: The Lucky charm writing framework for Juju.
 description: |
   Lucky is a charm writing framework for Juju focused on providing an easy, well-documented solution for writing Docker powered charms.
+# TODO: Find out whether lucky can run in strict confinement mode
 confinement: devmode
 base: core18
 parts:
