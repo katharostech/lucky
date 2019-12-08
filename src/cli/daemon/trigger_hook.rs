@@ -28,7 +28,7 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
                 )))
             .arg(Arg::with_name("hook_name")
                 .help("The name of the hook to trigger")
-                .required(true))
+                .required_unless("doc"))
             .args(&get_daemon_connection_args())
     }
 

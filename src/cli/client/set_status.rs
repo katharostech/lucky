@@ -28,9 +28,9 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
                     "independent of the other scripts in the charm."
                 ))
                 .env("LUCKY_SCRIPT_ID")
-                .required(true))
+                .required_unless("doc"))
             .arg(Arg::with_name("state")
-                .required(true)
+                .required_unless("doc")
                 .help("The enumerated state of the service")
                 .possible_values(&ScriptState::variants())
                 .case_insensitive(true))
