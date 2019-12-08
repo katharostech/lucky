@@ -98,26 +98,33 @@ steps:
       - cd build/
       - zip -r lucky-windows-x86_64.zip lucky.exe
 
-  - name: build-choco
+  # Build and push Chocolatey pre-release package
+  - name: publish-choco-pre-release
     depends_on:
       - build
     image: linuturk/mono-choco
+    environment:
+      API_KEY:
+        from_secret: chocolatey_api_key
     commands:
+      - cd chocolatey
+      - sed -i "s/\$${version}/0.1.0-pre-release-${DRONE_BUILD_NUMBER}/" lucky.nuspec
       - choco pack
+      - choco push --api-key "$${API_KEY}" --source https://push.chocolatey.org/
 
   # Publish pre-release to GitHub releases
   - name: publish-pre-release
     image: plugins/github-release
     depends_on:
       - build
-      - build-choco
+      - publish-choco-pre-release
     settings:
       title: pre-release
       api_key:
         from_secret: github_access_key
       files:
         - build/lucky-windows-x86_64.zip
-        - lucky*.nupkg
+        - chocolatey/lucky*.nupkg
     when:
       ref:
         - refs/tags/pre-release

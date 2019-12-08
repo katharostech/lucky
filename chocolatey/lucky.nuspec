@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>lucky</id>
+    <version>${version}</version>
+    <title>Lucky</title>
+    <authors>Katharos Technology</authors>
+    <owners>Katharos Technology LLC</owners>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://katharostech.github.io/lucky/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>The Lucky charm framework for Juju</summary>
+    <description>Lucky is a framework designed to make it easy to write [Juju] charms powered by Docker containers.
+
+More information can be found in the [Lucky documentation][ld]
+
+[juju]: https://jaas.ai/
+[ld]: katharostech.github.io/lucky/
+</description>
+    <releaseNotes>https://github.com/katharostech/lucky/releases/tag/pre-release</releaseNotes>
+    <copyright>Copyright © 2019 Katharos Technology</copyright>
+    <tags>Juju development DevOps</tags>
+    <packageSourceUrl>https://github.com/katharostech/lucky</packageSourceUrl>
+    <docsUrl>https://katharostech.github.io/lucky/</docsUrl>
+    <bugTrackerUrl>https://tree.taiga.io/project/zicklag-lucky/issues</bugTrackerUrl>
+    <projectSourceUrl>https://github.com/katharostech/lucky</projectSourceUrl>
+  </metadata>
+  <files>
+    <file src="../build/lucky.exe" target="tools" />
+    <file src="legal/**" target="legal" />
+  </files>
+</package>
