@@ -294,11 +294,18 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
     if subcommands.len() != 0 {
         // Add subcommands header
         command_help.push_str("### Subcommands\n\n");
-        
+
         // Add subcommand links to list
         for subcommand in subcommands {
+            let sub_app = subcommand.get_app();
             command_help.push_str(
-                format!("- [{0}](./{1}/{0}.md)\n", subcommand.get_name(), app.name).as_str(),
+                format!(
+                    "- [{name}](./{parent}/{name}.md): {help}\n",
+                    name = subcommand.get_name(),
+                    parent = app.name,
+                    help = sub_app.long_about.unwrap_or(sub_app.about.unwrap_or(""))
+                )
+                .as_str(),
             );
         }
     }
