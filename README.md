@@ -1,9 +1,11 @@
 # Lucky - A charming framework for Juju
 
-[![Build Status][bb]][bl] ![Lines of code][lc] [![lucky on snapcraft][sb]][sl]
+[![Build Status][bb]][bl] [![Snap Status][ssi]][ssl] [![lucky on snapcraft][sb]][sl] ![Lines of code][lc]
 
 [bb]: https://cloud.drone.io/api/badges/katharostech/lucky/status.svg
 [bl]: https://cloud.drone.io/katharostech/lucky
+[ssi]: https://build.snapcraft.io/badge/katharostech/lucky.svg
+[ssl]: https://build.snapcraft.io/user/katharostech/lucky
 [lc]: https://tokei.rs/b1/github/katharostech/lucky?category=code
 [sb]: https://snapcraft.io//lucky/badge.svg
 [sl]: https://snapcraft.io/lucky
