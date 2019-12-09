@@ -27,7 +27,7 @@ fn run_cli() -> anyhow::Result<()> {
         match context.as_ref() {
             "charm" => cli = Box::new(charm::CharmSubcommand),
             "daemon" => cli = Box::new(daemon::DaemonSubcommand),
-            "client" => unimplemented!(),
+            "client" => cli = Box::new(client::ClientSubcommand),
             other => anyhow::bail!("Unrecognized LUCKY_CONTEXT: {}", other),
         };
 
@@ -137,7 +137,7 @@ pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
             "This is a bug. TODO: Setup Taiga project for reporting errors!!\n"
         ));
 
-        Ok(())
+        std::process::exit(1);
     })
     .expect("Panic while handling panic");
 }
