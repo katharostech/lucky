@@ -247,6 +247,7 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
         }
 
         // Add help message
+        // TODO: Add the "possible values" to the argument help if there are any specified
         arg_buffer.push_str(
             format!(
                 "<td>{}</td></tr>\n",
