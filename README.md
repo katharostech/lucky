@@ -55,6 +55,10 @@ We have a [Homebrew] cask:
 
 ## Bugs, Features, and Questions
 
-If you have any questions, bug reports, feature requests, or anything else that you want to discuss about the project, you can create a [Taiga issue][ti] and we'll see what we can do. You can use your GitHub to log into Taiga and create the issue.
+If you have any bug reports or feature requests you can create a [Taiga issue][ti] and we'll see what we can do to help.
 
+For questions or general discussion there is also a [Lucky category][lc] on the [Juju forum][jf].
+
+[lc]: https://discourse.jujucharms.com/c/related-software/lucky
+[jf]: https://discourse.jujucharms.com
 [ti]: https://tree.taiga.io/project/zicklag-lucky/issues
