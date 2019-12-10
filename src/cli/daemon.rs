@@ -72,13 +72,15 @@ pub(crate) fn get_daemon_connection_args<'a>() -> [Arg<'a>; 2] {
 /// `get_daemon_connection_args`.
 pub(crate) fn get_daemon_socket_path(args: &ArgMatches) -> String {
     args.value_of("socket_path").map_or_else(
-        || format!(
-            "/run/lucky_{}.sock",
-            args.value_of("unit_name")
-                .expect("Missing required argument: unit_name")
-                .replace("/", "_")
-        ),
-        ToString::to_string
+        || {
+            format!(
+                "/run/lucky_{}.sock",
+                args.value_of("unit_name")
+                    .expect("Missing required argument: unit_name")
+                    .replace("/", "_")
+            )
+        },
+        ToString::to_string,
     )
 }
 

@@ -301,6 +301,7 @@ fn show_pager_help(mut w: &mut impl Write, events: &mut SyncReader) -> anyhow::R
                     view.scroll = 0;
                 }
                 // TODO: find be a better way to scroll to end of page
+                // https://github.com/Canop/termimad/issues/10
                 End | Char('G') => {
                     view.try_scroll_pages(90000);
                 }
