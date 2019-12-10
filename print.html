@@ -259,7 +259,7 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-l</code>, <code>--use-local-lucky</code></td><td></td><td>Build charm with the local copy of lucky embedded. This means that the charm will not attempt to download lucky when it starts and that the charm will only run on the platform and architecture that the charm was built with. This is mostly useful during development.
+<tr><td></td><code>-l</code>, <code>--use-local-lucky</code><td></td><td>Build charm with the local copy of lucky embedded. This means that the charm will not attempt to download lucky when it starts and that the charm will only run on the platform and architecture that the charm was built with. This is mostly useful during development.
 <p>If this is not specified, an automated build of lucky for the architecture that the charm is deployed to will be automatically downloaded when the charm is installed.</td></tr></p>
 </tbody>
 </table>
@@ -267,7 +267,7 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-b</code>, <code>--build-dir</code><code>&lt;build_dir&gt;</code></td><td></td><td>The directory to put the built charm in. Defaults to the <code>build</code> directory in the charm dir. The built charm will be in <code>build_dir/charm_name</code>.</td></tr>
+<tr><td><code>&lt;build_dir&gt;</code></td><code>-b</code>, <code>--build-dir</code><td></td><td>The directory to put the built charm in. Defaults to the <code>build</code> directory in the charm dir. The built charm will be in <code>build_dir/charm_name</code>.</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#positionals" id="positionals">Positionals</a></h3>
@@ -284,17 +284,17 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-D</code>, <code>--use-defaults</code></td><td></td><td>Do not prompt and use default values for unprovided fields</td></tr>
+<tr><td></td><code>-D</code>, <code>--use-defaults</code><td></td><td>Do not prompt and use default values for unprovided fields</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#options-1" id="options-1">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-n</code>, <code>--name</code><code>&lt;charm_name&gt;</code></td><td></td><td>The name of the charm. Defaults to the target_dir</td></tr>
-<tr><td><code>-d</code>, <code>--display-name</code><code>&lt;display_name&gt;</code></td><td></td><td>The display name of the charm ( may contain spaces )</td></tr>
-<tr><td><code>-s</code>, <code>--summary</code><code>&lt;charm_summary&gt;</code></td><td></td><td>Short description of the charm</td></tr>
-<tr><td><code>-m</code>, <code>--maintainer</code><code>&lt;charm_maintainer&gt;</code></td><td></td><td>The charm maintainer</td></tr>
+<tr><td><code>&lt;charm_name&gt;</code></td><code>-n</code>, <code>--name</code><td></td><td>The name of the charm. Defaults to the target_dir</td></tr>
+<tr><td><code>&lt;display_name&gt;</code></td><code>-d</code>, <code>--display-name</code><td></td><td>The display name of the charm ( may contain spaces )</td></tr>
+<tr><td><code>&lt;charm_summary&gt;</code></td><code>-s</code>, <code>--summary</code><td></td><td>Short description of the charm</td></tr>
+<tr><td><code>&lt;charm_maintainer&gt;</code></td><code>-m</code>, <code>--maintainer</code><td></td><td>The charm maintainer</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#positionals-1" id="positionals-1">Positionals</a></h3>
@@ -321,17 +321,17 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-i</code>, <code>--ignore-already-running</code></td><td></td><td>Don't complain if the daemon is already running</td></tr>
-<tr><td><code>-F</code>, <code>--foreground</code></td><td></td><td>Run in the foreground</td></tr>
+<tr><td></td><code>-i</code>, <code>--ignore-already-running</code><td></td><td>Don't complain if the daemon is already running</td></tr>
+<tr><td></td><code>-F</code>, <code>--foreground</code><td></td><td>Run in the foreground</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#options-2" id="options-2">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-S</code>, <code>--state-dir</code><code>&lt;state_dir&gt;</code></td><td><code>LUCKY_STATE_DIR</code></td><td>The directory to store the unit state in. If this is left unspecified the state directory will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the state dir will be <code>/var/lib/lucky/mysql_2_state</code></td></tr>
-<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
-<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
+<tr><td><code>&lt;state_dir&gt;</code></td><code>-S</code>, <code>--state-dir</code><td><code>LUCKY_STATE_DIR</code></td><td>The directory to store the unit state in. If this is left unspecified the state directory will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the state dir will be <code>/var/lib/lucky/mysql_2_state</code></td></tr>
+<tr><td><code>&lt;unit_name&gt;</code></td><code>-u</code>, <code>--unit-name</code><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
+<tr><td><code>&lt;socket_path&gt;</code></td><code>-s</code>, <code>--socket-path</code><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
 </tbody>
 </table>
 <h1><a class="header" href="#stop" id="stop">stop</a></h1>
@@ -341,15 +341,15 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-i</code>, <code>--ignore-already-stopped</code></td><td></td><td>Don't complain if the daemon is already stopped</td></tr>
+<tr><td></td><code>-i</code>, <code>--ignore-already-stopped</code><td></td><td>Don't complain if the daemon is already stopped</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#options-3" id="options-3">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
-<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
+<tr><td><code>&lt;unit_name&gt;</code></td><code>-u</code>, <code>--unit-name</code><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
+<tr><td><code>&lt;socket_path&gt;</code></td><code>-s</code>, <code>--socket-path</code><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
 </tbody>
 </table>
 <h1><a class="header" href="#trigger-hook" id="trigger-hook">trigger-hook</a></h1>
@@ -359,15 +359,15 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-L</code>, <code>--get-logs</code></td><td></td><td>Print the logs of the hook as it is running. Even if the logs are not printed here, the standard out and error of the hook will be logged to Juju and can be viewed with <code>juju debug-log</code>.</td></tr>
+<tr><td></td><code>-L</code>, <code>--get-logs</code><td></td><td>Print the logs of the hook as it is running. Even if the logs are not printed here, the standard out and error of the hook will be logged to Juju and can be viewed with <code>juju debug-log</code>.</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#options-4" id="options-4">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
-<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
+<tr><td><code>&lt;unit_name&gt;</code></td><code>-u</code>, <code>--unit-name</code><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
+<tr><td><code>&lt;socket_path&gt;</code></td><code>-s</code>, <code>--socket-path</code><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#positionals-2" id="positionals-2">Positionals</a></h3>
@@ -391,9 +391,9 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-I</code>, <code>--script-id</code><code>&lt;script_id&gt;</code></td><td><code>LUCKY_SCRIPT_ID</code></td><td>The ID of the script that is being run. Allows each script to have a status independent of the other scripts in the charm.</td></tr>
-<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
-<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
+<tr><td><code>&lt;script_id&gt;</code></td><code>-I</code>, <code>--script-id</code><td><code>LUCKY_SCRIPT_ID</code></td><td>The ID of the script that is being run. Allows each script to have a status independent of the other scripts in the charm.</td></tr>
+<tr><td><code>&lt;unit_name&gt;</code></td><code>-u</code>, <code>--unit-name</code><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
+<tr><td><code>&lt;socket_path&gt;</code></td><code>-s</code>, <code>--socket-path</code><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#positionals-3" id="positionals-3">Positionals</a></h3>
