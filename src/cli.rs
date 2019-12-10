@@ -1,5 +1,4 @@
 //! Commandline interface module
-
 use clap::{App, ArgMatches};
 
 mod types;

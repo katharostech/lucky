@@ -139,7 +139,7 @@ fn recurse_gen_cli_doc<'a>(
 
     let subcommands = command.get_subcommands();
     // If there are subcommands
-    if subcommands.len() != 0 {
+    if !subcommands.is_empty() {
         // Create subdirectory for subcommands
         let subdir = outpath.join(cli.name);
         std::fs::create_dir_all(&subdir)?;
@@ -164,7 +164,7 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
             "## Usage\n\n`{usage}`\n\n",
             usage = app // Here we have to parse out the `USAGE:\n` from `generate_usage()`
                 .generate_usage()
-                .split("\n")
+                .split('\n')
                 .nth(1)
                 .expect("Error parsing command usage")
                 .trim()
@@ -205,7 +205,7 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
         }
 
         // If there are flags
-        if flags.len() != 0 {
+        if !flags.is_empty() {
             // Add comma separated flags
             arg_buffer.push_str(flags.join(", ").as_str());
 
@@ -221,7 +221,7 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
                         format!(
                             "<code>&lt;{}&gt;</code>",
                             x.values()
-                                .map(|&x| x)
+                                .copied()
                                 .collect::<Vec<&str>>()
                                 .join("&gt; &lt;")
                         )
@@ -252,7 +252,7 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
             format!(
                 "<td>{}{}</td></tr>\n",
                 MD_INLINE_CODE.replace_all(
-                    arg.long_help.unwrap_or(arg.help.unwrap_or("")),
+                    arg.long_help.unwrap_or_else(|| arg.help.unwrap_or("")),
                     "<code>$text</code>"
                 ),
                 if let Some(vals) = &arg.possible_vals {
@@ -300,7 +300,7 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
 
     let subcommands = command.get_subcommands();
     // If this command has subcommands
-    if subcommands.len() != 0 {
+    if !subcommands.is_empty() {
         // Add subcommands header
         command_help.push_str("### Subcommands\n\n");
 
@@ -312,7 +312,7 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
                     "- [{name}](./{parent}/{name}.md): {help}\n",
                     name = subcommand.get_name(),
                     parent = app.name,
-                    help = sub_app.long_about.unwrap_or(sub_app.about.unwrap_or(""))
+                    help = sub_app.long_about.unwrap_or_else(|| sub_app.about.unwrap_or(""))
                 )
                 .as_str(),
             );
