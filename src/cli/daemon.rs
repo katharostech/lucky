@@ -71,15 +71,15 @@ pub(crate) fn get_daemon_connection_args<'a>() -> [Arg<'a>; 2] {
 /// Get the effective socket path from the daemon connection args provided by
 /// `get_daemon_connection_args`.
 pub(crate) fn get_daemon_socket_path(args: &ArgMatches) -> String {
-    match args.value_of("socket_path") {
-        Some(path) => path.to_string(),
-        None => format!(
+    args.value_of("socket_path").map_or_else(
+        || format!(
             "/run/lucky_{}.sock",
             args.value_of("unit_name")
                 .expect("Missing required argument: unit_name")
                 .replace("/", "_")
         ),
-    }
+        ToString::to_string
+    )
 }
 
 /// Test connection to daemon

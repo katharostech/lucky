@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -82,6 +83,7 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
         None
     }
 
+    #[allow(clippy::too_many_lines)]
     fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()> {
         // Make sure target directory doesn't already exist
         let target_dir = Path::new(
@@ -120,13 +122,28 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
             template_settings.charm_maintainer = String::from(value);
         }
 
+        // User skipped prompts and opt-ed for default values
+        if args.is_present("use_defaults") {
+            if !args.is_present("display_name") {
+                template_settings.charm_display_name = target_dir
+                    .file_name()
+                    .map_or(target_dir.to_string_lossy(), OsStr::to_string_lossy)
+                    .to_string();
+            }
+            if !args.is_present("charm_name") {
+                template_settings.charm_name = template_settings
+                    .charm_display_name
+                    .replace(" ", "_")
+                    .to_lowercase();
+            }
+
         // If the defaults flag is not provided
-        if !args.is_present("use_defaults") {
+        } else {
             // Prompt for missing display name
             if !args.is_present("display_name") {
                 let default = target_dir
                     .file_name()
-                    .map_or(target_dir.to_string_lossy(), |x| x.to_string_lossy());
+                    .map_or(target_dir.to_string_lossy(), OsStr::to_string_lossy);
                 let response = prompt_reply_stdout(&format!("Display name [{}]: ", default))
                     .context("Could not prompt for display name")?;
                 let value = if response.trim() == "" {
@@ -177,21 +194,6 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
                     response
                 };
                 template_settings.charm_maintainer = value;
-            }
-
-        // User skipped prompts and opt-ed for default values
-        } else {
-            if !args.is_present("display_name") {
-                template_settings.charm_display_name = target_dir
-                    .file_name()
-                    .map_or(target_dir.to_string_lossy(), |x| x.to_string_lossy())
-                    .to_string();
-            }
-            if !args.is_present("charm_name") {
-                template_settings.charm_name = template_settings
-                    .charm_display_name
-                    .replace(" ", "_")
-                    .to_lowercase();
             }
         }
 

@@ -176,25 +176,24 @@ fn log_juju(message: &str, debug: bool) {
     cmd.arg(&message);
 
     if let Err(e) = cmd.spawn() {
-        match e.kind() {
-            // Ignore it if juju-log isn't in the path
-            std::io::ErrorKind::NotFound => (),
-            // Otherwise print a warning that we couldn't log
-            _ => {
-                writeln!(
-                    std::io::stderr(),
-                    "[WARN]: Could not log to juju-log: {}",
-                    e
-                )
-                .ok();
-            }
+        // Ignore it if juju-log isn't in the path
+        if let std::io::ErrorKind::NotFound = e.kind() {
+        }
+        // Otherwise print a warning that we couldn't log
+        else {
+            writeln!(
+                std::io::stderr(),
+                "[WARN]: Could not log to juju-log: {}",
+                e
+            )
+            .ok();
         }
     }
 }
 
 static LUCKY_LOGGER: LuckyLogger = LuckyLogger;
 
-/// Initialize the logger and set the max log level from the LUCKY_LOG_LEVEL environment variable
+/// Initialize the logger and set the max log level from the `LUCKY_LOG_LEVEL` environment variable
 pub(crate) fn init_logger() {
     match log::set_logger(&LUCKY_LOGGER) {
         Ok(()) => {

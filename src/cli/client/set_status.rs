@@ -56,7 +56,7 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
             .expect("Missing required argument: state");
         let status = ScriptStatus {
             state: state.parse()?,
-            message: args.value_of("message").map(|x| x.to_owned()),
+            message: args.value_of("message").map(ToOwned::to_owned),
         };
         let script_id = args
             .value_of("script_id")

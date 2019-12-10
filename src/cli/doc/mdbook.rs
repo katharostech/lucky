@@ -153,6 +153,7 @@ fn recurse_gen_cli_doc<'a>(
     Ok(())
 }
 
+#[allow(clippy::too_many_lines)]
 // Get the app usage markdown
 fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
     let mut app = command.get_cli();
@@ -204,38 +205,34 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
             flags.push(format!("<code>--{}</code>", long));
         }
 
-        // If there are flags
-        if !flags.is_empty() {
-            // Add comma separated flags
-            arg_buffer.push_str(flags.join(", ").as_str());
+        // If there are no flags
+        if flags.is_empty() {
+            // Add this positional argument
+            arg_type = ArgType::Positional;
+            arg_buffer.push_str(format!("<code>&lt;{}&gt;</code></td>", arg.name).as_str());
 
+        // If there are flags
+        } else {
             // If the arg has a value
             if arg.is_set(ArgSettings::TakesValue) {
                 // The arg is an option
                 arg_type = ArgType::Opt;
                 // Add value names if present
-                let value_names = arg
-                    .val_names
-                    .as_ref()
-                    .map(|x| {
+                let value_names = arg.val_names.as_ref().map_or_else(
+                    || format!("<code>&lt;{}&gt;</code>", arg.name),
+                    |x| {
                         format!(
                             "<code>&lt;{}&gt;</code>",
-                            x.values()
-                                .copied()
-                                .collect::<Vec<&str>>()
-                                .join("&gt; &lt;")
+                            x.values().copied().collect::<Vec<&str>>().join("&gt; &lt;")
                         )
-                    })
-                    .unwrap_or_else(|| format!("<code>&lt;{}&gt;</code>", arg.name));
+                    },
+                );
                 arg_buffer.push_str(&value_names);
             }
             arg_buffer.push_str("</td>");
 
-        // If there are no flags
-        } else {
-            // Add this positional argument
-            arg_type = ArgType::Positional;
-            arg_buffer.push_str(format!("<code>&lt;{}&gt;</code></td>", arg.name).as_str());
+            // Add comma separated flags
+            arg_buffer.push_str(flags.join(", ").as_str());
         }
 
         // Add the environment variable if any
@@ -312,7 +309,9 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
                     "- [{name}](./{parent}/{name}.md): {help}\n",
                     name = subcommand.get_name(),
                     parent = app.name,
-                    help = sub_app.long_about.unwrap_or_else(|| sub_app.about.unwrap_or(""))
+                    help = sub_app
+                        .long_about
+                        .unwrap_or_else(|| sub_app.about.unwrap_or(""))
                 )
                 .as_str(),
             );

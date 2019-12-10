@@ -78,15 +78,15 @@ impl<'a> CliCommand<'a> for StartSubcommand {
         }
 
         // Get the state dir
-        let state_dir = args
-            .value_of("state_dir")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| {
+        let state_dir = args.value_of("state_dir").map_or_else(
+            || {
                 PathBuf::from(format!(
                     "/var/lib/lucky/{}_state",
                     unit_name.replace("/", "_")
                 ))
-            });
+            },
+            PathBuf::from,
+        );
 
         // If we are running in the forground
         if args.is_present("foreground") {

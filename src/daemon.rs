@@ -51,7 +51,7 @@ struct LuckyDaemon {
 impl LuckyDaemon {
     /// Create a new daemon instance
     ///
-    /// stop_listening will be set to `true` by the daemon if it recieves a StopDaemon RPC. The
+    /// `stop_listening` will be set to `true` by the daemon if it recieves a `StopDaemon` RPC. The
     /// actual stopping of the server itself is not handled by the daemon.
     fn new(
         lucky_metadata: LuckyMetadata,
@@ -191,6 +191,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 // Helpers
 //
 
+#[allow(clippy::needless_pass_by_value)]
 /// Convenience for handling errors in Results
 fn log_error(e: anyhow::Error) {
     log::error!("{:?}", e);

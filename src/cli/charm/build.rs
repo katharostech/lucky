@@ -56,6 +56,7 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
         None
     }
 
+    #[allow(clippy::too_many_lines)]
     fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()> {
         // Get charm dir
         let charm_path = Path::new(
@@ -147,7 +148,12 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
         }
 
         // Copy in Lucky binary
-        if !args.is_present("use_local_lucky") {
+        if args.is_present("use_local_lucky") {
+            // Copy in the Lucky executable
+            let lucky_path = bin_dir.join("lucky");
+            let executable_path = std::env::current_exe()?;
+            fs::copy(&executable_path, &lucky_path)?;
+        } else {
             // We will require the -l flag until our first release
             anyhow::bail!(concat!(
                 "Currently the --use-local-lucky or -l flag is required to build a charm. Once we ",
@@ -155,11 +161,6 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
                 "required version from GitHub so that it can run on whatever architecture the charm ",
                 "is deployed to"
             ));
-        } else {
-            // Copy in the Lucky executable
-            let lucky_path = bin_dir.join("lucky");
-            let executable_path = std::env::current_exe()?;
-            fs::copy(&executable_path, &lucky_path)?;
         }
 
         // Create stop hook

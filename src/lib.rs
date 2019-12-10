@@ -2,8 +2,12 @@
 //!
 //! Lucky is a charm writing framework for [Juju](https://jaas.ai).
 
+// Set compiler warning settings
 #![warn(missing_docs)]
 #![warn(future_incompatible)]
+#![warn(clippy::pedantic)]
+#![allow(clippy::default_trait_access)]
+#![allow(clippy::use_self)]
 
 use git_version::git_version;
 // TODO: Not working right with drone to use the tag as the version

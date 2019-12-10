@@ -1,3 +1,5 @@
+#![allow(clippy::enum_glob_use)]
+
 use crate::cli::CliError;
 use anyhow::Context;
 use crossterm::{
@@ -38,6 +40,7 @@ lazy_static! {
     };
 }
 
+#[allow(clippy::too_many_lines)]
 /// Show the commandline pager with documentation for the given command
 pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result<()> {
     // Hide the help, doc, and version flags in the command help message.
@@ -56,7 +59,7 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
     let mut scrolled_positions: HashMap<String, i32> = HashMap::new();
     let mut config_file: Option<std::fs::File> = None;
     // Only keep track of scrolled positions for commands with documentation
-    if let Some(_) = &cli_doc {
+    if cli_doc.is_some() {
         if let Some(config_dir) = dirs::config_dir() {
             // Open config file
             let mut config_path = config_dir;
@@ -84,7 +87,7 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
             // Set config file for use later
             config_file = Some(file);
         }
-    } // if let Some(cli_doc)
+    } // if cli_doc.is_some()
 
     // Switch to the Pager Screen
     queue!(w, EnterAlternateScreen)?;

@@ -54,7 +54,7 @@ pub(crate) struct RelationDef {
     pub interface: String,
 }
 
-/// See Juju Docs: https://discourse.jujucharms.com/t/writing-charms-that-use-storage/1128
+/// See [Juju Docs](https://discourse.jujucharms.com/t/writing-charms-that-use-storage/1128)
 #[derive(Deserialize, Debug)]
 pub(crate) struct StorageDef {
     #[serde(rename = "type")]
