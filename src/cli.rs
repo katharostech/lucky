@@ -123,7 +123,7 @@ pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
                     }
                 }
             } else {
-                log::error!("{:?}", e);
+                log::error!("\n{:?}", e);
                 std::process::exit(1);
             }
         }
@@ -132,8 +132,9 @@ pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
     // colored backtrace.
     .or_else(|_| -> Result<(), ()> {
         log::error!(concat!(
-            "The program has encountered a critical internal error and will now exit.\n",
-            "This is a bug. TODO: Setup Taiga project for reporting errors!!\n"
+            "The program has encountered a critical internal error and will now exit. ",
+            "This is a bug. Please report it on our issue tracker:\n\n",
+            "    https://tree.taiga.io/project/zicklag-lucky/issues"
         ));
 
         std::process::exit(1);
