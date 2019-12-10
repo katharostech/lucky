@@ -256,7 +256,10 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
                     "<code>$text</code>"
                 ),
                 if let Some(vals) = &arg.possible_vals {
-                    format!(" [ possible values: <code>{}</code> ]", vals.join("</code>, <code>"))
+                    format!(
+                        " [ possible values: <code>{}</code> ]",
+                        vals.join("</code>, <code>")
+                    )
                 } else {
                     "".to_owned()
                 }

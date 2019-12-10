@@ -268,6 +268,12 @@ impl rpc::VarlinkInterface for LuckyDaemon {
     ) -> varlink::Result<()> {
         log::info!("Triggering hook: {}", hook_name);
 
+        // Set the Juju context id during script execution
+        if let Some(context) = environment.get("JUJU_CONTEXT_ID") {
+            std::env::set_var("JUJU_CONTEXT_ID", context);
+        }
+
+        // Run hook scripts
         let mut exit_code = 0;
         if let Some(hook_scripts) = self.lucky_metadata.hooks.get(&hook_name) {
             for hook_script in hook_scripts {
@@ -301,6 +307,9 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             // Just reply without doing anything
             call.reply(None, None)?;
         }
+
+        // Unset the Juju context as it will be invalid after the hook exits
+        std::env::remove_var("JUJU_CONTEXT_ID");
 
         Ok(())
     }

@@ -160,22 +160,17 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             let lucky_path = bin_dir.join("lucky");
             let executable_path = std::env::current_exe()?;
             fs::copy(&executable_path, &lucky_path)?;
-
-            // Create install hook
-            let install_hook_path = hook_dir.join("install");
-            write_file(&install_hook_path, include_str!("build/install-hook.sh"))?;
-            set_file_mode(&install_hook_path, 0o755)?;
-
-            // Create stop hook
-            let stop_hook_path = hook_dir.join("stop");
-            write_file(&stop_hook_path, include_str!("build/stop-hook.sh"))?;
-            set_file_mode(&stop_hook_path, 0o755)?;
         }
 
+        // Create stop hook
+        let stop_hook_path = hook_dir.join("stop");
+        write_file(&stop_hook_path, include_str!("build/stop-hook.sh"))?;
+        set_file_mode(&stop_hook_path, 0o755)?;
+
         // Create normal Juju hooks ( those not specific to a relation or storage )
-        for hook in JUJU_NORMAL_HOOKS {
-            // Skip the install and stop hooks because we have already created them
-            if hook == &"install" || hook == &"stop" {
+        for &hook in JUJU_NORMAL_HOOKS {
+            // Skip the stop hooks because we have already created them
+            if hook == "stop" {
                 continue;
             }
             let new_hook_path = hook_dir.join(hook);
