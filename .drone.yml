@@ -116,6 +116,7 @@ steps:
       API_KEY:
         from_secret: chocolatey_api_key
     commands:
+      - cd chocolatey
       - choco push --api-key "$${API_KEY}" --source https://push.chocolatey.org/
     when:
       ref:
