@@ -123,7 +123,7 @@ pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
                     }
                 }
             } else {
-                log::error!("\n{:?}", e);
+                log::error!("{:?}", e);
                 std::process::exit(1);
             }
         }

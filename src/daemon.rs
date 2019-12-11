@@ -101,6 +101,17 @@ impl Drop for LuckyDaemon {
 }
 
 impl rpc::VarlinkInterface for LuckyDaemon {
+    /// Stop the Lucky daemon
+    fn stop_daemon(&self, call: &mut dyn rpc::Call_StopDaemon) -> varlink::Result<()> {
+        log::info!("Shutting down server");
+        // Set the stop_listening=true.
+        self.stop_listening.store(true, Ordering::SeqCst);
+
+        // Reply and exit
+        call.reply()?;
+        Ok(())
+    }
+
     /// Trigger a Juju hook
     fn trigger_hook(
         &self,
@@ -153,17 +164,6 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // Unset the Juju context as it will be invalid after the hook exits
         std::env::remove_var("JUJU_CONTEXT_ID");
 
-        Ok(())
-    }
-
-    /// Stop the Lucky daemon
-    fn stop_daemon(&self, call: &mut dyn rpc::Call_StopDaemon) -> varlink::Result<()> {
-        log::info!("Shutting down server");
-        // Set the stop_listening=true.
-        self.stop_listening.store(true, Ordering::SeqCst);
-
-        // Reply and exit
-        call.reply()?;
         Ok(())
     }
 
