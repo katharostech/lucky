@@ -57,7 +57,7 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
     }
 
     #[allow(clippy::too_many_lines)]
-    fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()> {
+    fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
         // Get charm dir
         let charm_path = Path::new(
             args.value_of("charm_dir")
@@ -233,7 +233,7 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             }
         }
 
-        Ok(())
+        Ok(data)
     }
 }
 

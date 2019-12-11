@@ -84,7 +84,7 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
     }
 
     #[allow(clippy::too_many_lines)]
-    fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()> {
+    fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
         // Make sure target directory doesn't already exist
         let target_dir = Path::new(
             args.value_of("target_dir")
@@ -279,6 +279,6 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
             }
         }
 
-        Ok(())
+        Ok(data)
     }
 }

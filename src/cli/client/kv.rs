@@ -2,15 +2,16 @@ use clap::{App, Arg, ArgMatches};
 
 use std::collections::HashMap;
 
+use crate::cli::daemon::get_daemon_client;
+use crate::cli::daemon::{get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::*;
-use crate::daemon::rpc::{VarlinkClient, VarlinkClientInterface};
-use crate::types::{ScriptState, ScriptStatus};
+use crate::daemon::rpc::VarlinkClientInterface;
 
-pub(crate) struct SetStatusSubcommand;
+pub(crate) struct KvSubcommand;
 
-impl<'a> CliCommand<'a> for SetStatusSubcommand {
+impl<'a> CliCommand<'a> for KvSubcommand {
     fn get_name(&self) -> &'static str {
-        "set-status"
+        "kv"
     }
 
     #[rustfmt::skip]
@@ -35,6 +36,7 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
             .arg(Arg::with_name("message")
                 .help("An optional message to provide with the state")
                 .required(false))
+            .args(&get_daemon_connection_args())
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -45,7 +47,9 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
         None
     }
 
-    fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
+    fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()> {
+        let socket_path = get_daemon_socket_path(args);
+
         let state = args
             .value_of("state")
             .expect("Missing required argument: state");
@@ -57,23 +61,26 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
             .value_of("script_id")
             .expect("Missing required argument: script_id");
 
-        let mut client: Box<VarlinkClient> = data
-            .remove("client")
-            .expect("Missing client data")
-            .downcast()
-            .expect("Invalid type");
+        // Connect to lucky daemon
+        let mut client = get_daemon_client(&socket_path)?;
 
-        let environment: Box<HashMap<String, String>> = data
-            .remove("environment")
-            .expect("Missing environment data")
-            .downcast()
-            .expect("Invalid type");
+        let mut environment = HashMap::<String, String>::new();
+        for &var in &[
+            "JUJU_RELATION",
+            "JUJU_RELATION_ID",
+            "JUJU_REMOTE_UNIT",
+            "JUJU_CONTEXT_ID",
+        ] {
+            if let Ok(value) = std::env::var(var) {
+                environment.insert(var.into(), value);
+            }
+        }
 
         // Set script status
         client
-            .set_status(script_id.into(), status.into(), *environment)
+            .set_status(script_id.into(), status.into(), environment)
             .call()?;
 
-        Ok(data)
+        Ok(())
     }
 }

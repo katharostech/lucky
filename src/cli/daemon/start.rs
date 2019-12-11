@@ -59,7 +59,7 @@ impl<'a> CliCommand<'a> for StartSubcommand {
         None
     }
 
-    fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()> {
+    fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
         let unit_name = args
             .value_of("unit_name")
             .expect("Missing required arg: unit_name");
@@ -189,6 +189,6 @@ impl<'a> CliCommand<'a> for StartSubcommand {
                 })?;
         }
 
-        Ok(())
+        Ok(data)
     }
 }

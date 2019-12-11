@@ -30,7 +30,7 @@ impl<'a> CliCommand<'a> for CharmSubcommand {
         })
     }
 
-    fn execute_command(&self, _args: &ArgMatches) -> anyhow::Result<()> {
-        Ok(())
+    fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
+        Ok(data)
     }
 }

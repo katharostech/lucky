@@ -19,7 +19,14 @@ use crate::types::{HookScript, LuckyMetadata, ScriptState, ScriptStatus};
 pub(crate) mod lucky_rpc;
 pub(crate) use lucky_rpc as rpc;
 
+/// Daemon tools
 mod tools;
+
+#[allow(clippy::needless_pass_by_value)]
+/// Convenience for handling errors in Results
+fn log_error(e: anyhow::Error) {
+    log::error!("{:?}", e);
+}
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 /// Contains the daemon state, which can be serialize and deserialized for persistance across
@@ -44,7 +51,7 @@ struct LuckyDaemon {
     /// This will be set to true to indicate that the server should stop.
     stop_listening: Arc<AtomicBool>,
     /// The daemon state. This will be serialized and written to disc for persistance when the
-    /// daemon crashes or is shutdown.
+    /// daemon crashes or is shutdown.  
     state: Arc<RwLock<DaemonState>>,
 }
 
@@ -185,17 +192,41 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         call.reply()?;
         Ok(())
     }
+
+    /// Get a value in the unit local key-value store
+    fn unit_kv_get(&self, call: &mut dyn rpc::Call_UnitKvGet, key: String) -> varlink::Result<()> {
+        // Get with key
+        let state = self.state.read().unwrap();
+        let value = state.kv.get(&key);
+
+        // Reply with value
+        call.reply(value.map_or(String::new(), Clone::clone))?;
+
+        Ok(())
+    }
+
+    /// Set a value in the unit local key-value store
+    fn unit_kv_set(
+        &self,
+        call: &mut dyn rpc::Call_UnitKvSet,
+        key: String,
+        value: String,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Set key to value
+        state.kv.insert(key, value);
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
 }
 
 //
-// Helpers
+// Client Helpers
 //
-
-#[allow(clippy::needless_pass_by_value)]
-/// Convenience for handling errors in Results
-fn log_error(e: anyhow::Error) {
-    log::error!("{:?}", e);
-}
 
 /// Get the server service
 pub(crate) fn get_service(

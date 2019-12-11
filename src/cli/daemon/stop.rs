@@ -33,7 +33,7 @@ impl<'a> CliCommand<'a> for StopSubcommand {
         None
     }
 
-    fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()> {
+    fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
         let socket_path = get_daemon_socket_path(args);
 
         // Connect to lucky daemon
@@ -58,6 +58,6 @@ impl<'a> CliCommand<'a> for StopSubcommand {
 
         log::info!("Shutdown server");
 
-        Ok(())
+        Ok(data)
     }
 }

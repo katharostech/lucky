@@ -7,9 +7,6 @@ interface lucky.rpc
 # General catch-all error type
 error Error(message: string)
 
-# Returned when the given hook doesn't exist
-error HookDoesNotExist()
-
 # Trigger a Juju hook
 # 
 # If this hook is called with --more it will return once for each line of output from the hook
@@ -30,3 +27,9 @@ type ScriptStatus (
 
 # Sets a script's status
 method SetStatus(script_id: string, status: ScriptStatus, environment: [string]string) -> ()
+
+# Get a value in the Unit's local Key-Value store
+method UnitKvGet(key: string) -> (value: string)
+
+# Set a value in the Unit's local Key-Value store
+method UnitKvSet(key: string, value: string) -> ()

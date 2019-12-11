@@ -2,6 +2,9 @@ use anyhow::Context;
 use clap::{App, AppSettings, Arg, ArgMatches};
 use thiserror::Error;
 
+use std::any::Any;
+use std::collections::HashMap;
+
 use crate::cli::doc::cmdln_pager::show_doc_page;
 
 #[derive(Error, Debug)]
@@ -11,6 +14,8 @@ pub(crate) enum CliError {
     /// Indicates that the process should exit with the given code
     Exit(i32),
 }
+
+pub(crate) type CliData = HashMap<String, Box<dyn Any>>;
 
 /// Trait for Lucky commands and subcommands
 ///
@@ -28,9 +33,12 @@ pub(crate) trait CliCommand<'a>: CliCommandExt<'a> {
     /// This should return the markdown template for the command's documentation.
     fn get_doc(&self) -> Option<CliDoc>;
     /// This should run any code that should be executed when the command is executed. If this
-    /// command has subcommands, then, most often, this will not need to do anything. The
-    /// selected subcommand will be automatically run by the `run()` function if one is selected.
-    fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()>;
+    /// command has subcommands, the selected subcommand will run with the output of this function
+    /// being passed to the subcommands `execute_command`.
+    ///
+    /// The `data` value is meant to allow subcommands to recieve data from their parent commands
+    /// and the return value is to allow parent commands to pass the data to the subcommand.
+    fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData>;
 }
 
 /// Extension trait to the `CliCommand` trait
@@ -40,8 +48,8 @@ pub(crate) trait CliCommand<'a>: CliCommandExt<'a> {
 pub(crate) trait CliCommandExt<'a> {
     /// Return the clap app for this command
     fn get_cli(&self) -> App<'a>;
-    /// Run the command
-    fn run(&self, args: &ArgMatches) -> anyhow::Result<()>;
+    /// Run the command arbitrary data can be passed in the `data` argument
+    fn run(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<()>;
     /// Creates a clap app with our default settings. This should be used by implementors to
     /// create a base app when implementing `get_command()`.
     fn get_base_app(&self) -> App<'a>;
@@ -58,20 +66,20 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
         cmd
     }
 
-    fn run(&self, args: &ArgMatches) -> anyhow::Result<()> {
+    fn run(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<()> {
         // Check for the --doc flag and show the doc page if present
         if args.is_present("doc") {
             show_doc_page(self).context("Could not show doc page")?;
         }
 
         // Run the command
-        self.execute_command(args)?;
+        let out_data = self.execute_command(args, data)?;
 
         // Run the selected subcommand if any
         if let (subcmd_name, Some(args)) = args.subcommand() {
             for subcommand in self.get_subcommands() {
                 if subcommand.get_name() == subcmd_name {
-                    return subcommand.run(args);
+                    return subcommand.run(args, out_data);
                 }
             }
         }
@@ -106,8 +114,6 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
                 })
                 .long("doc")
                 .short('H'))
-                // TODO: Put help in the pager instead
-                //.long_help(include_str!("doc/long_help.txt")))
     }
 }
 

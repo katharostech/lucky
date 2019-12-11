@@ -38,7 +38,7 @@ fn run_cli() -> anyhow::Result<()> {
     // Run the CLI
     let cmd = cli.get_cli();
     let args = cmd.get_matches();
-    cli.run(&args)?;
+    cli.run(&args, Default::default())?;
 
     Ok(())
 }
@@ -71,8 +71,8 @@ impl<'a> CliCommand<'a> for LuckyCli {
         })
     }
 
-    fn execute_command(&self, _args: &ArgMatches) -> anyhow::Result<()> {
-        Ok(())
+    fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
+        Ok(data)
     }
 }
 
