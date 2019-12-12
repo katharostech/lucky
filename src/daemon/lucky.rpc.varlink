@@ -6,6 +6,8 @@ interface lucky.rpc
 
 # General catch-all error type
 error Error(message: string)
+# Returned when a method must be called with `more`
+error RequiresMore()
 # Error returned when a hook fails while calling `TriggerHook` 
 error HookFailed(message: string)
 
@@ -27,10 +29,14 @@ type ScriptStatus (
 )
 
 # Sets a script's status
-method SetStatus(script_id: string, status: ScriptStatus, environment: [string]string) -> ()
+method SetStatus(script_id: string, status: ScriptStatus) -> ()
 
-# Get a value in the Unit's local Key-Value store
-method UnitKvGet(key: string) -> (value: string)
+# Get a value in the Unit's local Key-Value store. Value will be null if the key is not set.
+method UnitKvGet(key: string) -> (value: ?string)
 
-# Set a value in the Unit's local Key-Value store
-method UnitKvSet(key: string, value: string) -> ()
+# Get all of the key-value pairs that have been set. Must be called with --more or it will return
+# a `RequiresMore` error.
+method UnitKvGetAll() -> (key: string, value: string)
+
+# Set a value in the Unit's local Key-Value store. Setting `value` to null will erase the value.
+method UnitKvSet(key: string, value: ?string) -> ()

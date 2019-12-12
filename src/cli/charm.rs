@@ -5,7 +5,7 @@ mod create;
 
 use crate::cli::*;
 
-pub(crate) struct CharmSubcommand;
+pub(super) struct CharmSubcommand;
 
 impl<'a> CliCommand<'a> for CharmSubcommand {
     fn get_name(&self) -> &'static str {

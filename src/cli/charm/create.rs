@@ -35,7 +35,7 @@ impl Default for TemplateData {
 
 use crate::cli::*;
 
-pub(crate) struct CreateSubcommand;
+pub(super) struct CreateSubcommand;
 
 impl<'a> CliCommand<'a> for CreateSubcommand {
     fn get_name(&self) -> &'static str {

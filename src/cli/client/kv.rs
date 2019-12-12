@@ -1,13 +1,11 @@
 use clap::{App, Arg, ArgMatches};
 
-use std::collections::HashMap;
+use std::io::Write;
 
-use crate::cli::daemon::get_daemon_client;
-use crate::cli::daemon::{get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::*;
-use crate::daemon::rpc::VarlinkClientInterface;
+use crate::daemon::rpc::{VarlinkClient, VarlinkClientInterface};
 
-pub(crate) struct KvSubcommand;
+pub(super) struct KvSubcommand;
 
 impl<'a> CliCommand<'a> for KvSubcommand {
     fn get_name(&self) -> &'static str {
@@ -17,26 +15,36 @@ impl<'a> CliCommand<'a> for KvSubcommand {
     #[rustfmt::skip]
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
-            .about("Set the status of the current script")
-            .arg(Arg::with_name("script_id")
-                .long("script-id")
-                .short('I')
-                .help("The ID of the script that is being run")
-                .long_help(concat!(
-                    "The ID of the script that is being run. Allows each script to have a status ",
-                    "independent of the other scripts in the charm."
-                ))
-                .env("LUCKY_SCRIPT_ID")
-                .required_unless("doc"))
-            .arg(Arg::with_name("state")
-                .required_unless("doc")
-                .help("The enumerated state of the service")
-                .possible_values(&ScriptState::variants())
-                .case_insensitive(true))
-            .arg(Arg::with_name("message")
-                .help("An optional message to provide with the state")
-                .required(false))
-            .args(&get_daemon_connection_args())
+            .about("Get and set values in the unit key-value store")
+    }
+
+    fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
+        vec![Box::new(GetSubcommand), Box::new(SetSubcommand), Box::new(DeleteSubcommand)]
+    }
+
+    fn get_doc(&self) -> Option<CliDoc> {
+        None
+    }
+
+    fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
+        Ok(data)
+    }
+}
+
+struct GetSubcommand;
+
+impl<'a> CliCommand<'a> for GetSubcommand {
+    fn get_name(&self) -> &'static str {
+        "get"
+    }
+
+    #[rustfmt::skip]
+    fn get_app(&self) -> App<'a> {
+        self.get_base_app()
+            .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
+            .about("Get a value")
+            .arg(Arg::with_name("key")
+                .help("The key to get from the store"))
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -47,40 +55,130 @@ impl<'a> CliCommand<'a> for KvSubcommand {
         None
     }
 
-    fn execute_command(&self, args: &ArgMatches) -> anyhow::Result<()> {
-        let socket_path = get_daemon_socket_path(args);
+    fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
+        let key = args
+            .value_of("key");
+        
+        // Get client data
+        let mut client: Box<VarlinkClient> = data
+            .remove("client")
+            .expect("Missing client data")
+            .downcast()
+            .expect("Invalid type");
 
-        let state = args
-            .value_of("state")
-            .expect("Missing required argument: state");
-        let status = ScriptStatus {
-            state: state.parse()?,
-            message: args.value_of("message").map(ToOwned::to_owned),
-        };
-        let script_id = args
-            .value_of("script_id")
-            .expect("Missing required argument: script_id");
+        // If a specific key was given
+        if let Some(key) = key {
+            // Print out the requested value
+            let response = client
+                .unit_kv_get(key.into())
+                .call()?;
 
-        // Connect to lucky daemon
-        let mut client = get_daemon_client(&socket_path)?;
+            writeln!(std::io::stdout(), "{}", response.value.unwrap_or_else(|| "".into()))?;
 
-        let mut environment = HashMap::<String, String>::new();
-        for &var in &[
-            "JUJU_RELATION",
-            "JUJU_RELATION_ID",
-            "JUJU_REMOTE_UNIT",
-            "JUJU_CONTEXT_ID",
-        ] {
-            if let Ok(value) = std::env::var(var) {
-                environment.insert(var.into(), value);
+        // If no key was given
+        } else {
+            // Return all of the key-value pairs
+            for response in client.unit_kv_get_all().more()? {
+                let response = response?;
+
+                writeln!(std::io::stdout(), "{}={}", response.key, response.value)?;
             }
         }
 
+        Ok(data)
+    }
+}
+
+struct SetSubcommand;
+
+impl<'a> CliCommand<'a> for SetSubcommand {
+    fn get_name(&self) -> &'static str {
+        "set"
+    }
+
+    #[rustfmt::skip]
+    fn get_app(&self) -> App<'a> {
+        self.get_base_app()
+            .about("Set a value")
+            .arg(Arg::with_name("key")
+                .help("The key to set in the store")
+                .required_unless("doc"))
+            .arg(Arg::with_name("value")
+                .help(r#"The value to set "key" to"#)
+                .required_unless("doc"))
+    }
+
+    fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
+        vec![]
+    }
+
+    fn get_doc(&self) -> Option<CliDoc> {
+        None
+    }
+
+    fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
+        let key = args
+            .value_of("key")
+            .expect("Missing required argument: key");
+        let value = args.value_of("value");
+        
+        // Get client data
+        let mut client: Box<VarlinkClient> = data
+            .remove("client")
+            .expect("Missing client data")
+            .downcast()
+            .expect("Invalid type");
+
         // Set script status
         client
-            .set_status(script_id.into(), status.into(), environment)
+            .unit_kv_set(key.into(), value.map(ToOwned::to_owned))
             .call()?;
 
-        Ok(())
+        Ok(data)
+    }
+}
+
+struct DeleteSubcommand;
+
+impl<'a> CliCommand<'a> for DeleteSubcommand {
+    fn get_name(&self) -> &'static str {
+        "delete"
+    }
+
+    #[rustfmt::skip]
+    fn get_app(&self) -> App<'a> {
+        self.get_base_app()
+            .about("Delete a value")
+            .arg(Arg::with_name("key")
+                .help("The key to delete from the store")
+                .required_unless("doc"))
+    }
+
+    fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
+        vec![]
+    }
+
+    fn get_doc(&self) -> Option<CliDoc> {
+        None
+    }
+
+    fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
+        let key = args
+            .value_of("key")
+            .expect("Missing required argument: key");
+        
+        // Get client data
+        let mut client: Box<VarlinkClient> = data
+            .remove("client")
+            .expect("Missing client data")
+            .downcast()
+            .expect("Invalid type");
+
+        // Set script status
+        client
+            .unit_kv_set(key.into(), None)
+            .call()?;
+
+        Ok(data)
     }
 }

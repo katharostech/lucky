@@ -14,8 +14,7 @@ pub(crate) use types::*;
 ///
 /// Returns the command output
 pub(crate) fn set_status(
-    status: ScriptStatus,
-    environment: Option<&HashMap<String, String>>,
+    status: ScriptStatus
 ) -> anyhow::Result<()> {
     run_command(
         "status-set",
@@ -23,7 +22,7 @@ pub(crate) fn set_status(
             status.state.as_ref(),
             &status.message.unwrap_or_else(|| "".into()),
         ],
-        environment,
+        None,
     )?;
 
     Ok(())

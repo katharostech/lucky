@@ -2,14 +2,16 @@ use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 use walkdir::WalkDir;
 
-use std::str::FromStr;
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
-use std::collections::HashMap;
+use std::str::FromStr;
 
 use crate::cli::*;
 use crate::config::load_yaml;
-use crate::juju::{CharmMetadata, RelationDef, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS};
+use crate::juju::{
+    CharmMetadata, RelationDef, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS,
+};
 
 pub(super) struct BuildSubcommand;
 

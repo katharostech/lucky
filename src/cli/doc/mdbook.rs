@@ -220,7 +220,7 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
             if arg.is_set(ArgSettings::TakesValue) {
                 // The arg is an option
                 arg_type = ArgType::Opt;
-                
+
                 // Add value names if present
                 let value_names = arg.val_names.as_ref().map_or_else(
                     || format!("<code>&lt;{}&gt;</code>", arg.name),

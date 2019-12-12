@@ -19,3 +19,7 @@
     - [trigger-hook](./cli/lucky/daemon/trigger-hook.md)
   - [client](./cli/lucky/client.md)
     - [set-status](./cli/lucky/client/set-status.md)
+    - [kv](./cli/lucky/client/kv.md)
+      - [get](./cli/lucky/client/kv/get.md)
+      - [set](./cli/lucky/client/kv/set.md)
+      - [delete](./cli/lucky/client/kv/delete.md)

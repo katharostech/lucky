@@ -5,7 +5,7 @@ use crate::cli::daemon::{get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::*;
 use crate::daemon::{self, rpc::VarlinkClientInterface};
 
-pub(crate) struct StopSubcommand;
+pub(super) struct StopSubcommand;
 
 impl<'a> CliCommand<'a> for StopSubcommand {
     fn get_name(&self) -> &'static str {

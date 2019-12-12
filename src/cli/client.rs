@@ -2,13 +2,15 @@ use clap::{App, ArgMatches};
 
 use std::collections::HashMap;
 
+// Subcommands
+mod kv;
 mod set_status;
 
 use crate::cli::daemon::get_daemon_client;
 use crate::cli::daemon::{get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::*;
 
-pub(crate) struct ClientSubcommand;
+pub(super) struct ClientSubcommand;
 
 impl<'a> CliCommand<'a> for ClientSubcommand {
     fn get_name(&self) -> &'static str {
@@ -18,11 +20,16 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Communicate with the Lucky daemon in charm scripts")
+            // TODO: FIXME: Causes issue where client subcommands --doc flag will not work because
+            // of required `unit_name` arg.
             .args(&get_daemon_connection_args())
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
-        vec![Box::new(set_status::SetStatusSubcommand)]
+        vec![
+            Box::new(set_status::SetStatusSubcommand),
+            Box::new(kv::KvSubcommand),
+        ]
     }
 
     fn get_doc(&self) -> Option<CliDoc> {

@@ -83,7 +83,7 @@ impl LuckyDaemon {
         });
 
         // Update the Juju status
-        crate::juju::set_status(tools::get_juju_status(&daemon), None).unwrap_or_else(|e| {
+        crate::juju::set_status(tools::get_juju_status(&daemon)).unwrap_or_else(|e| {
             log::warn!("{:?}", e.context("Could not set juju status"));
         });
 
@@ -135,7 +135,8 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     HookScript::HostScript(script_name) => {
                         let code = tools::run_host_script(self, call, script_name, &environment)?;
                         if code != 0 {
-                            let message = format!(r#"Script "{}" exited non-zero ({})"#, script_name, code);
+                            let message =
+                                format!(r#"Script "{}" exited non-zero ({})"#, script_name, code);
                             log::error!("{}", message);
                             hook_result = Err(message);
                             break;
@@ -149,7 +150,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
             // Update the Juju status as Juju will clear it if we don't re-set it after hook
             // execution
-            crate::juju::set_status(tools::get_juju_status(&self), Some(&environment))
+            crate::juju::set_status(tools::get_juju_status(&self))
                 .or_else(|e| call.reply_error(e.to_string()))?;
 
             // If there was an error executing hook scripts
@@ -165,7 +166,8 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // If the hook is not handled by the charm
         } else {
             // Update the Juju status
-            crate::juju::set_status(tools::get_juju_status(&self), Some(&environment))
+
+            crate::juju::set_status(tools::get_juju_status(&self))
                 .or_else(|e| call.reply_error(e.to_string()))?;
 
             // Just reply without doing anything ( setting exit code to 0 )
@@ -183,8 +185,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         &self,
         call: &mut dyn rpc::Call_SetStatus,
         script_id: String,
-        status: rpc::ScriptStatus,
-        environment: HashMap<String, String>,
+        status: rpc::ScriptStatus
     ) -> varlink::Result<()> {
         // Add status to script statuses
         let status: ScriptStatus = status.into();
@@ -196,7 +197,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             .insert(script_id, status);
 
         // Set the Juju status to the consolidated script statuses
-        crate::juju::set_status(tools::get_juju_status(&self), Some(&environment))
+        crate::juju::set_status(tools::get_juju_status(&self))
             .or_else(|e| call.reply_error(e.to_string()))?;
 
         // Reply
@@ -211,7 +212,31 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         let value = state.kv.get(&key);
 
         // Reply with value
-        call.reply(value.map_or(String::new(), Clone::clone))?;
+        call.reply(value.map(Clone::clone))?;
+
+        Ok(())
+    }
+
+    fn unit_kv_get_all(&self, call: &mut dyn rpc::Call_UnitKvGetAll) -> varlink::Result<()> {
+        // This call must be called with more
+        if !call.wants_more() {
+            call.reply_requires_more()?;
+            return Ok(());
+        }
+
+        // Loop through key-value pairs and return result to client
+        let state = self.state.read().unwrap();
+        let pairs: Vec<(&String, &String)> = state.kv.iter().collect();
+        call.set_continues(true);
+        let mut i = 0;
+        let len = pairs.len();
+        while i < len {
+            if i == len - 1 {
+                call.set_continues(false);
+            }
+            call.reply(pairs[i].0.clone(), pairs[i].1.clone())?;
+            i += 1;
+        }
 
         Ok(())
     }
@@ -221,12 +246,18 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         &self,
         call: &mut dyn rpc::Call_UnitKvSet,
         key: String,
-        value: String,
+        value: Option<String>,
     ) -> varlink::Result<()> {
         let mut state = self.state.write().unwrap();
 
-        // Set key to value
-        state.kv.insert(key, value);
+        // If a value has been provided
+        if let Some(value) = value {
+            // Set key to value
+            state.kv.insert(key, value);
+        } else {
+            // Erase key
+            state.kv.remove(&key);
+        }
 
         // Reply empty
         call.reply()?;

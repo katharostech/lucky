@@ -6,7 +6,7 @@ use crate::cli::daemon::{get_daemon_client, get_daemon_connection_args, get_daem
 use crate::cli::*;
 use crate::daemon::rpc::VarlinkClientInterface;
 
-pub(crate) struct TriggerHookSubcommand;
+pub(super) struct TriggerHookSubcommand;
 
 impl<'a> CliCommand<'a> for TriggerHookSubcommand {
     fn get_name(&self) -> &'static str {

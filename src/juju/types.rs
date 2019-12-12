@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// The list of the normal Juju hook names
@@ -28,17 +28,17 @@ pub(crate) const JUJU_RELATION_HOOKS: &[&str] = &[
 pub(crate) const JUJU_STORAGE_HOOKS: &[&str] = &["{}-storage-attached", "{}-storage-detaching"];
 
 /// The charm metadata as defined in a charm's `metadata.yaml` file
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct CharmMetadata {
     pub name: String,
     pub summary: Option<String>,
-    #[serde(rename = "display-name")]
     pub display_name: Option<String>,
     pub description: Option<String>,
     pub maintainer: Option<String>,
     pub maintainers: Option<Vec<String>>,
     pub tags: Option<Vec<String>>,
-    pub series: Option<String>,
+    pub series: Option<Vec<String>>,
     pub subordinate: Option<bool>,
     pub terms: Option<Vec<String>>,
     pub provides: Option<HashMap<String, RelationDef>>,
@@ -49,35 +49,33 @@ pub(crate) struct CharmMetadata {
 }
 
 /// The definition of a relation in the `metadata.yaml` file
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct RelationDef {
     pub interface: String,
 }
 
 /// See [Juju Docs](https://discourse.jujucharms.com/t/writing-charms-that-use-storage/1128)
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct StorageDef {
     #[serde(rename = "type")]
     pub storage_type: StorageType,
     pub description: Option<String>,
     pub shared: Option<bool>,
-    #[serde(rename = "read-only")]
     pub read_only: Option<bool>,
-    #[serde(rename = "minimum-size")]
     pub minimum_size: Option<String>,
     pub location: Option<String>,
     pub multiple: Option<StorageMultiple>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) enum StorageType {
-    #[serde(rename = "filesystem")]
     Filesystem,
-    #[serde(rename = "block")]
     Block,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct StorageMultiple {
     pub range: String,
 }

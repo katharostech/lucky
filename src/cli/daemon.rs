@@ -8,7 +8,7 @@ mod trigger_hook;
 use crate::cli::*;
 use std::sync::{Arc, RwLock};
 
-pub(crate) struct DaemonSubcommand;
+pub(super) struct DaemonSubcommand;
 
 impl<'a> CliCommand<'a> for DaemonSubcommand {
     fn get_name(&self) -> &'static str {

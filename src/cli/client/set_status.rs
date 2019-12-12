@@ -1,12 +1,10 @@
 use clap::{App, Arg, ArgMatches};
 
-use std::collections::HashMap;
-
 use crate::cli::*;
 use crate::daemon::rpc::{VarlinkClient, VarlinkClientInterface};
 use crate::types::{ScriptState, ScriptStatus};
 
-pub(crate) struct SetStatusSubcommand;
+pub(super) struct SetStatusSubcommand;
 
 impl<'a> CliCommand<'a> for SetStatusSubcommand {
     fn get_name(&self) -> &'static str {
@@ -57,21 +55,16 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
             .value_of("script_id")
             .expect("Missing required argument: script_id");
 
+        // Get client data
         let mut client: Box<VarlinkClient> = data
             .remove("client")
             .expect("Missing client data")
             .downcast()
             .expect("Invalid type");
 
-        let environment: Box<HashMap<String, String>> = data
-            .remove("environment")
-            .expect("Missing environment data")
-            .downcast()
-            .expect("Invalid type");
-
         // Set script status
         client
-            .set_status(script_id.into(), status.into(), *environment)
+            .set_status(script_id.into(), status.into())
             .call()?;
 
         Ok(data)

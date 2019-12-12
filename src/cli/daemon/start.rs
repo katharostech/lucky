@@ -16,7 +16,7 @@ use crate::cli::daemon::{
 use crate::cli::*;
 use crate::config;
 
-pub(crate) struct StartSubcommand;
+pub(super) struct StartSubcommand;
 
 impl<'a> CliCommand<'a> for StartSubcommand {
     fn get_name(&self) -> &'static str {
