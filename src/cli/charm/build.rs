@@ -1,16 +1,17 @@
-use std::fs;
-use std::path::Path;
-
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 use walkdir::WalkDir;
 
+use std::str::FromStr;
+use std::fs;
+use std::path::Path;
+use std::collections::HashMap;
+
 use crate::cli::*;
 use crate::config::load_yaml;
-use crate::juju::{CharmMetadata, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS};
-use crate::types::LuckyMetadata;
+use crate::juju::{CharmMetadata, RelationDef, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS};
 
-pub(crate) struct BuildSubcommand;
+pub(super) struct BuildSubcommand;
 
 impl<'a> CliCommand<'a> for BuildSubcommand {
     fn get_name(&self) -> &'static str {
@@ -73,9 +74,7 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
         create_dir_all(&build_dir)?;
 
         // Load charm metadata
-        let charm_metadata: CharmMetadata = load_yaml(&charm_path, "metadata")?;
-        // Make sure there is a valid lucky.yaml file
-        load_yaml::<LuckyMetadata>(&charm_path, "lucky")?;
+        let mut charm_metadata: CharmMetadata = load_yaml(&charm_path, "metadata")?;
         // Get charm name
         let charm_name = &charm_metadata.name;
         // Get build target dir
@@ -92,7 +91,6 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
         // Copy charm contents to build directory
         let build_dir_canonical = build_dir.canonicalize()?;
         for entry in WalkDir::new(charm_path).into_iter().filter_entry(|e| {
-            // Don't include any files in the build dir
             let entry_path = if let Ok(path) = e.path().canonicalize() {
                 path
             } else {
@@ -100,7 +98,10 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
                 // https://github.com/BurntSushi/walkdir/issues/131
                 return false;
             };
-            entry_path != build_dir_canonical
+            // Skip paths in the build dir
+            entry_path != build_dir_canonical &&
+            // Skip the metadata.yml file because we will be adding it with modifications
+            !e.path().ends_with("metadata.yaml")
         }) {
             let entry = entry?;
             let relative_path = entry
@@ -134,6 +135,22 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
                 }
             }
         }
+
+        // Add extra `lucky-data` relation to charm metadata
+        let lucky_data_relation = RelationDef {
+            interface: "lucky-data".into(),
+        };
+        if let Some(peers) = &mut charm_metadata.peers {
+            peers.insert("lucky-data".into(), lucky_data_relation);
+        } else {
+            let mut peers = HashMap::new();
+            peers.insert("lucky-data".into(), lucky_data_relation);
+            charm_metadata.peers = Some(peers);
+        }
+        let empty_fields = regex::Regex::from_str(r".*: ~\n?").expect("Could not compile regex");
+        let file_content = &serde_yaml::to_string(&charm_metadata)?;
+        let file_content = empty_fields.replace_all(file_content, "");
+        write_file(&target_dir.join("metadata.yaml"), &file_content)?;
 
         // Create bin dir
         let bin_dir = target_dir.join("bin");
