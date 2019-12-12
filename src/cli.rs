@@ -35,9 +35,15 @@ fn run_cli() -> anyhow::Result<()> {
         cli = Box::new(LuckyCli);
     }
 
-    // Run the CLI
+    // Show doc page if applicable
+    let args: Vec<String> = std::env::args().collect();
+    let mut args_iter = args.iter();
+    args_iter.next(); // Skip first arg, which is the binary name
+    cli.handle_doc_flags(args_iter)?;
+
+    // Run CLI
     let cmd = cli.get_cli();
-    let args = cmd.get_matches();
+    let args = cmd.get_matches_from(&args);
     cli.run(&args, Default::default())?;
 
     Ok(())

@@ -50,6 +50,8 @@ pub(crate) trait CliCommandExt<'a> {
     fn get_cli(&self) -> App<'a>;
     /// Run the command arbitrary data can be passed in the `data` argument
     fn run(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<()>;
+    /// Check for the `--doc` or `-H` flag and show docs if present
+    fn handle_doc_flags(&self, args: std::slice::Iter<String>) -> anyhow::Result<()>;
     /// Creates a clap app with our default settings. This should be used by implementors to
     /// create a base app when implementing `get_command()`.
     fn get_base_app(&self) -> App<'a>;
@@ -67,11 +69,6 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
     }
 
     fn run(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<()> {
-        // Check for the --doc flag and show the doc page if present
-        if args.is_present("doc") {
-            show_doc_page(self).context("Could not show doc page")?;
-        }
-
         // Run the command
         let out_data = self.execute_command(args, data)?;
 
@@ -82,6 +79,39 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
                     return subcommand.run(args, out_data);
                 }
             }
+        }
+
+        Ok(())
+    }
+
+    fn handle_doc_flags(&self, mut args: std::slice::Iter<String>) -> anyhow::Result<()> {
+        // If there is another arg, capture it
+        let next_arg = if let Some(arg) = args.next() {
+            arg
+        
+        // If there are no more args, exit without doing anything
+        } else {
+            return Ok(());
+        };
+        
+        // If the arg is a help flag
+        if next_arg == "--doc" || next_arg == "-H" {
+            // show the help
+            show_doc_page(self).context("Could not show doc page")?;
+        
+        // If the arg isn't a help flag
+        } else {
+            // See if it matches a subcommand
+            for subcmd in self.get_subcommands() {
+                if next_arg == subcmd.get_name() {
+                    // Handle doc flags for that subcommand
+                    subcmd.handle_doc_flags(args)?;
+                    return Ok(())
+                }
+            }
+
+            // If none of the subcommands matched, return Ok
+            return Ok(())
         }
 
         Ok(())
