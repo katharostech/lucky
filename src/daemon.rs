@@ -127,14 +127,18 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Run hook scripts
-        let mut exit_code = 0;
+        let mut hook_result: Result<(), String> = Ok(());
         if let Some(hook_scripts) = self.lucky_metadata.hooks.get(&hook_name) {
+            // Execute all scripts registered for this hook
             for hook_script in hook_scripts {
                 match hook_script {
                     HookScript::HostScript(script_name) => {
                         let code = tools::run_host_script(self, call, script_name, &environment)?;
                         if code != 0 {
-                            exit_code = 1;
+                            let message = format!(r#"Script "{}" exited non-zero ({})"#, script_name, code);
+                            log::error!("{}", message);
+                            hook_result = Err(message);
+                            break;
                         }
                     }
                     HookScript::ContainerScript(_script_name) => {
@@ -148,8 +152,15 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             crate::juju::set_status(tools::get_juju_status(&self), Some(&environment))
                 .or_else(|e| call.reply_error(e.to_string()))?;
 
-            call.set_continues(false);
-            call.reply(Some(exit_code), None)?;
+            // If there was an error executing hook scripts
+            if let Err(message) = hook_result {
+                // Reply with hook error
+                call.reply_hook_failed(message)?;
+            } else {
+                // Finish reply
+                call.set_continues(false);
+                call.reply(None)?;
+            }
 
         // If the hook is not handled by the charm
         } else {
@@ -157,8 +168,8 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             crate::juju::set_status(tools::get_juju_status(&self), Some(&environment))
                 .or_else(|e| call.reply_error(e.to_string()))?;
 
-            // Just reply without doing anything
-            call.reply(None, None)?;
+            // Just reply without doing anything ( setting exit code to 0 )
+            call.reply(None)?;
         }
 
         // Unset the Juju context as it will be invalid after the hook exits

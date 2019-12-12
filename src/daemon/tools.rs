@@ -163,7 +163,7 @@ pub(super) fn run_host_script(
 
         // Send caller output if they asked for it
         if call.wants_more() {
-            call.reply(None, Some(line))?;
+            call.reply(Some(line))?;
         }
     }
 

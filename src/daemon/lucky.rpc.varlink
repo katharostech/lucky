@@ -6,15 +6,16 @@ interface lucky.rpc
 
 # General catch-all error type
 error Error(message: string)
+# Error returned when a hook fails while calling `TriggerHook` 
+error HookFailed(message: string)
 
 # Trigger a Juju hook
 # 
-# If this hook is called with --more it will return once for each line of output from the hook
-# execution with exit code being null until last response when the hook is done executing. If the
-# hook is not called with --more, it will return only once and with output=null and exit_code equal
-# to the exit code of the hook.
+# If this hook is called with --more it will return once for each line of output from the hook.
+#
+# If hook execution failed this will throw a `HookFailed` error
 method TriggerHook(hook_name: String, environment: [string]string)
-    -> (exit_code: ?int, output: ?string)
+    -> (output: ?string)
 
 # Stops the deamon service
 method StopDaemon() -> ()

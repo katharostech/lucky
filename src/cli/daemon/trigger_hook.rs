@@ -66,44 +66,24 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
 
         log::info!(r#"Triggering hook "{}""#, &hook_name);
 
-        let mut exit_code = 1; // This value will be overwritten with the actual exit code
-
         // If the caller wants the hook logs
         if args.is_present("get_logs") {
             // Trigger the hook and stream the logs
             for response in client.trigger_hook(hook_name.clone(), environment).more()? {
+                // TODO: Add prettier error handling.
+                // related: https://github.com/varlink/rust/issues/31
                 let response = response?;
 
                 // Log output
                 if let Some(output) = response.output {
                     log::info!("output: {}", output);
                 }
-
-                // Capture exit code
-                if let Some(code) = response.exit_code {
-                    exit_code = code;
-                    break;
-                }
             }
 
         // If we don't care about the logs
         } else {
             // Just trigger the hook and exit
-            let response = client.trigger_hook(hook_name.clone(), environment).call()?;
-            if let Some(code) = response.exit_code {
-                exit_code = code;
-            } else {
-                panic!("Hook should not exit without exit code");
-            }
-        }
-
-        // If the hook exited non-zero
-        if exit_code != 0 {
-            // Exit with that exit code
-            anyhow::bail!(format!(
-                r#"Non-zero exit code ({}) while running hook "{}"."#,
-                exit_code, hook_name
-            ));
+            client.trigger_hook(hook_name.clone(), environment).call()?;
         }
 
         log::info!(r#"Done running hook "{}""#, &hook_name);
