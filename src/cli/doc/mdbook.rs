@@ -213,10 +213,14 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
 
         // If there are flags
         } else {
+            // Add comma separated flags
+            arg_buffer.push_str(flags.join(", ").as_str());
+
             // If the arg has a value
             if arg.is_set(ArgSettings::TakesValue) {
                 // The arg is an option
                 arg_type = ArgType::Opt;
+                
                 // Add value names if present
                 let value_names = arg.val_names.as_ref().map_or_else(
                     || format!("<code>&lt;{}&gt;</code>", arg.name),
@@ -230,9 +234,6 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
                 arg_buffer.push_str(&value_names);
             }
             arg_buffer.push_str("</td>");
-
-            // Add comma separated flags
-            arg_buffer.push_str(flags.join(", ").as_str());
         }
 
         // Add the environment variable if any
