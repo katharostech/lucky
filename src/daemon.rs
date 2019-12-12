@@ -1,4 +1,4 @@
-//! Contains the Lucky RPC implementaiton used for client->daemon communication.
+//! Contains the Lucky Daemon and RPC implementaiton used for client->daemon communication.
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 

@@ -1,8 +1,11 @@
+//! Contains utilities for loading configuration
+
 use anyhow::{anyhow, Context};
 
 use std::fs;
 use std::path::{Path, PathBuf};
 
+/// Gets the charm directory path
 pub(crate) fn get_charm_dir() -> anyhow::Result<PathBuf> {
     match std::env::var("JUJU_CHARM_DIR") {
         Ok(charm_dir) => {

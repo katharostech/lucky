@@ -1,3 +1,5 @@
+//! Contains the lucky logging implementation
+
 use crossterm::style::{style, Color};
 use log::{Level, LevelFilter, Metadata, Record};
 

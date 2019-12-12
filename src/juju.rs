@@ -1,4 +1,4 @@
-//! Module contains functions used to interact with Juju through the hook environment
+//! Contains functions used to interact with Juju through the hook environment
 //! tools. Also contains Juju specific types such as the Juju metadata.yaml struct.
 use anyhow::Context;
 use subprocess::{Exec, ExitStatus, Redirection};
