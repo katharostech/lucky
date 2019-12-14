@@ -4,11 +4,10 @@ use crate::cli::CliError;
 use anyhow::Context;
 use crossterm::{
     cursor::{Hide, MoveTo, Show},
-    input::{input, InputEvent::*, KeyEvent::*, SyncReader},
+    event::{self, Event, KeyEvent, KeyCode::*},
     queue,
-    screen::{EnterAlternateScreen, LeaveAlternateScreen, RawScreen},
     style::{style, Attribute::*, Color::*, ResetColor, SetBackgroundColor, SetForegroundColor},
-    terminal::{size, Clear, ClearType::All},
+    terminal::{self, size, Clear, ClearType::All, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use lazy_static::lazy_static;
 use minimad::TextTemplate;
@@ -91,16 +90,14 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
 
     // Switch to the Pager Screen
     queue!(w, EnterAlternateScreen)?;
-    let _raw = RawScreen::into_raw_mode()?;
+    terminal::enable_raw_mode()?;
     queue!(w, Hide)?;
 
     // // Keep track of changes to scroll, screensize, and first view
     let mut scroll = 0;
-    let mut screen_size = size()?;
     let mut first_view = true;
 
     // Listen for events and redraw screen
-    let mut events = input().read_sync();
     loop {
         // Reload CLI in case the screen size changed and help message needs re-printing
         let mut cli = command
@@ -146,12 +143,6 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
         // Prepare and write to scroll area
         let mut area = Area::full_screen();
 
-        // Clear the screen if screen was resized
-        if screen_size != (area.width, area.height) {
-            queue!(w, Clear(All))?;
-            screen_size = (area.width, area.height);
-        }
-
         // Pad text area and give room for help bar at bottom
         area.pad(1, 1);
         area.height -= 1;
@@ -185,35 +176,39 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
         w.flush()?;
 
         // Respond to keyboard events
-        if let Some(Keyboard(key)) = events.next() {
-            match key {
-                Home | Char('g') => {
-                    view.scroll = 0;
+        match event::read() {
+            Ok(Event::Key(KeyEvent{code, ..})) => {
+                match code {
+                    Home | Char('g') => {
+                        view.scroll = 0;
+                    }
+                    // TODO: find be a better way to scroll to end of page:
+                    // https://github.com/Canop/termimad/issues/10
+                    End | Char('G') => {
+                        view.try_scroll_pages(90000);
+                    }
+                    Up | Char('k') => {
+                        view.try_scroll_lines(-1);
+                    }
+                    Down | Char('j') => {
+                        view.try_scroll_lines(1);
+                    }
+                    PageUp | Backspace => {
+                        view.try_scroll_pages(-1);
+                    }
+                    PageDown | Char(' ') => {
+                        view.try_scroll_pages(1);
+                    }
+                    Char('h') | Char('?') => {
+                        show_pager_help(&mut w)?;
+                        continue;
+                    }
+                    Esc | Enter | Char('q') => break,
+                    _ => (),
                 }
-                // TODO: find be a better way to scroll to end of page:
-                // https://github.com/Canop/termimad/issues/10
-                End | Char('G') => {
-                    view.try_scroll_pages(90000);
-                }
-                Up | Char('k') => {
-                    view.try_scroll_lines(-1);
-                }
-                Down | Char('j') => {
-                    view.try_scroll_lines(1);
-                }
-                PageUp | Backspace => {
-                    view.try_scroll_pages(-1);
-                }
-                PageDown | Char(' ') => {
-                    view.try_scroll_pages(1);
-                }
-                Char('h') | Char('?') => {
-                    show_pager_help(&mut w, &mut events)?;
-                    continue;
-                }
-                Esc | Enter | Char('q') => break,
-                _ => (),
-            }
+            },
+            Ok(Event::Resize(_, _)) => queue!(w, Clear(All))?,
+            _ => (),
         }
 
         // Update our tracked scroll position
@@ -270,7 +265,7 @@ fn print_raw_doc(w: &mut impl Write, cli_doc: Option<CliDoc>) -> anyhow::Result<
 }
 
 /// Show the pager controls help page
-fn show_pager_help(mut w: &mut impl Write, events: &mut SyncReader) -> anyhow::Result<()> {
+fn show_pager_help(mut w: &mut impl Write) -> anyhow::Result<()> {
     // Clear screen
     queue!(w, Clear(All))?;
 
@@ -295,33 +290,37 @@ fn show_pager_help(mut w: &mut impl Write, events: &mut SyncReader) -> anyhow::R
         view.write_on(&mut w)?;
         w.flush()?;
 
-        if let Some(Keyboard(key)) = events.next() {
-            match key {
-                Home | Char('g') => {
-                    view.scroll = 0;
+        match event::read() {
+            Ok(Event::Key(KeyEvent{code, ..})) => {
+                match code {
+                    Home | Char('g') => {
+                        view.scroll = 0;
+                    }
+                    // TODO: find be a better way to scroll to end of page
+                    // https://github.com/Canop/termimad/issues/10
+                    End | Char('G') => {
+                        view.try_scroll_pages(90000);
+                    }
+                    Up | Char('k') => {
+                        view.try_scroll_lines(-1);
+                    }
+                    Down | Char('j') => {
+                        view.try_scroll_lines(1);
+                    }
+                    PageUp | Backspace => {
+                        view.try_scroll_pages(-1);
+                    }
+                    PageDown | Char(' ') => {
+                        view.try_scroll_pages(1);
+                    }
+                    Esc | Enter | Char('q') => break,
+                    _ => (),
                 }
-                // TODO: find be a better way to scroll to end of page
-                // https://github.com/Canop/termimad/issues/10
-                End | Char('G') => {
-                    view.try_scroll_pages(90000);
-                }
-                Up | Char('k') => {
-                    view.try_scroll_lines(-1);
-                }
-                Down | Char('j') => {
-                    view.try_scroll_lines(1);
-                }
-                PageUp | Backspace => {
-                    view.try_scroll_pages(-1);
-                }
-                PageDown | Char(' ') => {
-                    view.try_scroll_pages(1);
-                }
-                Esc | Enter | Char('q') => break,
-                _ => (),
-            }
 
-            scroll = view.scroll;
+                scroll = view.scroll;
+            },
+            Ok(Event::Resize(_, _)) => queue!(w, Clear(All))?,
+            _ => (),
         }
     }
 
