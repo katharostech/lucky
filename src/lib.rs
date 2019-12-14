@@ -16,6 +16,7 @@ const GIT_VERSION: &str = git_version!();
 pub mod cli;
 pub(crate) mod config;
 pub(crate) mod daemon;
+pub(crate) mod docker;
 pub(crate) mod juju;
 pub(crate) mod log;
 pub(crate) mod types;

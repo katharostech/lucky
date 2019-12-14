@@ -88,17 +88,17 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
         // If there is another arg, capture it
         let next_arg = if let Some(arg) = args.next() {
             arg
-        
+
         // If there are no more args, exit without doing anything
         } else {
             return Ok(());
         };
-        
+
         // If the arg is a help flag
         if next_arg == "--doc" || next_arg == "-H" {
             // show the help
             show_doc_page(self).context("Could not show doc page")?;
-        
+
         // If the arg isn't a help flag
         } else {
             // See if it matches a subcommand
@@ -106,12 +106,12 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
                 if next_arg == subcmd.get_name() {
                     // Handle doc flags for that subcommand
                     subcmd.handle_doc_flags(args)?;
-                    return Ok(())
+                    return Ok(());
                 }
             }
 
             // If none of the subcommands matched, return Ok
-            return Ok(())
+            return Ok(());
         }
 
         Ok(())

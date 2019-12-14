@@ -63,9 +63,7 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
             .expect("Invalid type");
 
         // Set script status
-        client
-            .set_status(script_id.into(), status.into())
-            .call()?;
+        client.set_status(script_id.into(), status.into()).call()?;
 
         Ok(data)
     }

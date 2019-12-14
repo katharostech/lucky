@@ -107,16 +107,30 @@ impl Into<RpcScriptStatus> for ScriptStatus {
 //
 
 #[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
 /// The struct definition for the `lucky.yaml` file
 pub(crate) struct LuckyMetadata {
+    #[serde(default = "default_true")]
+    /// Specifies whether or not to install Docker on the host and enable Docker-based features
+    pub use_docker: bool,
     pub hooks: HashMap<String, Vec<HookScript>>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "kebab-case")]
 /// A hook script in the `lucky.yaml` definition
 pub(crate) enum HookScript {
     #[serde(rename = "host-script")]
     HostScript(String),
     #[serde(rename = "container-script")]
     ContainerScript(String),
+}
+
+//
+// Helpers
+//
+
+fn default_true() -> bool {
+    true
 }

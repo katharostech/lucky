@@ -21,6 +21,8 @@ pub(crate) use lucky_rpc as rpc;
 
 /// Daemon tools
 mod tools;
+// Built-in daemon hook handlers
+mod hook_handlers;
 
 #[allow(clippy::needless_pass_by_value)]
 /// Convenience for handling errors in Results
@@ -75,12 +77,9 @@ impl LuckyDaemon {
         };
 
         // Load daemon state
-        tools::load_state(&daemon).unwrap_or_else(|e| {
-            log::error!(
-                "{:?}",
-                e.context("Could not load daemon state from filesystem")
-            );
-        });
+        tools::load_state(&daemon)
+            .context("Could not load daemon state from filesystem")
+            .unwrap_or_else(log_error);
 
         // Update the Juju status
         crate::juju::set_status(tools::get_juju_status(&daemon)).unwrap_or_else(|e| {
@@ -90,6 +89,20 @@ impl LuckyDaemon {
         log::trace!("Loaded daemon state: {:#?}", daemon.state.read().unwrap());
 
         daemon
+    }
+
+    fn _set_status(&self, script_id: &str, status: ScriptStatus) -> anyhow::Result<()> {
+        log::info!(r#"Setting status for script "{}": {}"#, script_id, status);
+        self.state
+            .write()
+            .unwrap()
+            .script_statuses
+            .insert(script_id.into(), status);
+
+        // Set the Juju status to the consolidated script statuses
+        crate::juju::set_status(tools::get_juju_status(&self))?;
+
+        Ok(())
     }
 }
 
@@ -120,6 +133,18 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         environment: HashMap<String, String>,
     ) -> varlink::Result<()> {
         log::info!("Triggering hook: {}", hook_name);
+
+        // Run any built-in hook handler
+        if let Err(e) = hook_handlers::handle_hook(&self, &hook_name) {
+            let e = e.context(format!(
+                r#"Error running internal hook handler for hook "{}""#,
+                hook_name
+            ));
+            let message = format!("{:?}", e);
+            log_error(e);
+            call.reply_error(message)?;
+            return Ok(());
+        }
 
         // Set the Juju context id during script execution
         if let Some(context) = environment.get("JUJU_CONTEXT_ID") {
@@ -185,19 +210,12 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         &self,
         call: &mut dyn rpc::Call_SetStatus,
         script_id: String,
-        status: rpc::ScriptStatus
+        status: rpc::ScriptStatus,
     ) -> varlink::Result<()> {
         // Add status to script statuses
         let status: ScriptStatus = status.into();
-        log::info!(r#"Setting status for script "{}": {}"#, script_id, status);
-        self.state
-            .write()
-            .unwrap()
-            .script_statuses
-            .insert(script_id, status);
 
-        // Set the Juju status to the consolidated script statuses
-        crate::juju::set_status(tools::get_juju_status(&self))
+        self._set_status(&script_id, status)
             .or_else(|e| call.reply_error(e.to_string()))?;
 
         // Reply

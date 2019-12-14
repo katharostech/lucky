@@ -19,7 +19,11 @@ impl<'a> CliCommand<'a> for KvSubcommand {
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
-        vec![Box::new(GetSubcommand), Box::new(SetSubcommand), Box::new(DeleteSubcommand)]
+        vec![
+            Box::new(GetSubcommand),
+            Box::new(SetSubcommand),
+            Box::new(DeleteSubcommand),
+        ]
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
@@ -56,9 +60,8 @@ impl<'a> CliCommand<'a> for GetSubcommand {
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        let key = args
-            .value_of("key");
-        
+        let key = args.value_of("key");
+
         // Get client data
         let mut client: Box<VarlinkClient> = data
             .remove("client")
@@ -69,11 +72,13 @@ impl<'a> CliCommand<'a> for GetSubcommand {
         // If a specific key was given
         if let Some(key) = key {
             // Print out the requested value
-            let response = client
-                .unit_kv_get(key.into())
-                .call()?;
+            let response = client.unit_kv_get(key.into()).call()?;
 
-            writeln!(std::io::stdout(), "{}", response.value.unwrap_or_else(|| "".into()))?;
+            writeln!(
+                std::io::stdout(),
+                "{}",
+                response.value.unwrap_or_else(|| "".into())
+            )?;
 
         // If no key was given
         } else {
@@ -121,7 +126,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .value_of("key")
             .expect("Missing required argument: key");
         let value = args.value_of("value");
-        
+
         // Get client data
         let mut client: Box<VarlinkClient> = data
             .remove("client")
@@ -166,7 +171,7 @@ impl<'a> CliCommand<'a> for DeleteSubcommand {
         let key = args
             .value_of("key")
             .expect("Missing required argument: key");
-        
+
         // Get client data
         let mut client: Box<VarlinkClient> = data
             .remove("client")
@@ -175,9 +180,7 @@ impl<'a> CliCommand<'a> for DeleteSubcommand {
             .expect("Invalid type");
 
         // Set script status
-        client
-            .unit_kv_set(key.into(), None)
-            .call()?;
+        client.unit_kv_set(key.into(), None).call()?;
 
         Ok(data)
     }

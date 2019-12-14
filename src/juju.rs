@@ -13,9 +13,7 @@ pub(crate) use types::*;
 /// Set the Juju status
 ///
 /// Returns the command output
-pub(crate) fn set_status(
-    status: ScriptStatus
-) -> anyhow::Result<()> {
+pub(crate) fn set_status(status: ScriptStatus) -> anyhow::Result<()> {
     run_command(
         "status-set",
         &[
