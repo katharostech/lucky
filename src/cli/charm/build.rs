@@ -149,10 +149,10 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             peers.insert("lucky-data".into(), lucky_data_relation);
             charm_metadata.peers = Some(peers);
         }
-        let empty_fields = regex::Regex::from_str(r".*: ~\n?").expect("Could not compile regex");
-        let file_content = &serde_yaml::to_string(&charm_metadata)?;
-        let file_content = empty_fields.replace_all(file_content, "");
-        write_file(&target_dir.join("metadata.yaml"), &file_content)?;
+        write_file(
+            &target_dir.join("metadata.yaml"),
+            &serde_yaml::to_string(&charm_metadata)?,
+        )?;
 
         // Create bin dir
         let bin_dir = target_dir.join("bin");
