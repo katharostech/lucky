@@ -19,4 +19,5 @@ pub(crate) mod daemon;
 pub(crate) mod docker;
 pub(crate) mod juju;
 pub(crate) mod log;
+pub(crate) mod process;
 pub(crate) mod types;

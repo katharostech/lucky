@@ -9,7 +9,7 @@ error Error(message: string)
 # Returned when a method must be called with `more`
 error RequiresMore()
 # Error returned when a hook fails while calling `TriggerHook` 
-error HookFailed(message: string)
+error HookFailed(hook_name: string, message: string)
 
 # Trigger a Juju hook
 # 

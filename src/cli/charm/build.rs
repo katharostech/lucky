@@ -5,7 +5,6 @@ use walkdir::WalkDir;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
-use std::str::FromStr;
 
 use crate::cli::*;
 use crate::config::load_yaml;

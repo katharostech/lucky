@@ -4,7 +4,7 @@ use crate::cli::CliError;
 use anyhow::Context;
 use crossterm::{
     cursor::{Hide, MoveTo, Show},
-    event::{self, Event, KeyEvent, KeyCode::*},
+    event::{self, Event, KeyCode::*, KeyEvent},
     queue,
     style::{style, Attribute::*, Color::*, ResetColor, SetBackgroundColor, SetForegroundColor},
     terminal::{self, size, Clear, ClearType::All, EnterAlternateScreen, LeaveAlternateScreen},
@@ -177,7 +177,7 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
 
         // Respond to keyboard events
         match event::read() {
-            Ok(Event::Key(KeyEvent{code, ..})) => {
+            Ok(Event::Key(KeyEvent { code, .. })) => {
                 match code {
                     Home | Char('g') => {
                         view.scroll = 0;
@@ -206,7 +206,7 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
                     Esc | Enter | Char('q') => break,
                     _ => (),
                 }
-            },
+            }
             Ok(Event::Resize(_, _)) => queue!(w, Clear(All))?,
             _ => (),
         }
@@ -291,7 +291,7 @@ fn show_pager_help(mut w: &mut impl Write) -> anyhow::Result<()> {
         w.flush()?;
 
         match event::read() {
-            Ok(Event::Key(KeyEvent{code, ..})) => {
+            Ok(Event::Key(KeyEvent { code, .. })) => {
                 match code {
                     Home | Char('g') => {
                         view.scroll = 0;
@@ -318,7 +318,7 @@ fn show_pager_help(mut w: &mut impl Write) -> anyhow::Result<()> {
                 }
 
                 scroll = view.scroll;
-            },
+            }
             Ok(Event::Resize(_, _)) => queue!(w, Clear(All))?,
             _ => (),
         }

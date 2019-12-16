@@ -41,34 +41,34 @@ pub(crate) struct CharmMetadata {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub maintainer: Option<String>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub maintainers: Option<Vec<String>>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub series: Option<Vec<String>>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub subordinate: Option<bool>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub terms: Option<Vec<String>>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provides: Option<HashMap<String, RelationDef>>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub requires: Option<HashMap<String, RelationDef>>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub peers: Option<HashMap<String, RelationDef>>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub storage: Option<HashMap<String, StorageDef>>,
     // TODO: Resources, payloads, and extra bindings
@@ -86,22 +86,22 @@ pub(crate) struct RelationDef {
 pub(crate) struct StorageDef {
     #[serde(rename = "type")]
     pub storage_type: StorageType,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shared: Option<bool>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub read_only: Option<bool>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub minimum_size: Option<String>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<String>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub multiple: Option<StorageMultiple>,
 }

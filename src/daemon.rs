@@ -181,7 +181,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             // If there was an error executing hook scripts
             if let Err(message) = hook_result {
                 // Reply with hook error
-                call.reply_hook_failed(message)?;
+                call.reply_hook_failed(hook_name, message)?;
             } else {
                 // Finish reply
                 call.set_continues(false);

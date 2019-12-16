@@ -1,0 +1,66 @@
+use anyhow::{anyhow, Context};
+use subprocess::{Exec, ExitStatus, PopenError, Redirection};
+
+use std::io::ErrorKind as IoErrorKind;
+
+/// Test that a program exists and that running it succeeds
+///
+/// The function will attempt to execute the given command on the system and and will return
+/// `Ok(true)` if the command exists and `Ok(false)` if the command is not found.
+pub(crate) fn cmd_exists(command: &str, args: &[&str]) -> anyhow::Result<bool> {
+    let cmd = Exec::cmd(command).args(args);
+    let command_string = cmd.to_cmdline_lossy();
+    let err_message = format!("Error running {}", command_string);
+
+    match cmd.join() {
+        Err(PopenError::IoError(e)) => match e.kind() {
+            IoErrorKind::NotFound => Ok(false), // If Docker isn't found continue to install
+            // If there is a different kind of error, report it
+            _ => return Err(e).context(err_message),
+        },
+        Err(PopenError::Utf8Error(e)) => return Err(e).context(err_message),
+        Err(PopenError::LogicError(e)) => panic!("Logic error spawning {}: {}", command_string, e),
+        Ok(_) => return Ok(true),
+    }
+}
+
+/// Run a command synchronously with error context
+///
+/// A utility for running commands, merging their stdout and stderr, and using that output during
+/// error reporting. Command will exit with an error if there is an IO error or if the command exits
+/// non-zero.
+pub(crate) fn run_cmd(command: &str, args: &[&str]) -> anyhow::Result<()> {
+    let cmd = Exec::cmd(command)
+        .args(args)
+        .stdout(Redirection::Pipe)
+        .stderr(Redirection::Merge);
+    let command_string = cmd.to_cmdline_lossy();
+    let err_message = format!("Error running {}", command_string);
+
+    match cmd.capture() {
+        Err(PopenError::IoError(e)) => return Err(e).context(err_message),
+        Err(PopenError::Utf8Error(e)) => return Err(e).context(err_message),
+        Err(PopenError::LogicError(e)) => panic!(
+            "Logic error while running command {}: {}",
+            command_string, e
+        ),
+        Ok(capture) => {
+            if capture.success() {
+                Ok(())
+            } else {
+                let exit_code_str = match capture.exit_status {
+                    ExitStatus::Exited(code) => format!("({})", code),
+                    ExitStatus::Signaled(sig) => format!("( Got signal: {} )", sig),
+                    _ => "".into(),
+                };
+
+                Err(anyhow!(
+                    "Command exited non-zero {}. Output:\n{}",
+                    exit_code_str,
+                    capture.stdout_str()
+                )
+                .context(format!("Error running command {}", command_string)))
+            }
+        }
+    }
+}

@@ -1,53 +1,66 @@
 //! Contains tools for installing and interracting with Docker
 
-use anyhow::Context;
-use subprocess::{Exec, ExitStatus, PopenError, Redirection};
+use anyhow::{bail, Context};
 
-use std::io::ErrorKind as IoErrorKind;
+use std::fs;
+use std::io::Write;
+
+use crate::process::{cmd_exists, run_cmd};
 
 /// Make sure Docker is installed an available
 pub(crate) fn ensure_docker() -> anyhow::Result<()> {
-    // Try running `docker --version`
-    match Exec::cmd("docker").arg("--version").join() {
-        Err(PopenError::IoError(e)) => match e.kind() {
-            IoErrorKind::NotFound => (), // If Docker isn't found continue to install
-            // If there is a different kind of error, report it
-            _ => return Err(e).context("Error running \"docker --version\""),
-        },
-        Err(PopenError::Utf8Error(e)) => {
-            return Err(e).context("Error running \"docker --version\"")
-        }
-        Err(PopenError::LogicError(e)) => panic!("Logic error spanwing docker script: {}", e),
-        Ok(_) => return Ok(()),
-    }
+    // Skip if docker is already installed
+    if cmd_exists("docker", &["--version"])? {
+        return Ok(());
+    };
 
     // Install the Docker snap
-    let capture = Exec::cmd("snap")
-        .args(&["install", "docker"])
-        .stdout(Redirection::Pipe)
-        .stderr(Redirection::Merge)
-        .capture()
-        .context(r#"Could not run "snap install docker""#)?;
-
-    // If the install was successful
-    if let ExitStatus::Exited(0) = capture.exit_status {
-        // Try running `docker --version` again
-        match Exec::cmd("docker").arg("--version").join() {
-            Err(PopenError::LogicError(e)) => panic!("Logic error spanwing docker script: {}", e),
-            Err(e) => Err(e).context("Could not install docker"),
-            Ok(_) => Ok(()),
-        }
-
-    // If the install failed
-    } else {
-        anyhow::bail!(
-            "Running \"snap install docker\" failed.\n{}\noutput: {}",
-            if let ExitStatus::Exited(n) = capture.exit_status {
-                format!("Exit code: {}", n)
-            } else {
-                "".into()
-            },
-            capture.stdout_str()
-        );
+    run_cmd("snap", &["install", "docker"])?;
+    // Make sure docker is installed
+    if !cmd_exists("docker", &["--version"])? {
+        bail!("Could not install Docker");
     }
+
+    // Get proxy settings from environment
+    let mut proxy_settings = String::new();
+    if let Ok(http_proxy) = std::env::var("HTTP_PROXY").or(std::env::var("http_proxy")) {
+        proxy_settings.push_str(&format!("Environment=\"HTTP_PROXY={}\"\n", http_proxy));
+    }
+    if let Ok(https_proxy) = std::env::var("HTTPS_PROXY").or(std::env::var("https_proxy")) {
+        proxy_settings.push_str(&format!("Environment=\"HTTPS_PROXY={}\"\n", https_proxy));
+    }
+
+    // If there are any proxy settings
+    if proxy_settings != "" {
+        // Create the Docker service drop-in dir
+        let dropin_dir = "/etc/systemd/system/snap.docker.dockerd.service.d/";
+        fs::create_dir_all(dropin_dir).context(format!(
+            "Could not create docker service drop-in config dir: {:?}",
+            dropin_dir
+        ))?;
+
+        // Open the drop-in file
+        let file_path = "/etc/systemd/system/snap.docker.dockerd.service.d/http-proxy.conf";
+        let mut file = fs::OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .create(true)
+            .open(file_path)
+            .context(format!(
+                "Could not open Docker service dropin file: {:?}",
+                file_path
+            ))?;
+
+        // Insert proxy settings
+        file.write_all(format!("[Service]\n{}", proxy_settings).as_bytes())?;
+
+        // Close file
+        drop(file);
+
+        // Reload Docker config
+        run_cmd("systemctl", &["daemon-reload"])?;
+        run_cmd("snap", &["restart", "docker"])?;
+    }
+
+    Ok(())
 }

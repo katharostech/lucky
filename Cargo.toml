@@ -7,40 +7,41 @@ edition = "2018"
 [dependencies]
 # Use Clap v3.0.0-beta.1
 clap = { git = "https://github.com/clap-rs/clap.git", rev="92c2b5d", features = ["wrap_help"] }
-zip = { version = "0.5", features = ["bzip2"], default-features = false }
-handlebars = "2.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_derive = "1.0"
-color-backtrace = { version = "0.2", optional = true }
+zip = { version = "0.5.0", features = ["bzip2"], default-features = false }
+handlebars = "2.0.0"
+serde = { version = "1.0.0", features = ["derive"] }
+serde_derive = "1.0.0"
+color-backtrace = { version = "0.2.0", optional = true }
 # This is a very small lib that could be removed if we wanted to implement it ourselves for some
 # reason.
-rprompt = "1.0"
-termimad = "0.8.3"
-minimad = "0.5"
-crossterm = "0.14"
-atty = "0.2"
-anyhow = "1.0"
-dirs = "2.0"
-serde_json = "1.0"
-lazy_static = "1.4"
-walkdir = "2.2"
-serde_yaml = "0.8"
+rprompt = "1.0.0"
+termimad = "0.8.4"
+minimad = "0.5.0"
+crossterm = "0.14.0"
+atty = "0.2.0"
+anyhow = "1.0.0"
+dirs = "2.0.0"
+serde_json = "1.0.0"
+lazy_static = "1.4.0"
+walkdir = "2.2.0"
+serde_yaml = "0.8.0"
 varlink = { git = "https://github.com/varlink/rust.git", rev = "04b2a5a" }
-num_cpus = "1.11"
+num_cpus = "1.11.0"
 ctrlc = { version = "3.1", features = ["termination"] }
-log = "0.4"
-strum = "0.16"
+log = "0.4.0"
+strum = "0.16.0"
 strum_macros = "0.16.0"
-subprocess = "0.1"
-git-version = "0.3"
-thiserror = "1.0"
-regex = "1.3"
+subprocess = "0.1.0"
+git-version = "0.3.0"
+thiserror = "1.0.0"
+regex = "1.3.0"
 
 [features]
 default = ["color-backtrace"]
 doc-gen = []
 
 [build-dependencies]
+regex = "1.3"
 zip = { version = "0.5", features = ["bzip2"], default-features = false }
 walkdir = "2.2"
 varlink_generator = "9.0"
