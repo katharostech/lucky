@@ -17,6 +17,7 @@ pub mod cli;
 pub(crate) mod config;
 pub(crate) mod daemon;
 pub(crate) mod docker;
+pub(crate) mod error;
 pub(crate) mod juju;
 pub(crate) mod log;
 pub(crate) mod process;

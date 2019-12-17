@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Context};
 use subprocess::{Exec, ExitStatus, PopenError, Redirection};
 
+use std::collections::HashMap;
 use std::io::ErrorKind as IoErrorKind;
 
 /// Test that a program exists and that running it succeeds
@@ -29,11 +30,23 @@ pub(crate) fn cmd_exists(command: &str, args: &[&str]) -> anyhow::Result<bool> {
 /// A utility for running commands, merging their stdout and stderr, and using that output during
 /// error reporting. Command will exit with an error if there is an IO error or if the command exits
 /// non-zero.
-pub(crate) fn run_cmd(command: &str, args: &[&str]) -> anyhow::Result<()> {
-    let cmd = Exec::cmd(command)
+fn _run_cmd(
+    command: &str,
+    args: &[&str],
+    env: Option<&HashMap<String, String>>,
+) -> anyhow::Result<String> {
+    let mut cmd = Exec::cmd(command)
         .args(args)
         .stdout(Redirection::Pipe)
         .stderr(Redirection::Merge);
+    if let Some(env) = env {
+        cmd = cmd.env_extend(
+            env.iter()
+                .map(|(x, y)| (x.as_str(), y.as_str()))
+                .collect::<Vec<(&str, &str)>>()
+                .as_slice(),
+        )
+    }
     let command_string = cmd.to_cmdline_lossy();
     let err_message = format!("Error running {}", command_string);
 
@@ -46,7 +59,7 @@ pub(crate) fn run_cmd(command: &str, args: &[&str]) -> anyhow::Result<()> {
         ),
         Ok(capture) => {
             if capture.success() {
-                Ok(())
+                Ok(capture.stdout_str())
             } else {
                 let exit_code_str = match capture.exit_status {
                     ExitStatus::Exited(code) => format!("({})", code),
@@ -63,4 +76,8 @@ pub(crate) fn run_cmd(command: &str, args: &[&str]) -> anyhow::Result<()> {
             }
         }
     }
+}
+
+pub(crate) fn run_cmd(command: &str, args: &[&str]) -> anyhow::Result<String> {
+    _run_cmd(command, args, None)
 }

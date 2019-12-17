@@ -2,6 +2,7 @@ use clap::{App, Arg, ArgMatches};
 
 use crate::cli::*;
 use crate::daemon::rpc::{VarlinkClient, VarlinkClientInterface};
+use crate::error::map_rpc_err;
 use crate::types::{ScriptState, ScriptStatus};
 
 pub(super) struct SetStatusSubcommand;
@@ -63,7 +64,10 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
             .expect("Invalid type");
 
         // Set script status
-        client.set_status(script_id.into(), status.into()).call()?;
+        client
+            .set_status(script_id.into(), status.into())
+            .call()
+            .map_err(map_rpc_err)?;
 
         Ok(data)
     }

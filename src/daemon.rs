@@ -132,6 +132,10 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         hook_name: String,
         environment: HashMap<String, String>,
     ) -> varlink::Result<()> {
+        // Set the Juju context id
+        if let Some(context) = environment.get("JUJU_CONTEXT_ID") {
+            std::env::set_var("JUJU_CONTEXT_ID", context);
+        }
         log::info!("Triggering hook: {}", hook_name);
 
         // Run any built-in hook handler
@@ -144,11 +148,6 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             log_error(e);
             call.reply_error(message)?;
             return Ok(());
-        }
-
-        // Set the Juju context id during script execution
-        if let Some(context) = environment.get("JUJU_CONTEXT_ID") {
-            std::env::set_var("JUJU_CONTEXT_ID", context);
         }
 
         // Run hook scripts
