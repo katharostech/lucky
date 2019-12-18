@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context};
+use anyhow::{format_err, Context};
 use subprocess::{Exec, ExitStatus, PopenError, Redirection};
 
 use std::collections::HashMap;
@@ -17,11 +17,11 @@ pub(crate) fn cmd_exists(command: &str, args: &[&str]) -> anyhow::Result<bool> {
         Err(PopenError::IoError(e)) => match e.kind() {
             IoErrorKind::NotFound => Ok(false), // If Docker isn't found continue to install
             // If there is a different kind of error, report it
-            _ => return Err(e).context(err_message),
+            _ => Err(e).context(err_message),
         },
-        Err(PopenError::Utf8Error(e)) => return Err(e).context(err_message),
+        Err(PopenError::Utf8Error(e)) => Err(e).context(err_message),
         Err(PopenError::LogicError(e)) => panic!("Logic error spawning {}: {}", command_string, e),
-        Ok(_) => return Ok(true),
+        Ok(_) => Ok(true),
     }
 }
 
@@ -51,8 +51,8 @@ fn _run_cmd(
     let err_message = format!("Error running {}", command_string);
 
     match cmd.capture() {
-        Err(PopenError::IoError(e)) => return Err(e).context(err_message),
-        Err(PopenError::Utf8Error(e)) => return Err(e).context(err_message),
+        Err(PopenError::IoError(e)) => Err(e).context(err_message),
+        Err(PopenError::Utf8Error(e)) => Err(e).context(err_message),
         Err(PopenError::LogicError(e)) => panic!(
             "Logic error while running command {}: {}",
             command_string, e
@@ -67,7 +67,7 @@ fn _run_cmd(
                     _ => "".into(),
                 };
 
-                Err(anyhow!(
+                Err(format_err!(
                     "Command exited non-zero {}. Output:\n{}",
                     exit_code_str,
                     capture.stdout_str()

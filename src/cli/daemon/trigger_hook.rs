@@ -5,7 +5,6 @@ use std::collections::HashMap;
 use crate::cli::daemon::{get_daemon_client, get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::*;
 use crate::daemon::rpc::VarlinkClientInterface;
-use crate::error::map_rpc_err;
 
 pub(super) struct TriggerHookSubcommand;
 
@@ -70,11 +69,7 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
         // If the caller wants the hook logs
         if args.is_present("get_logs") {
             // Trigger the hook and stream the logs
-            for response in client
-                .trigger_hook(hook_name.clone(), environment)
-                .more()
-                .map_err(map_rpc_err)?
-            {
+            for response in client.trigger_hook(hook_name.clone(), environment).more()? {
                 let response = response?;
 
                 // Log output
@@ -86,10 +81,7 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
         // If we don't care about the logs
         } else {
             // Just trigger the hook and exit
-            client
-                .trigger_hook(hook_name.clone(), environment)
-                .call()
-                .map_err(map_rpc_err)?;
+            client.trigger_hook(hook_name.clone(), environment).call()?;
         }
 
         log::info!(r#"Done running hook "{}""#, &hook_name);

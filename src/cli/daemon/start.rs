@@ -182,7 +182,7 @@ impl<'a> CliCommand<'a> for StartSubcommand {
                         out = "Could not read daemon logs".into();
                         0
                     });
-                    Err(anyhow::anyhow!(format!(
+                    Err(anyhow::format_err!(format!(
                         "Could not connect to daemon. Dameon logs:\n----\n{}",
                         out
                     )))

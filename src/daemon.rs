@@ -24,12 +24,6 @@ mod tools;
 // Built-in daemon hook handlers
 mod hook_handlers;
 
-#[allow(clippy::needless_pass_by_value)]
-/// Convenience for handling errors in Results
-fn log_error(e: anyhow::Error) {
-    log::error!("{:?}", e);
-}
-
 #[derive(Debug, Default, Serialize, Deserialize)]
 /// Contains the daemon state, which can be serialize and deserialized for persistance across
 /// daemon crashes, upgrades, etc.
@@ -79,7 +73,7 @@ impl LuckyDaemon {
         // Load daemon state
         tools::load_state(&daemon)
             .context("Could not load daemon state from filesystem")
-            .unwrap_or_else(log_error);
+            .unwrap_or_else(|e| log::error!("{:?}", e));
 
         // Update the Juju status
         crate::juju::set_status(tools::get_juju_status(&daemon)).unwrap_or_else(|e| {
@@ -104,12 +98,60 @@ impl LuckyDaemon {
 
         Ok(())
     }
+
+    #[allow(clippy::needless_pass_by_value)]
+    fn _trigger_hook(
+        &self,
+        call: &mut dyn rpc::Call_TriggerHook,
+        hook_name: String,
+        environment: HashMap<String, String>,
+    ) -> anyhow::Result<()> {
+        // Run any built-in hook handler
+        hook_handlers::handle_hook(&self, &hook_name).context(format!(
+            r#"Error running internal hook handler for hook "{}""#,
+            hook_name
+        ))?;
+
+        // Run hook scripts
+        if let Some(hook_scripts) = self.lucky_metadata.hooks.get(&hook_name) {
+            // Execute all scripts registered for this hook
+            for hook_script in hook_scripts {
+                match hook_script {
+                    HookScript::HostScript(script_name) => {
+                        tools::run_host_script(self, call, script_name, &environment)?;
+                    }
+                    HookScript::ContainerScript(_script_name) => {
+                        log::warn!("Container scripts not yet implemented");
+                    }
+                }
+            }
+
+            // Update the Juju status as Juju will clear it if we don't re-set it after hook
+            // execution
+            crate::juju::set_status(tools::get_juju_status(&self))?;
+
+            // Finish reply
+            call.set_continues(false);
+            call.reply(None)?;
+
+        // If the hook is not handled by the charm
+        } else {
+            // Update the Juju status
+            crate::juju::set_status(tools::get_juju_status(&self))
+                .or_else(|e| call.reply_error(e.to_string()))?;
+
+            // Just reply without doing anything ( setting exit code to 0 )
+            call.reply(None)?;
+        }
+
+        Ok(())
+    }
 }
 
 impl Drop for LuckyDaemon {
     /// Persist the daeomon state before it is dropped
     fn drop(&mut self) {
-        tools::flush_state(&self).unwrap_or_else(log_error);
+        tools::flush_state(&self).unwrap_or_else(|e| log::error!("{:?}", e));
     }
 }
 
@@ -138,65 +180,13 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
         log::info!("Triggering hook: {}", hook_name);
 
-        // Run any built-in hook handler
-        if let Err(e) = hook_handlers::handle_hook(&self, &hook_name) {
-            let e = e.context(format!(
-                r#"Error running internal hook handler for hook "{}""#,
-                hook_name
-            ));
-            let message = format!("{:?}", e);
-            log_error(e);
-            call.reply_error(message)?;
-            return Ok(());
-        }
-
-        // Run hook scripts
-        let mut hook_result: Result<(), String> = Ok(());
-        if let Some(hook_scripts) = self.lucky_metadata.hooks.get(&hook_name) {
-            // Execute all scripts registered for this hook
-            for hook_script in hook_scripts {
-                match hook_script {
-                    HookScript::HostScript(script_name) => {
-                        let code = tools::run_host_script(self, call, script_name, &environment)?;
-                        if code != 0 {
-                            let message =
-                                format!(r#"Script "{}" exited non-zero ({})"#, script_name, code);
-                            log::error!("{}", message);
-                            hook_result = Err(message);
-                            break;
-                        }
-                    }
-                    HookScript::ContainerScript(_script_name) => {
-                        log::warn!("Container scripts not yet implemented");
-                    }
-                }
-            }
-
-            // Update the Juju status as Juju will clear it if we don't re-set it after hook
-            // execution
-            crate::juju::set_status(tools::get_juju_status(&self))
-                .or_else(|e| call.reply_error(e.to_string()))?;
-
-            // If there was an error executing hook scripts
-            if let Err(message) = hook_result {
-                // Reply with hook error
-                call.reply_hook_failed(hook_name, message)?;
-            } else {
-                // Finish reply
-                call.set_continues(false);
-                call.reply(None)?;
-            }
-
-        // If the hook is not handled by the charm
-        } else {
-            // Update the Juju status
-
-            crate::juju::set_status(tools::get_juju_status(&self))
-                .or_else(|e| call.reply_error(e.to_string()))?;
-
-            // Just reply without doing anything ( setting exit code to 0 )
-            call.reply(None)?;
-        }
+        // Trigger hook and handle error
+        self._trigger_hook(call, hook_name, environment)
+            .or_else(|e| {
+                let e = format!("{:?}", e);
+                log::error!("{}", e);
+                call.reply_error(e)
+            })?;
 
         // Unset the Juju context as it will be invalid after the hook exits
         std::env::remove_var("JUJU_CONTEXT_ID");

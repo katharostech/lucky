@@ -10,19 +10,6 @@ impl ::std::fmt::Display for ErrorKind {
                 v.as_ref()
                     .map_or_else(|| format!("{:#?}", v), |v| v.message.clone())
             ),
-            // Print the hook that failed and the error message
-            ErrorKind::HookFailed(v) => write!(
-                f,
-                "{}",
-                v.as_ref().map_or_else(
-                    || format!("{:#?}", v),
-                    |v| format!(
-                        "Hook \"{}\" failed: {}",
-                        v.hook_name.clone(),
-                        v.message.clone()
-                    )
-                )
-            ),
             // Print that RPC requires the "more" flag
             ErrorKind::RequiresMore(_) => write!(
                 f,

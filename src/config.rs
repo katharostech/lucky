@@ -1,6 +1,6 @@
 //! Contains utilities for loading configuration
 
-use anyhow::{anyhow, Context};
+use anyhow::{format_err, Context};
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -14,11 +14,11 @@ pub(crate) fn get_charm_dir() -> anyhow::Result<PathBuf> {
             if path.exists() {
                 Ok(path)
             } else {
-                Err(anyhow!("JUJU_CHARM_DIR does not exist: {:?}", path))
+                Err(format_err!("JUJU_CHARM_DIR does not exist: {:?}", path))
             }
         }
         Err(e) => {
-            Err(anyhow!("{}", e).context("Could not read environment variable: JUJU_CHARM_DIR"))
+            Err(format_err!("{}", e).context("Could not read environment variable: JUJU_CHARM_DIR"))
         }
     }
 }

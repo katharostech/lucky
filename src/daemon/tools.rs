@@ -1,3 +1,5 @@
+use anyhow::format_err;
+
 use subprocess::{Exec, ExitStatus, Redirection};
 
 use std::env;
@@ -94,20 +96,12 @@ pub(super) fn run_host_script(
     call: &mut dyn rpc::Call_TriggerHook,
     script_name: &str,
     environment: &HashMap<String, String>,
-) -> varlink::Result<u32> {
+) -> anyhow::Result<()> {
     // Add bin dir to the PATH
     let path_env = if let Some(path) = std::env::var_os("PATH") {
         let mut paths = env::split_paths(&path).collect::<Vec<_>>();
         paths.push(daemon.charm_dir.join("bin"));
-        match env::join_paths(paths) {
-            Ok(p) => p,
-            Err(e) => {
-                let e = anyhow::Error::from(e).context("Path contains invalid character");
-                call.reply_error(format!("{:?}", e))?;
-                log_error(e);
-                return Ok(1);
-            }
-        }
+        env::join_paths(paths).context("Path contains invalid character")?
     } else {
         daemon.charm_dir.join("bin").as_os_str().to_owned()
     };
@@ -119,9 +113,9 @@ pub(super) fn run_host_script(
         .stderr(Redirection::Merge)
         .env("PATH", path_env)
         .env("LUCKY_CONTEXT", "client")
-        .env("LUCKY_SCRIPT_ID", script_name)
-        // Set the log level to "off" to avoid duplicating log messages from client and daemon
-        .env("LUCKY_LOG_LEVEL", "off");
+        .env("LUCKY_SCRIPT_ID", script_name);
+    // Set the log level to "off" to avoid duplicating log messages from client and daemon
+    // .env("LUCKY_LOG_LEVEL", "off");
 
     // Set environment for hook exececution
     for (k, v) in environment.iter() {
@@ -129,16 +123,9 @@ pub(super) fn run_host_script(
     }
 
     // Run script process
-    let mut process = match command.popen() {
-        Ok(stream) => stream,
-        Err(e) => {
-            let e = anyhow::Error::from(e)
-                .context(format!("Error executing script: {:?}", command_path));
-            call.reply_error(format!("{:?}", e))?;
-            log_error(e);
-            return Ok(1);
-        }
-    };
+    let mut process = command
+        .popen()
+        .context(format!("Error executing script: {:?}", command_path))?;
 
     // Get script output buffer
     let output_buffer = BufReader::new(process.stdout.as_ref().expect("Stdout not opened"));
@@ -151,14 +138,7 @@ pub(super) fn run_host_script(
 
     // Loop through lines of output
     for line in output_buffer.lines() {
-        let line = match line {
-            Ok(line) => line,
-            Err(e) => {
-                call.reply_error(format!("{:?}", e))?;
-                log_error(e.into());
-                return Ok(1);
-            }
-        };
+        let line = line?;
         log::info!("output: {}", line);
 
         // Send caller output if they asked for it
@@ -168,19 +148,26 @@ pub(super) fn run_host_script(
     }
 
     // Wait for script to exit
-    let exit_status = match process.wait() {
-        Ok(status) => status,
-        Err(e) => {
-            call.reply_error(format!("{:?}", e))?;
-            log_error(e.into());
-            return Ok(1);
-        }
-    };
+    let exit_status = process.wait()?;
 
     match exit_status {
         // If the command exited with a code, return the code
-        ExitStatus::Exited(n) => Ok(n),
+        ExitStatus::Exited(0) => Ok(()),
         // If process had an abnormal exit code just exit 1
-        _ => Ok(1),
+        ExitStatus::Exited(n) => Err(format_err!(
+            r#"Host script "{}" exited non-zero ({})"#,
+            script_name,
+            n
+        )),
+        ExitStatus::Signaled(signum) => Err(format_err!(
+            r#"Host script "{}" terminated by signal ({})"#,
+            script_name,
+            signum
+        )),
+        status => Err(format_err!(
+            r#"Host script "{}" failed: {:?}"#,
+            script_name,
+            status
+        )),
     }
 }

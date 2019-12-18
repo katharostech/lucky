@@ -1,8 +1,8 @@
 //! Contains functions used to interact with Juju through the hook environment
 //! tools. Also contains Juju specific types such as the Juju metadata.yaml struct.
 
-use crate::types::ScriptStatus;
 use crate::process::run_cmd;
+use crate::types::ScriptStatus;
 
 mod types;
 pub(crate) use types::*;

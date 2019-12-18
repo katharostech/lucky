@@ -4,7 +4,6 @@ use clap::{App, Arg, ArgMatches};
 use crate::cli::daemon::{get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::*;
 use crate::daemon::{self, rpc::VarlinkClientInterface};
-use crate::error::map_rpc_err;
 
 pub(super) struct StopSubcommand;
 
@@ -55,7 +54,7 @@ impl<'a> CliCommand<'a> for StopSubcommand {
         let mut service = daemon::get_client(connection);
 
         // Stop the daemon
-        service.stop_daemon().call().map_err(map_rpc_err)?;
+        service.stop_daemon().call()?;
 
         log::info!("Shutdown server");
 

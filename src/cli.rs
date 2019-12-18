@@ -1,4 +1,5 @@
 //! Commandline interface module
+use anyhow::format_err;
 use clap::{App, ArgMatches};
 
 mod types;
@@ -120,6 +121,7 @@ pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
     std::panic::catch_unwind(|| {
         // run program and report any errors
         if let Err(e) = f() {
+            // Handle special instructions from `CliError`s
             if let Some(cli_error) = e.downcast_ref::<CliError>() {
                 match cli_error {
                     CliError::Exit(0) => std::process::exit(0),
@@ -128,6 +130,14 @@ pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
                         std::process::exit(*code);
                     }
                 }
+
+            // Print varlink errors without the extra debug printing
+            } else if let Some(varlink_error) = e.downcast_ref::<crate::daemon::rpc::Error>() {
+                let e = format_err!("Response from Lucky daemon: {}", varlink_error.kind());
+                log::error!("{}", e);
+                std::process::exit(1);
+
+            // For all other errors just print out the default anyhow rendering of it
             } else {
                 log::error!("{:?}", e);
                 std::process::exit(1);

@@ -23,10 +23,11 @@ pub(crate) fn ensure_docker() -> anyhow::Result<()> {
 
     // Get proxy settings from environment
     let mut proxy_settings = String::new();
-    if let Ok(http_proxy) = std::env::var("HTTP_PROXY").or(std::env::var("http_proxy")) {
+    if let Ok(http_proxy) = std::env::var("HTTP_PROXY").or_else(|_| std::env::var("http_proxy")) {
         proxy_settings.push_str(&format!("Environment=\"HTTP_PROXY={}\"\n", http_proxy));
     }
-    if let Ok(https_proxy) = std::env::var("HTTPS_PROXY").or(std::env::var("https_proxy")) {
+    if let Ok(https_proxy) = std::env::var("HTTPS_PROXY").or_else(|_| std::env::var("https_proxy"))
+    {
         proxy_settings.push_str(&format!("Environment=\"HTTPS_PROXY={}\"\n", https_proxy));
     }
 

@@ -4,7 +4,6 @@ use std::io::Write;
 
 use crate::cli::*;
 use crate::daemon::rpc::{VarlinkClient, VarlinkClientInterface};
-use crate::error::map_rpc_err;
 
 pub(super) struct KvSubcommand;
 
@@ -73,7 +72,7 @@ impl<'a> CliCommand<'a> for GetSubcommand {
         // If a specific key was given
         if let Some(key) = key {
             // Print out the requested value
-            let response = client.unit_kv_get(key.into()).call().map_err(map_rpc_err)?;
+            let response = client.unit_kv_get(key.into()).call()?;
 
             writeln!(
                 std::io::stdout(),
@@ -84,7 +83,7 @@ impl<'a> CliCommand<'a> for GetSubcommand {
         // If no key was given
         } else {
             // Return all of the key-value pairs
-            for response in client.unit_kv_get_all().more().map_err(map_rpc_err)? {
+            for response in client.unit_kv_get_all().more()? {
                 let response = response?;
 
                 writeln!(std::io::stdout(), "{}={}", response.key, response.value)?;
@@ -138,8 +137,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         // Set script status
         client
             .unit_kv_set(key.into(), value.map(ToOwned::to_owned))
-            .call()
-            .map_err(map_rpc_err)?;
+            .call()?;
 
         Ok(data)
     }
@@ -182,10 +180,7 @@ impl<'a> CliCommand<'a> for DeleteSubcommand {
             .expect("Invalid type");
 
         // Set script status
-        client
-            .unit_kv_set(key.into(), None)
-            .call()
-            .map_err(map_rpc_err)?;
+        client.unit_kv_set(key.into(), None).call()?;
 
         Ok(data)
     }
