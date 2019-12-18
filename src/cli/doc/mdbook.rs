@@ -247,14 +247,25 @@ fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
         // Add help message
         arg_buffer.push_str(
             format!(
-                "<td>{}{}</td></tr>\n",
+                "<td>{}{}{}</td></tr>\n",
                 MD_INLINE_CODE.replace_all(
                     arg.long_help.unwrap_or_else(|| arg.help.unwrap_or("")),
                     "<code>$text</code>"
                 ),
+                if let Some(vals) = &arg.default_vals {
+                    format!(
+                        "<br /><strong>default:</strong> <code>{}</code>",
+                        vals.iter()
+                            .map(|x| x.to_string_lossy())
+                            .collect::<Vec<_>>()
+                            .join("</code>, <code>")
+                    )
+                } else {
+                    "".to_owned()
+                },
                 if let Some(vals) = &arg.possible_vals {
                     format!(
-                        " [ possible values: <code>{}</code> ]",
+                        "<br /><strong>possible values:</strong> <code>{}</code>",
                         vals.join("</code>, <code>")
                     )
                 } else {
