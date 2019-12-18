@@ -1,6 +1,5 @@
 //! Contains the lucky logging implementation
 
-use crossterm::style::{style, Color};
 use log::{Level, LevelFilter, Metadata, Record};
 
 use std::fmt::Write as FmtWrite;
@@ -89,7 +88,7 @@ impl log::Log for LuckyLogger {
                         write!(
                             message,
                             "{} {}",
-                            style("Error:").with(Color::Red),
+                            red("Error:"),
                             record.args()
                         )
                         .expect(buffer_error);
@@ -99,7 +98,7 @@ impl log::Log for LuckyLogger {
                         write!(
                             message,
                             "{} {}",
-                            style("Warning:").with(Color::Yellow),
+                            yellow("Warning:"),
                             record.args()
                         )
                         .expect(buffer_error);
@@ -108,12 +107,12 @@ impl log::Log for LuckyLogger {
                     Level::Info => {
                         write!(message, "{}", record.args()).expect(buffer_error);
                     }
-                    // Print debug with plain `Debug:` prefix
+                    // Print debug with dark blue `Debug:` prefix
                     Level::Debug => {
                         write!(
                             message,
                             "{} {}",
-                            style("Debug:").with(Color::DarkBlue),
+                            dark_blue("Debug:"),
                             record.args()
                         )
                         .expect(buffer_error);
@@ -121,7 +120,7 @@ impl log::Log for LuckyLogger {
                     // Print trace with grey `Trace:` prefix
                     Level::Trace => {
                         // Add `Trace:`
-                        write!(message, "{}", style("Trace").with(Color::DarkGrey),)
+                        write!(message, "{}", dark_grey("Trace"))
                             .expect(buffer_error);
 
                         // Add source and line
@@ -129,12 +128,11 @@ impl log::Log for LuckyLogger {
                             write!(
                                 message,
                                 "{}",
-                                style(format!(
+                                dark_grey(&format!(
                                     "[{}:{}]",
                                     record.file().unwrap(),
                                     record.line().unwrap()
-                                ))
-                                .with(Color::DarkGrey),
+                                )),
                             )
                             .expect(buffer_error);
                         }
@@ -143,7 +141,7 @@ impl log::Log for LuckyLogger {
                         write!(
                             message,
                             "{} {}",
-                            style(":").with(Color::DarkGrey),
+                            dark_grey(":"),
                             record.args()
                         )
                         .expect(buffer_error);
@@ -206,5 +204,46 @@ pub(crate) fn init_logger() {
             }
         }
         Err(e) => panic!("Could not set logger: {}", e),
+    }
+}
+
+//
+// Color helpers
+//
+// These functions add color to the output if stderr is a tty
+//
+
+use atty::Stream::Stderr;
+use crossterm::style::{style, Color};
+
+fn red(s: &str) -> String {
+    if atty::is(Stderr) {
+        style(s).with(Color::Red).to_string()
+    } else {
+        s.to_string()
+    }
+}
+
+fn yellow(s: &str) -> String {
+    if atty::is(Stderr) {
+        style(s).with(Color::Yellow).to_string()
+    } else {
+        s.to_string()
+    }
+}
+
+fn dark_blue(s: &str) -> String {
+    if atty::is(Stderr) {
+        style(s).with(Color::DarkBlue).to_string()
+    } else {
+        s.to_string()
+    }
+}
+
+fn dark_grey(s: &str) -> String {
+    if atty::is(Stderr) {
+        style(s).with(Color::DarkGrey).to_string()
+    } else {
+        s.to_string()
     }
 }

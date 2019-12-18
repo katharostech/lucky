@@ -63,7 +63,7 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
 
         // Connect to lucky daemon
         let mut client = get_daemon_client(&socket_path)?;
-        
+
         log::info!(r#"Triggering hook "{}""#, &hook_name);
 
         // If the caller wants the hook logs
