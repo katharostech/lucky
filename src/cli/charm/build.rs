@@ -34,6 +34,17 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
                 .long("use-local-lucky")
                 .short('l'))
             .stop_custom_headings()
+            .arg(Arg::with_name("log_level")
+                .help("The log level to build the charm with")
+                .long_help(concat!(
+                    "The log level to build the charm with. Build with the log level set to",
+                    "\"debug\" or \"trace\" to get more verbose logging from Lucky while the",
+                    "charm is running"))
+                .long("log-level")
+                .short('L')
+                .possible_values(&["trace", "debug", "info", "warn", "error"])
+                .case_insensitive(true)
+                .default_value("info"))
             .arg(Arg::with_name("build_dir")
                 .help(concat!(
                     "The directory to put the built charm in. Defaults to the `build` ",
@@ -73,6 +84,11 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             charm_path.join("build")
         };
         create_dir_all(&build_dir)?;
+
+        // Get the charm log level
+        let log_level = args
+            .value_of("log_level")
+            .expect("Missing required arg `log_level`");
 
         // Load charm metadata
         let mut charm_metadata: CharmMetadata = load_yaml(&charm_path, "metadata")?;
@@ -197,7 +213,11 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             // Create hook from template
             write_file(
                 &new_hook_path,
-                &format!(include_str!("build/hook-template.sh"), hook_name = hook),
+                &format!(
+                    include_str!("build/hook-template.sh"),
+                    log_level = log_level,
+                    hook_name = hook
+                ),
             )?;
             set_file_mode(&new_hook_path, 0o755)?;
         }
@@ -213,6 +233,7 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
                     &new_hook_path,
                     &format!(
                         include_str!("build/hook-template.sh"),
+                        log_level = log_level,
                         hook_name = hook_name
                     ),
                 )?;
@@ -243,6 +264,7 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
                         &new_hook_path,
                         &format!(
                             include_str!("build/hook-template.sh"),
+                            log_level = log_level,
                             hook_name = hook_name
                         ),
                     )?;

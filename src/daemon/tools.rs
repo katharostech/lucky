@@ -114,8 +114,6 @@ pub(super) fn run_host_script(
         .env("PATH", path_env)
         .env("LUCKY_CONTEXT", "client")
         .env("LUCKY_SCRIPT_ID", script_name);
-    // Set the log level to "off" to avoid duplicating log messages from client and daemon
-    // .env("LUCKY_LOG_LEVEL", "off");
 
     // Set environment for hook exececution
     for (k, v) in environment.iter() {

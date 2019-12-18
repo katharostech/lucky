@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e # Exit immediately if a command fails
 
+# Set the lucky log level
+export LUCKY_LOG_LEVEL={log_level}
+
 if [ ! -f ./bin/lucky ]; then
     # TODO: Download or install Lucky
     echo "TODO: Download or install Lucky"
