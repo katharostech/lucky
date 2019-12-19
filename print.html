@@ -267,6 +267,7 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
+<tr><td><code>-L</code>, <code>--log-level</code><code>&lt;log_level&gt;</code></td><td></td><td>The log level to build the charm with. Build with the log level set to"debug" or "trace" to get more verbose logging from Lucky while thecharm is running<br /><strong>default:</strong> <code>info</code><br /><strong>possible values:</strong> <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code></td></tr>
 <tr><td><code>-b</code>, <code>--build-dir</code><code>&lt;build_dir&gt;</code></td><td></td><td>The directory to put the built charm in. Defaults to the <code>build</code> directory in the charm dir. The built charm will be in <code>build_dir/charm_name</code>.</td></tr>
 </tbody>
 </table>
@@ -274,7 +275,7 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>&lt;charm_dir&gt;</code></td><td></td><td>The path to the charm you want to build</td></tr>
+<tr><td><code>&lt;charm_dir&gt;</code></td><td></td><td>The path to the charm you want to build<br /><strong>default:</strong> <code>.</code></td></tr>
 </tbody>
 </table>
 <h1><a class="header" href="#create" id="create">create</a></h1>
@@ -407,7 +408,7 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>&lt;state&gt;</code></td><td></td><td>The enumerated state of the service [ possible values: <code>active</code>, <code>waiting</code>, <code>maintenance</code>, <code>blocked</code> ]</td></tr>
+<tr><td><code>&lt;state&gt;</code></td><td></td><td>The enumerated state of the service<br /><strong>possible values:</strong> <code>active</code>, <code>waiting</code>, <code>maintenance</code>, <code>blocked</code></td></tr>
 <tr><td><code>&lt;message&gt;</code></td><td></td><td>An optional message to provide with the state</td></tr>
 </tbody>
 </table>
