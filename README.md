@@ -1,14 +1,12 @@
 # Lucky - A charming framework for Juju
 
-[![Build Status][bb]][bl] [![Snap Status][ssi]][ssl] [![lucky on snapcraft][sb]][sl] ![Lines of code][lc]
+[![Build Status][bb]][bl] [![Snap Status][ssi]][ssl] ![Lines of code][lc]
 
 [bb]: https://cloud.drone.io/api/badges/katharostech/lucky/status.svg
 [bl]: https://cloud.drone.io/katharostech/lucky
 [ssi]: https://build.snapcraft.io/badge/katharostech/lucky.svg
 [ssl]: https://build.snapcraft.io/user/katharostech/lucky
 [lc]: https://tokei.rs/b1/github/katharostech/lucky?category=code
-[sb]: https://snapcraft.io//lucky/badge.svg
-[sl]: https://snapcraft.io/lucky
 
 This is the home of a work-in-progress charm writing framework for [Juju]. The framework will seek to provide a well-documented and easy-to-use experience for writing charms that run Docker containers. While currently we are focusing on Docker containers, as development progresses, this framework could very well end up being useful for writing non-Docker charms as well.
 
@@ -31,6 +29,8 @@ We also support the following package managers.
 
 ### Chocolatey ( Windows )
 
+![Chocolatey (with prereleases)](https://img.shields.io/chocolatey/vpre/lucky?label=Chocolatey) ![Chocolatey](https://img.shields.io/chocolatey/dt/lucky?label=Downloads)
+
 You can install Lucky with the [Chocolatey] package manager for Windows:
 
     choco install lucky --pre
@@ -39,6 +39,8 @@ You can install Lucky with the [Chocolatey] package manager for Windows:
 
 ### Snap ( Linux )
 
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/lucky)
+
 We have a [snap] which can be installed on supported linux distros from the commandline:
 
     sudo snap install --edge --devmode lucky
@@ -46,6 +48,11 @@ We have a [snap] which can be installed on supported linux distros from the comm
 [snap]: https://snapcraft.io/lucky
 
 ### Homebrew ( MacOS )
+
+[![brew_cask_img]][brew_cask_link]
+
+[brew_cask_img]: https://img.shields.io/badge/Homebrew%20Cask-pre--release-yellow?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjExR/NCNwAAAaJJREFUOE9jwAa4uLiUpk+ffr6hoWEniAsRxQFkZWV1a2tr57W0tOxdsGDB6/9A8PPnz/9AAz7k5eVNhyrDAKxZWVnbQIqxgRkzZryysrLyhapFAEFBQb/v379DlWEHq1ev/gpVjgIESktLj29cv/r/qVOn/j9//vz/p0+fwBpev379f87smf/9/PxyoWpRQWpqau3fCz3/n66P+H+ix/j/tga9/9vXLfy/Ydn0/2/uHPm/bNmyB52dnQeASoUhOqAgJSWl5u+lif//niz8/3uDAxgfmeD4f1u39//Lh9f89/DwKNu0adNzaWnpUKgWCEhOTsbQCMMHN878D1TCv2TJkiuKiorhEB1QANRYTZbGpKQkPBpn4daYmJhYhUvjw4u7/re3t689fPjwRzExsQCoFghISEio+nux///fYzkYGh9c2Pm/u7t7Y2ZmZj9QKTtEBxQANVb+e3ft/98Lff//HC36/+dQzv8/J2v+/7279v/BfbtBTuWDqEQDcnJyWo2NjfOB6fTcqlWrHgNTynNg3N2aNGnSVmdn51SoMihgYAAADftfvlht2OgAAAAASUVORK5CYII=
+[brew_cask_link]: https://github.com/katharostech/homebrew-tap/blob/master/Casks/lucky-pre-release.rb
 
 We have a [Homebrew] cask:
 
@@ -57,8 +64,8 @@ We have a [Homebrew] cask:
 
 If you have any bug reports or feature requests you can create a [Taiga issue][ti] and we'll see what we can do to help.
 
-For questions or general discussion there is also a [Lucky category][lc] on the [Juju forum][jf].
+For questions or general discussion there is also a [Lucky category][category] on the [Juju forum][jf].
 
-[lc]: https://discourse.jujucharms.com/c/related-software/lucky
+[category]: https://discourse.jujucharms.com/c/related-software/lucky
 [jf]: https://discourse.jujucharms.com
 [ti]: https://tree.taiga.io/project/zicklag-lucky/issues
