@@ -1,8 +1,16 @@
 [package]
 name = "lucky"
-version = "0.1.0"
-authors = ["zicklag <zicklag@katharostech.com>"]
+version = "0.1.0-pre-release"
+authors = ["Katharos Technology"]
 edition = "2018"
+license-file = "LICENSE"
+description = "The Lucky charming framework for Juju"
+homepage = "https://github.com/katharostech/lucky"
+readme = "README.md"
+documentation = "https://katharostech.github.io/lucky"
+repository = "https://github.com/katharostech/lucky"
+keywords = ["juju", "charm", "development", "devops"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 # Use Clap v3.0.0-beta.1
