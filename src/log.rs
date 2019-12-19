@@ -85,23 +85,12 @@ impl log::Log for LuckyLogger {
                 match record.level() {
                     // Print errors with newline and red `Error:` prefix
                     Level::Error => {
-                        write!(
-                            message,
-                            "{} {}",
-                            red("Error:"),
-                            record.args()
-                        )
-                        .expect(buffer_error);
+                        write!(message, "{} {}", red("Error:"), record.args()).expect(buffer_error);
                     }
                     // Print warnings with yellow `Warning:` prefix
                     Level::Warn => {
-                        write!(
-                            message,
-                            "{} {}",
-                            yellow("Warning:"),
-                            record.args()
-                        )
-                        .expect(buffer_error);
+                        write!(message, "{} {}", yellow("Warning:"), record.args())
+                            .expect(buffer_error);
                     }
                     // Print info without decoration ( might want to change that, needs thought )
                     Level::Info => {
@@ -109,19 +98,13 @@ impl log::Log for LuckyLogger {
                     }
                     // Print debug with dark blue `Debug:` prefix
                     Level::Debug => {
-                        write!(
-                            message,
-                            "{} {}",
-                            dark_blue("Debug:"),
-                            record.args()
-                        )
-                        .expect(buffer_error);
+                        write!(message, "{} {}", dark_blue("Debug:"), record.args())
+                            .expect(buffer_error);
                     }
                     // Print trace with grey `Trace:` prefix
                     Level::Trace => {
                         // Add `Trace:`
-                        write!(message, "{}", dark_grey("Trace"))
-                            .expect(buffer_error);
+                        write!(message, "{}", dark_grey("Trace")).expect(buffer_error);
 
                         // Add source and line
                         if record.file().is_some() && record.line().is_some() {
@@ -138,13 +121,8 @@ impl log::Log for LuckyLogger {
                         }
 
                         // Add message
-                        write!(
-                            message,
-                            "{} {}",
-                            dark_grey(":"),
-                            record.args()
-                        )
-                        .expect(buffer_error);
+                        write!(message, "{} {}", dark_grey(":"), record.args())
+                            .expect(buffer_error);
                     }
                 }
 

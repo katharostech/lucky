@@ -66,7 +66,6 @@ impl<'a> CliCommand<'a> for LuckyCli {
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
         vec![
             Box::new(charm::CharmSubcommand),
-            Box::new(daemon::DaemonSubcommand),
             Box::new(client::ClientSubcommand),
         ]
     }

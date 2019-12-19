@@ -152,8 +152,8 @@ impl<'a> CliCommand<'a> for StartSubcommand {
 
             // Spawn another process for running the daemon in the background
             let mut output: Box<dyn Read> = Exec::cmd(std::env::current_exe()?)
+                .env("LUCKY_CONTEXT", "daemon")
                 .args(&[
-                    "daemon",
                     "start",
                     "--socket-path",
                     &socket_path,

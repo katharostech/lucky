@@ -10,7 +10,7 @@ if [ ! -f ./bin/lucky ]; then
 fi
 
 # Start the Lucky daemon
-./bin/lucky daemon start --ignore-already-running
+LUCKY_CONTEXT=daemon ./bin/lucky start --ignore-already-running
 
 # Trigger the `{hook_name}` hook
-./bin/lucky daemon trigger-hook {hook_name}
+LUCKY_CONTEXT=daemon ./bin/lucky trigger-hook {hook_name}
