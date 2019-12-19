@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="affix"><a href="overview.html">Overview</a></li><li class="spacer"></li><li><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="development.html"><strong aria-hidden="true">2.</strong> Development</a></li><li class="spacer"></li><li><a href="cli/lucky.html"><strong aria-hidden="true">3.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="cli/lucky/charm.html"><strong aria-hidden="true">3.1.</strong> charm</a></li><li><ol class="section"><li><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">3.1.1.</strong> build</a></li><li><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">3.1.2.</strong> create</a></li></ol></li><li><a href="cli/lucky/daemon.html"><strong aria-hidden="true">3.2.</strong> daemon</a></li><li><ol class="section"><li><a href="cli/lucky/daemon/start.html"><strong aria-hidden="true">3.2.1.</strong> start</a></li><li><a href="cli/lucky/daemon/stop.html"><strong aria-hidden="true">3.2.2.</strong> stop</a></li><li><a href="cli/lucky/daemon/trigger-hook.html"><strong aria-hidden="true">3.2.3.</strong> trigger-hook</a></li></ol></li><li><a href="cli/lucky/client.html"><strong aria-hidden="true">3.3.</strong> client</a></li><li><ol class="section"><li><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">3.3.1.</strong> set-status</a></li><li><a href="cli/lucky/client/kv.html"><strong aria-hidden="true">3.3.2.</strong> kv</a></li><li><ol class="section"><li><a href="cli/lucky/client/kv/get.html"><strong aria-hidden="true">3.3.2.1.</strong> get</a></li><li><a href="cli/lucky/client/kv/set.html"><strong aria-hidden="true">3.3.2.2.</strong> set</a></li><li><a href="cli/lucky/client/kv/delete.html"><strong aria-hidden="true">3.3.2.3.</strong> delete</a></li></ol></li></ol></li></ol></li></ol>
+                <ol class="chapter"><li class="affix"><a href="overview.html">Overview</a></li><li class="spacer"></li><li><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="development.html"><strong aria-hidden="true">2.</strong> Development</a></li><li class="spacer"></li><li><a href="cli/lucky.html"><strong aria-hidden="true">3.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="cli/lucky/charm.html"><strong aria-hidden="true">3.1.</strong> charm</a></li><li><ol class="section"><li><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">3.1.1.</strong> build</a></li><li><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">3.1.2.</strong> create</a></li></ol></li><li><a href="cli/lucky/client.html"><strong aria-hidden="true">3.2.</strong> client</a></li><li><ol class="section"><li><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">3.2.1.</strong> set-status</a></li><li><a href="cli/lucky/client/kv.html"><strong aria-hidden="true">3.2.2.</strong> kv</a></li><li><ol class="section"><li><a href="cli/lucky/client/kv/get.html"><strong aria-hidden="true">3.2.2.1.</strong> get</a></li><li><a href="cli/lucky/client/kv/set.html"><strong aria-hidden="true">3.2.2.2.</strong> set</a></li><li><a href="cli/lucky/client/kv/delete.html"><strong aria-hidden="true">3.2.2.3.</strong> delete</a></li></ol></li></ol></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -212,7 +212,6 @@
 <h3><a class="header" href="#subcommands" id="subcommands">Subcommands</a></h3>
 <ul>
 <li><a href="cli/./lucky/charm.html">charm</a>: Build and create Lucky charms</li>
-<li><a href="cli/./lucky/daemon.html">daemon</a>: Start, stop, and trigger the Lucky daemon</li>
 <li><a href="cli/./lucky/client.html">client</a>: Communicate with the Lucky daemon in charm scripts</li>
 </ul>
 <h2><a class="header" href="#development-2" id="development-2">Development</a></h2>
@@ -305,106 +304,33 @@ $ charm push build/charm_name
 <tr><td><code>&lt;target_dir&gt;</code></td><td></td><td>The directory to create the charm in</td></tr>
 </tbody>
 </table>
-<h1><a class="header" href="#lucky-daemon" id="lucky-daemon">Lucky Daemon</a></h1>
-<p>The Lucky daemon runs alongside your charm and executes your charm's scripts at the proper times. Users of Lucky will not need to manually run the Lucky daemon as it will be automatically run when the charm is installed.</p>
+<h1><a class="header" href="#client" id="client">client</a></h1>
 <h2><a class="header" href="#usage-4" id="usage-4">Usage</a></h2>
-<p><code>daemon [FLAGS] [SUBCOMMAND]</code></p>
-<h3><a class="header" href="#subcommands-2" id="subcommands-2">Subcommands</a></h3>
-<ul>
-<li><a href="cli/lucky/./daemon/start.html">start</a>: Start the Lucky daemon</li>
-<li><a href="cli/lucky/./daemon/stop.html">stop</a>: Stop the Lucky daemon</li>
-<li><a href="cli/lucky/./daemon/trigger-hook.html">trigger-hook</a>: Run a hook through the Lucky daemon</li>
-</ul>
-<h1><a class="header" href="#start" id="start">start</a></h1>
-<h2><a class="header" href="#usage-5" id="usage-5">Usage</a></h2>
-<p><code>start [FLAGS] [OPTIONS]</code></p>
-<h3><a class="header" href="#flags-2" id="flags-2">Flags</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-i</code>, <code>--ignore-already-running</code></td><td></td><td>Don't complain if the daemon is already running</td></tr>
-<tr><td><code>-F</code>, <code>--foreground</code></td><td></td><td>Run in the foreground</td></tr>
-</tbody>
-</table>
+<p><code>client [FLAGS] [OPTIONS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#options-2" id="options-2">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-S</code>, <code>--state-dir</code><code>&lt;state_dir&gt;</code></td><td><code>LUCKY_STATE_DIR</code></td><td>The directory to store the unit state in. If this is left unspecified the state directory will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the state dir will be <code>/var/lib/lucky/mysql_2_state</code></td></tr>
 <tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
 <tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
 </tbody>
 </table>
-<h1><a class="header" href="#stop" id="stop">stop</a></h1>
-<h2><a class="header" href="#usage-6" id="usage-6">Usage</a></h2>
-<p><code>stop [FLAGS] [OPTIONS]</code></p>
-<h3><a class="header" href="#flags-3" id="flags-3">Flags</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-i</code>, <code>--ignore-already-stopped</code></td><td></td><td>Don't complain if the daemon is already stopped</td></tr>
-</tbody>
-</table>
-<h3><a class="header" href="#options-3" id="options-3">Options</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
-<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
-</tbody>
-</table>
-<h1><a class="header" href="#trigger-hook" id="trigger-hook">trigger-hook</a></h1>
-<h2><a class="header" href="#usage-7" id="usage-7">Usage</a></h2>
-<p><code>trigger-hook [FLAGS] [OPTIONS] [hook_name]</code></p>
-<h3><a class="header" href="#flags-4" id="flags-4">Flags</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-L</code>, <code>--get-logs</code></td><td></td><td>Print the logs of the hook as it is running. Even if the logs are not printed here, the standard out and error of the hook will be logged to Juju and can be viewed with <code>juju debug-log</code>.</td></tr>
-</tbody>
-</table>
-<h3><a class="header" href="#options-4" id="options-4">Options</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
-<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
-</tbody>
-</table>
-<h3><a class="header" href="#positionals-2" id="positionals-2">Positionals</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>&lt;hook_name&gt;</code></td><td></td><td>The name of the hook to trigger</td></tr>
-</tbody>
-</table>
-<h1><a class="header" href="#client" id="client">client</a></h1>
-<h2><a class="header" href="#usage-8" id="usage-8">Usage</a></h2>
-<p><code>client [FLAGS] [OPTIONS] [SUBCOMMAND]</code></p>
-<h3><a class="header" href="#options-5" id="options-5">Options</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
-<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
-</tbody>
-</table>
-<h3><a class="header" href="#subcommands-3" id="subcommands-3">Subcommands</a></h3>
+<h3><a class="header" href="#subcommands-2" id="subcommands-2">Subcommands</a></h3>
 <ul>
 <li><a href="cli/lucky/./client/set-status.html">set-status</a>: Set the status of the current script</li>
 <li><a href="cli/lucky/./client/kv.html">kv</a>: Get and set values in the unit key-value store</li>
 </ul>
 <h1><a class="header" href="#set-status" id="set-status">set-status</a></h1>
-<h2><a class="header" href="#usage-9" id="usage-9">Usage</a></h2>
+<h2><a class="header" href="#usage-5" id="usage-5">Usage</a></h2>
 <p><code>set-status [FLAGS] [OPTIONS] [ARGS]</code></p>
-<h3><a class="header" href="#options-6" id="options-6">Options</a></h3>
+<h3><a class="header" href="#options-3" id="options-3">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
 <tr><td><code>-I</code>, <code>--script-id</code><code>&lt;script_id&gt;</code></td><td><code>LUCKY_SCRIPT_ID</code></td><td>The ID of the script that is being run. Allows each script to have a status independent of the other scripts in the charm.</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-3" id="positionals-3">Positionals</a></h3>
+<h3><a class="header" href="#positionals-2" id="positionals-2">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -413,18 +339,18 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#kv" id="kv">kv</a></h1>
-<h2><a class="header" href="#usage-10" id="usage-10">Usage</a></h2>
+<h2><a class="header" href="#usage-6" id="usage-6">Usage</a></h2>
 <p><code>kv [FLAGS] [SUBCOMMAND]</code></p>
-<h3><a class="header" href="#subcommands-4" id="subcommands-4">Subcommands</a></h3>
+<h3><a class="header" href="#subcommands-3" id="subcommands-3">Subcommands</a></h3>
 <ul>
 <li><a href="cli/lucky/client/./kv/get.html">get</a>: Get a value</li>
 <li><a href="cli/lucky/client/./kv/set.html">set</a>: Set a value</li>
 <li><a href="cli/lucky/client/./kv/delete.html">delete</a>: Delete a value</li>
 </ul>
 <h1><a class="header" href="#get" id="get">get</a></h1>
-<h2><a class="header" href="#usage-11" id="usage-11">Usage</a></h2>
+<h2><a class="header" href="#usage-7" id="usage-7">Usage</a></h2>
 <p><code>get [FLAGS] [key]</code></p>
-<h3><a class="header" href="#positionals-4" id="positionals-4">Positionals</a></h3>
+<h3><a class="header" href="#positionals-3" id="positionals-3">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -432,9 +358,9 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set" id="set">set</a></h1>
-<h2><a class="header" href="#usage-12" id="usage-12">Usage</a></h2>
+<h2><a class="header" href="#usage-8" id="usage-8">Usage</a></h2>
 <p><code>set [FLAGS] [ARGS]</code></p>
-<h3><a class="header" href="#positionals-5" id="positionals-5">Positionals</a></h3>
+<h3><a class="header" href="#positionals-4" id="positionals-4">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -443,9 +369,9 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#delete" id="delete">delete</a></h1>
-<h2><a class="header" href="#usage-13" id="usage-13">Usage</a></h2>
+<h2><a class="header" href="#usage-9" id="usage-9">Usage</a></h2>
 <p><code>delete [FLAGS] [key]</code></p>
-<h3><a class="header" href="#positionals-6" id="positionals-6">Positionals</a></h3>
+<h3><a class="header" href="#positionals-5" id="positionals-5">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
