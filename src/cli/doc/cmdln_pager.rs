@@ -232,6 +232,7 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
     }
 
     // Clean up and revert screen
+    terminal::disable_raw_mode()?;
     queue!(w, Show)?;
     queue!(w, LeaveAlternateScreen)?;
     w.flush()?;
