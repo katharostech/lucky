@@ -7,6 +7,10 @@ use std::io::Write;
 
 use crate::process::{cmd_exists, run_cmd};
 
+/// Docker related types
+mod types;
+pub(crate) use types::*;
+
 /// Make sure Docker is installed an available
 pub(crate) fn ensure_docker() -> anyhow::Result<()> {
     // Skip if docker is already installed

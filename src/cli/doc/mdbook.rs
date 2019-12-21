@@ -153,7 +153,6 @@ fn recurse_gen_cli_doc<'a>(
     Ok(())
 }
 
-#[allow(clippy::too_many_lines)]
 // Get the app usage markdown
 fn get_app_usage_md<'a>(command: &dyn CliCommand<'a>) -> String {
     let mut app = command.get_cli();

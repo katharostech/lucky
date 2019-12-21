@@ -11,6 +11,7 @@ use std::sync::{
     Arc, RwLock,
 };
 
+use crate::docker::Container;
 use crate::types::{HookScript, LuckyMetadata, ScriptState, ScriptStatus};
 
 #[allow(clippy::all)]
@@ -23,6 +24,9 @@ pub(crate) use lucky_rpc as rpc;
 mod tools;
 // Built-in daemon hook handlers
 mod hook_handlers;
+// Daemon helper types
+mod types;
+use types::*;
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 /// Contains the daemon state, which can be serialize and deserialized for persistance across
@@ -32,7 +36,10 @@ struct DaemonState {
     /// The statuses of all of the scripts
     script_statuses: HashMap<String, ScriptStatus>,
     /// The unit-local key-value store
-    kv: HashMap<String, String>,
+    kv: HashMap<String, Cd<String>>,
+    default_container: Option<Cd<Container>>,
+    /// Other containers that the daemon is supervising
+    containers: HashMap<String, Cd<Container>>,
 }
 
 /// The Lucky Daemon RPC service
@@ -104,7 +111,7 @@ impl LuckyDaemon {
         &self,
         call: &mut dyn rpc::Call_TriggerHook,
         hook_name: String,
-        environment: HashMap<String, String>,
+        environment: &HashMap<String, String>,
     ) -> anyhow::Result<()> {
         // Run any built-in hook handler
         hook_handlers::handle_hook(&self, &hook_name).context(format!(
@@ -148,13 +155,6 @@ impl LuckyDaemon {
     }
 }
 
-impl Drop for LuckyDaemon {
-    /// Persist the daeomon state before it is dropped
-    fn drop(&mut self) {
-        tools::flush_state(&self).unwrap_or_else(|e| log::error!("{:?}", e));
-    }
-}
-
 impl rpc::VarlinkInterface for LuckyDaemon {
     /// Stop the Lucky daemon
     fn stop_daemon(&self, call: &mut dyn rpc::Call_StopDaemon) -> varlink::Result<()> {
@@ -174,22 +174,25 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         hook_name: String,
         environment: HashMap<String, String>,
     ) -> varlink::Result<()> {
-        // Set the Juju context id
-        if let Some(context) = environment.get("JUJU_CONTEXT_ID") {
-            std::env::set_var("JUJU_CONTEXT_ID", context);
+        // Set the hook environment variables
+        for (var, value) in &environment {
+            std::env::set_var(var, value);
         }
+
         log::info!("Triggering hook: {}", hook_name);
 
         // Trigger hook and handle error
-        self._trigger_hook(call, hook_name, environment)
+        self._trigger_hook(call, hook_name, &environment)
             .or_else(|e| {
                 let e = format!("{:?}", e);
                 log::error!("{}", e);
                 call.reply_error(e)
             })?;
 
-        // Unset the Juju context as it will be invalid after the hook exits
-        std::env::remove_var("JUJU_CONTEXT_ID");
+        // Unset the hook environment variables as they will be invalid when the hook exits
+        for var in environment.keys() {
+            std::env::remove_var(var);
+        }
 
         Ok(())
     }
@@ -219,7 +222,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         let value = state.kv.get(&key);
 
         // Reply with value
-        call.reply(value.map(Clone::clone))?;
+        call.reply(value.map(|x| x.clone().to_inner()))?;
 
         Ok(())
     }
@@ -233,15 +236,18 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
         // Loop through key-value pairs and return result to client
         let state = self.state.read().unwrap();
-        let pairs: Vec<(&String, &String)> = state.kv.iter().collect();
+        let pairs: Vec<(&String, &Cd<String>)> = state.kv.iter().collect();
         call.set_continues(true);
         let mut i = 0;
         let len = pairs.len();
         while i < len {
+            // If this is the last pair
             if i == len - 1 {
+                // Tell client not to expect more after this one
                 call.set_continues(false);
             }
-            call.reply(pairs[i].0.clone(), pairs[i].1.clone())?;
+            // Reply with the pair
+            call.reply(pairs[i].0.clone(), pairs[i].1.clone().to_inner())?;
             i += 1;
         }
 
@@ -260,7 +266,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // If a value has been provided
         if let Some(value) = value {
             // Set key to value
-            state.kv.insert(key, value);
+            state.kv.insert(key, value.into());
         } else {
             // Erase key
             state.kv.remove(&key);
@@ -270,6 +276,75 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         call.reply()?;
 
         Ok(())
+    }
+
+    fn container_image_set(
+        &self,
+        call: &mut dyn rpc::Call_ContainerImageSet,
+        image: String,
+        container_name: Option<String>
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // If this is for a named container
+        if let Some(name) = container_name {
+            if let Some(container) = state.containers.get_mut(&name) {
+                // Set the image on existing container
+                container.def.image = image;
+            } else {
+                // Create a new container with the given image
+                let mut new_container = Container::default();
+                new_container.def.image = image;
+                state.containers.insert(name, new_container.into());
+            }
+        // If this is for the default container
+        } else {
+            if let Some(container) = &mut state.default_container {
+                // Set the image on existing container
+                container.def.image = image;
+            } else {
+                // Create a new container with the given image
+                let mut new_container = Container::default();
+                new_container.def.image = image;
+                state.default_container = Some(new_container.into());
+            }
+        }
+
+        call.reply()?;
+        Ok(())
+    }
+
+    fn container_image_get(
+        &self,
+        call: &mut dyn rpc::Call_ContainerImageGet,
+        container_name: Option<String>
+    ) -> varlink::Result<()> {
+        let state = self.state.read().unwrap();
+
+        // If this is for a named container
+        if let Some(name) = container_name {
+            if let Some(container) = state.containers.get(&name) {
+                call.reply(Some(container.def.image.clone()))?;
+            } else {
+                call.reply(None)?;
+            }
+        // If this is for the default container
+        } else {
+            if let Some(container) = &state.default_container {
+                call.reply(Some(container.def.image.clone()))?;
+            } else {
+                call.reply(None)?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl Drop for LuckyDaemon {
+    /// Persist the daeomon state before it is dropped
+    fn drop(&mut self) {
+        tools::flush_state(&self).unwrap_or_else(|e| log::error!("{:?}", e));
     }
 }
 

@@ -39,7 +39,6 @@ lazy_static! {
     };
 }
 
-#[allow(clippy::too_many_lines)]
 /// Show the commandline pager with documentation for the given command
 pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result<()> {
     // Hide the help, doc, and version flags in the command help message.

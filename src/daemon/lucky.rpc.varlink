@@ -38,3 +38,8 @@ method UnitKvGetAll() -> (key: string, value: string)
 
 # Set a value in the Unit's local Key-Value store. Setting `value` to null will erase the value.
 method UnitKvSet(key: string, value: ?string) -> ()
+
+# Set a container's image
+method ContainerImageSet(image: string, container_name: ?string) -> ()
+# Get a container's image. Image will be none if container doesn't exist.
+method ContainerImageGet(container_name: ?string) -> (image: ?string)

@@ -8,7 +8,7 @@
 #![warn(clippy::pedantic)]
 #![allow(clippy::default_trait_access)]
 #![allow(clippy::use_self)]
-
+#![allow(clippy::too_many_lines)]
 use git_version::git_version;
 // TODO: Not working right with drone to use the tag as the version
 const GIT_VERSION: &str = git_version!();
