@@ -10,7 +10,7 @@ dependencies = [
  "gimli",
  "intervaltree",
  "lazycell",
- "smallvec",
+ "smallvec 0.6.13",
 ]
 
 [[package]]
@@ -359,9 +359,9 @@ dependencies = [
 
 [[package]]
 name = "crossterm"
-version = "0.14.0"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58e30e09480c6aa31b93990b230cb8f62bd21379a362ae15e812644e6e09e625"
+checksum = "9f03c2ede596aa7d3c74a36f63e9c01047375fdbcf2203a5cdb70a996656b028"
 dependencies = [
  "bitflags",
  "crossterm_winapi",
@@ -627,7 +627,7 @@ version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af39074dd8d5eff756ddea3d8f34c7ae287d4dadb6f29fb1b67ca6b3f5036482"
 dependencies = [
- "smallvec",
+ "smallvec 0.6.13",
 ]
 
 [[package]]
@@ -690,9 +690,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.10"
+version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b9ad466a945c9c40f6f9a449c55675547e59bc75a2722d4689042ab3ae80c9c"
+checksum = "14b6052be84e6b71ab17edffc2eeabf5c2c3ae1fdb464aae35ac50c67a44e1f7"
 dependencies = [
  "cfg-if",
 ]
@@ -770,9 +770,9 @@ dependencies = [
 
 [[package]]
 name = "minimad"
-version = "0.5.2"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "799df554345607862e997d922f9303e432100d8ac23ed77943a0b278883ba4ae"
+checksum = "1053fdb571e63f50016e07b07dd857545773e4012ffdb734af819607bb3c5a63"
 dependencies = [
  "lazy_static",
 ]
@@ -856,27 +856,25 @@ checksum = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
 
 [[package]]
 name = "parking_lot"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f842b1982eb6c2fe34036a4fbfb06dd185a3f5c8edfaacdf7d1ea10b07de6252"
+checksum = "92e98c49ab0b7ce5b222f2cc9193fc4efe11c6d0bd4f648e374684a6857b1cfc"
 dependencies = [
  "lock_api",
  "parking_lot_core",
- "rustc_version",
 ]
 
 [[package]]
 name = "parking_lot_core"
-version = "0.6.2"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b876b1b9e7ac6e1a74a6da34d25c42e17e8862aa409cbbbdcfc8d86c6f3bc62b"
+checksum = "7582838484df45743c8434fbff785e8edf260c28748353d44bc0da32e0ceabf1"
 dependencies = [
  "cfg-if",
  "cloudabi",
  "libc",
  "redox_syscall",
- "rustc_version",
- "smallvec",
+ "smallvec 1.1.0",
  "winapi 0.3.8",
 ]
 
@@ -1312,6 +1310,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "smallvec"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "44e59e0c9fa00817912ae6e4e6e3c4fe04455e75699d06eedc7d85917ed8e8f4"
+
+[[package]]
 name = "stable_deref_trait"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1444,9 +1448,9 @@ dependencies = [
 
 [[package]]
 name = "termimad"
-version = "0.8.4"
+version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a08d0b4d0b9141c57a6a5a8cedaeed668f33bdff2f3cdfb5f35ea694dd5c064"
+checksum = "7263d3f4214b76a29174d75b979f00e9570749d718d7d9d7cbd66608cb5dac9a"
 dependencies = [
  "crossbeam",
  "crossterm",
