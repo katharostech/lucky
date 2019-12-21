@@ -12,7 +12,7 @@ use std::sync::{
 };
 
 use crate::docker::Container;
-use crate::types::{HookScript, LuckyMetadata, ScriptState, ScriptStatus};
+use crate::types::{HookScript, LuckyMetadata, ScriptStatus};
 
 #[allow(clippy::all)]
 #[allow(bare_trait_objects)]
@@ -39,7 +39,7 @@ struct DaemonState {
     kv: HashMap<String, Cd<String>>,
     default_container: Option<Cd<Container>>,
     /// Other containers that the daemon is supervising
-    containers: HashMap<String, Cd<Container>>,
+    named_containers: HashMap<String, Cd<Container>>,
 }
 
 /// The Lucky Daemon RPC service
@@ -92,8 +92,12 @@ impl LuckyDaemon {
         daemon
     }
 
-    fn _set_status(&self, script_id: &str, status: ScriptStatus) -> anyhow::Result<()> {
-        log::info!(r#"Setting status for script "{}": {}"#, script_id, status);
+    pub(crate) fn set_script_status(
+        &self,
+        script_id: &str,
+        status: ScriptStatus,
+    ) -> anyhow::Result<()> {
+        log::info!(r#"Set status[{}]: {}"#, script_id, status);
         self.state
             .write()
             .unwrap()
@@ -110,7 +114,7 @@ impl LuckyDaemon {
     fn _trigger_hook(
         &self,
         call: &mut dyn rpc::Call_TriggerHook,
-        hook_name: String,
+        hook_name: &str,
         environment: &HashMap<String, String>,
     ) -> anyhow::Result<()> {
         // Run any built-in hook handler
@@ -120,7 +124,7 @@ impl LuckyDaemon {
         ))?;
 
         // Run hook scripts
-        if let Some(hook_scripts) = self.lucky_metadata.hooks.get(&hook_name) {
+        if let Some(hook_scripts) = self.lucky_metadata.hooks.get(hook_name) {
             // Execute all scripts registered for this hook
             for hook_script in hook_scripts {
                 match hook_script {
@@ -131,6 +135,9 @@ impl LuckyDaemon {
                         log::warn!("Container scripts not yet implemented");
                     }
                 }
+
+                // Apply any container configuration changed by the script
+                tools::apply_container_updates(self)?;
             }
 
             // Update the Juju status as Juju will clear it if we don't re-set it after hook
@@ -182,7 +189,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         log::info!("Triggering hook: {}", hook_name);
 
         // Trigger hook and handle error
-        self._trigger_hook(call, hook_name, &environment)
+        self._trigger_hook(call, &hook_name, &environment)
             .or_else(|e| {
                 let e = format!("{:?}", e);
                 log::error!("{}", e);
@@ -193,6 +200,8 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         for var in environment.keys() {
             std::env::remove_var(var);
         }
+
+        log::info!("Done triggering hook: {}", hook_name);
 
         Ok(())
     }
@@ -207,8 +216,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // Add status to script statuses
         let status: ScriptStatus = status.into();
 
-        self._set_status(&script_id, status)
-            .or_else(|e| call.reply_error(e.to_string()))?;
+        self.set_script_status(&script_id, status).or_else(|e| {
+            let e = format!("{:?}", e);
+            log::error!("{}", e);
+            call.reply_error(e)
+        })?;
 
         // Reply
         call.reply()?;
@@ -222,7 +234,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         let value = state.kv.get(&key);
 
         // Reply with value
-        call.reply(value.map(|x| x.clone().to_inner()))?;
+        call.reply(value.map(|x| x.clone().into_inner()))?;
 
         Ok(())
     }
@@ -247,7 +259,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 call.set_continues(false);
             }
             // Reply with the pair
-            call.reply(pairs[i].0.clone(), pairs[i].1.clone().to_inner())?;
+            call.reply(pairs[i].0.clone(), pairs[i].1.clone().into_inner())?;
             i += 1;
         }
 
@@ -265,9 +277,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
         // If a value has been provided
         if let Some(value) = value {
+            log::debug!("Key-Value set: {} = {}", key, value);
             // Set key to value
             state.kv.insert(key, value.into());
         } else {
+            log::debug!("Key-Value delete: {}", key);
             // Erase key
             state.kv.remove(&key);
         }
@@ -278,31 +292,39 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    // The uncollapsed if is easier to understand in this case
+    #[allow(clippy::collapsible_if)]
     fn container_image_set(
         &self,
         call: &mut dyn rpc::Call_ContainerImageSet,
         image: String,
-        container_name: Option<String>
+        container_name: Option<String>,
     ) -> varlink::Result<()> {
         let mut state = self.state.write().unwrap();
 
         // If this is for a named container
         if let Some(name) = container_name {
-            if let Some(container) = state.containers.get_mut(&name) {
+            if let Some(container) = state.named_containers.get_mut(&name) {
+                log::debug!("Set Docker image [{}]: {}", name, image);
                 // Set the image on existing container
                 container.def.image = image;
             } else {
+                log::debug!("Adding new docker container: {}", name);
+                log::debug!("Set Docker image [{}]: {}", name, image);
                 // Create a new container with the given image
                 let mut new_container = Container::default();
                 new_container.def.image = image;
-                state.containers.insert(name, new_container.into());
+                state.named_containers.insert(name, new_container.into());
             }
         // If this is for the default container
         } else {
             if let Some(container) = &mut state.default_container {
+                log::debug!("Set container image: {}", image);
                 // Set the image on existing container
                 container.def.image = image;
             } else {
+                log::debug!("Adding container");
+                log::debug!("Set container image: {}", image);
                 // Create a new container with the given image
                 let mut new_container = Container::default();
                 new_container.def.image = image;
@@ -314,16 +336,18 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    // The uncollapsed if is easier to understand in this case
+    #[allow(clippy::collapsible_if)]
     fn container_image_get(
         &self,
         call: &mut dyn rpc::Call_ContainerImageGet,
-        container_name: Option<String>
+        container_name: Option<String>,
     ) -> varlink::Result<()> {
         let state = self.state.read().unwrap();
 
         // If this is for a named container
         if let Some(name) = container_name {
-            if let Some(container) = state.containers.get(&name) {
+            if let Some(container) = state.named_containers.get(&name) {
                 call.reply(Some(container.def.image.clone()))?;
             } else {
                 call.reply(None)?;
@@ -336,6 +360,16 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 call.reply(None)?;
             }
         }
+
+        Ok(())
+    }
+
+    fn container_apply(&self, call: &mut dyn rpc::Call_ContainerApply) -> varlink::Result<()> {
+        tools::apply_container_updates(self).or_else(|e| {
+            let e = format!("{:?}", e);
+            log::error!("{}", e);
+            call.reply_error(e)
+        })?;
 
         Ok(())
     }

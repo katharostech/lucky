@@ -56,7 +56,7 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
             .value_of("script_id")
             .expect("Missing required argument: script_id");
 
-        // Get client data
+        // Get client connection
         let mut client: Box<VarlinkClient> = data
             .remove("client")
             .expect("Missing client data")

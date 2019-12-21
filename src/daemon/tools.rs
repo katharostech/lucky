@@ -1,9 +1,11 @@
 use anyhow::format_err;
-
 use subprocess::{Exec, ExitStatus, Redirection};
 
 use std::env;
 use std::io::{BufRead, BufReader};
+
+use crate::process::run_cmd;
+use crate::types::{ScriptState, ScriptStatus};
 
 use super::*;
 
@@ -97,6 +99,8 @@ pub(super) fn run_host_script(
     script_name: &str,
     environment: &HashMap<String, String>,
 ) -> anyhow::Result<()> {
+    log::debug!("Running host script: {}", script_name);
+
     // Add bin dir to the PATH
     let path_env = if let Some(path) = std::env::var_os("PATH") {
         let mut paths = env::split_paths(&path).collect::<Vec<_>>();
@@ -168,4 +172,69 @@ pub(super) fn run_host_script(
             status
         )),
     }
+}
+
+/// Apply any updates to container configuration for the charm by running
+pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()> {
+    log::debug!("Applying container configuration");
+    daemon.set_script_status(
+        "__apply_container_updates__",
+        ScriptStatus {
+            state: ScriptState::Maintenance,
+            message: Some("Applying Docker configuration updates".into()),
+        },
+    )?;
+    let mut state = daemon.state.write().unwrap();
+
+    // Apply changes for any updated named containers
+    for mut container in state.named_containers.values_mut() {
+        apply_updates(&mut container)?;
+    }
+
+    // Apply changes for the default container
+    if let Some(container) = &mut state.default_container {
+        apply_updates(container)?;
+    }
+
+    daemon.set_script_status(
+        "__apply_container_updates__",
+        ScriptStatus {
+            state: ScriptState::Active,
+            message: None,
+        },
+    )?;
+    Ok(())
+}
+
+fn apply_updates(container: &mut Cd<Container>) -> anyhow::Result<()> {
+    // Skip apply if container config is unchanged since last apply
+    if !container.is_dirty() {
+        return Ok(());
+    }
+
+    // If the container has already been deployed
+    if let Some(id) = &container.id {
+        log::debug!("Removing container: {}", id);
+        // Remove the container
+        run_cmd("docker", &["rm", id])?;
+    }
+
+    // Deploy the container
+    let docker_args = container.def.to_docker_args();
+    let docker_args: Vec<&str> = docker_args.iter().map(AsRef::as_ref).collect();
+
+    log::debug!("Running container: docker {}", docker_args.join(" "));
+
+    let output = run_cmd("docker", docker_args.as_slice())?;
+
+    // Get new container ID
+    let id = output.trim();
+    container.id = Some(id.into());
+
+    log::debug!("New container id: {}", id);
+
+    // Mark container as "clean" and up-to-date with the config
+    container.clean();
+
+    Ok(())
 }

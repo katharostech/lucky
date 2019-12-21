@@ -13,7 +13,7 @@ pub(super) fn handle_hook(daemon: &LuckyDaemon, hook_name: &str) -> anyhow::Resu
 fn handle_install(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     // If Docker is required
     if daemon.lucky_metadata.use_docker {
-        daemon._set_status(
+        daemon.set_script_status(
             "__internal__",
             ScriptStatus {
                 state: ScriptState::Maintenance,
@@ -24,7 +24,7 @@ fn handle_install(daemon: &LuckyDaemon) -> anyhow::Result<()> {
         // Make sure Docker is installed
         crate::docker::ensure_docker()?;
 
-        daemon._set_status(
+        daemon.set_script_status(
             "__internal__",
             ScriptStatus {
                 state: ScriptState::Active,

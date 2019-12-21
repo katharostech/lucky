@@ -62,7 +62,7 @@ impl<'a> CliCommand<'a> for GetSubcommand {
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
         let key = args.value_of("key");
 
-        // Get client data
+        // Get client connection
         let mut client: Box<VarlinkClient> = data
             .remove("client")
             .expect("Missing client data")
@@ -127,7 +127,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .expect("Missing required argument: key");
         let value = args.value_of("value");
 
-        // Get client data
+        // Get client connection
         let mut client: Box<VarlinkClient> = data
             .remove("client")
             .expect("Missing client data")
@@ -172,7 +172,7 @@ impl<'a> CliCommand<'a> for DeleteSubcommand {
             .value_of("key")
             .expect("Missing required argument: key");
 
-        // Get client data
+        // Get client connection
         let mut client: Box<VarlinkClient> = data
             .remove("client")
             .expect("Missing client data")

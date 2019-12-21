@@ -3,6 +3,7 @@ use clap::{App, ArgMatches};
 use std::collections::HashMap;
 
 // Subcommands
+mod container;
 mod kv;
 mod set_status;
 
@@ -29,6 +30,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
         vec![
             Box::new(set_status::SetStatusSubcommand),
             Box::new(kv::KvSubcommand),
+            Box::new(container::ContainerSubcommand),
         ]
     }
 

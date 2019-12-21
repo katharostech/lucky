@@ -43,3 +43,5 @@ method UnitKvSet(key: string, value: ?string) -> ()
 method ContainerImageSet(image: string, container_name: ?string) -> ()
 # Get a container's image. Image will be none if container doesn't exist.
 method ContainerImageGet(container_name: ?string) -> (image: ?string)
+# Apply updates to the container configuration
+method ContainerApply() -> ()
