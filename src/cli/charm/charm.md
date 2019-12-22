@@ -12,7 +12,7 @@ The `lucky charm` command contains tools for creating and building your charms. 
 
 In order to publish your charms to the charm store you will need the sepparate Juju [charm tools](https://github.com/juju/charm-tools). After you have the charm tools installed, you can push your charm to the charm store:
 
-```
+```bash
 # Build the charm using Lucky
 $ lucky charm build
 # Login to the charm store
