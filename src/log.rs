@@ -1,25 +1,53 @@
 //! Contains the lucky logging implementation
-
+use lazy_static::lazy_static;
 use log::{Level, LevelFilter, Metadata, Record};
 
 use std::fmt::Write as FmtWrite;
 use std::io::Write;
 use std::process::Command;
+use std::sync::{Arc, RwLock};
 
 /// The Lucky logging implementation
 ///
-/// This logger uses different output styles for the CLI and for the daemon. Also the daemon log
-/// level can be independently controlled from the CLI by using the `LUCKY_DAEMON_LOG_LEVEL` and
-/// `LUCKY_CLI_LOG_LEVEL` environment variables. The `LUCKY_LOG_LEVEL` environment variable can be
-/// used to set a global default log level.
-pub struct LuckyLogger;
+/// This logger uses different output styles in the CLI and Daemon logging modes. The default mode
+/// is CLI, but the mode can be changed with `set_log_mode`.
+///
+/// The daemon log level can be independently controlled from the CLI log level by using the
+/// `LUCKY_DAEMON_LOG_LEVEL` and `LUCKY_CLI_LOG_LEVEL` environment variables. The `LUCKY_LOG_LEVEL`
+/// environment variable can be used to set a global default log level.
+pub(crate) struct LuckyLogger {
+    log_mode: Arc<RwLock<LogMode>>,
+}
+
+impl LuckyLogger {
+    fn new() -> Self {
+        LuckyLogger {
+            log_mode: Arc::new(RwLock::new(LogMode::Cli)),
+        }
+    }
+
+    fn set_log_mode(&self, mode: LogMode) {
+        let mut log_mode = self.log_mode.write().unwrap();
+
+        *log_mode = mode;
+    }
+}
+
+/// The logging output mode to use
+pub(crate) enum LogMode {
+    /// The CLI logging mode
+    Cli,
+    /// The Daemon logging mode
+    Daemon,
+}
 
 impl log::Log for LuckyLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
+        let log_mode = self.log_mode.read().unwrap();
         // Filter based on specific log level environment variables
-        match metadata.target() {
+        match *log_mode {
             // Daemon logs
-            target if target.starts_with("lucky::daemon") => {
+            LogMode::Daemon => {
                 if let Ok(level) = std::env::var("LUCKY_DAEMON_LOG_LEVEL") {
                     metadata.level() <= level.parse().unwrap_or(LevelFilter::Trace)
                 } else {
@@ -27,8 +55,8 @@ impl log::Log for LuckyLogger {
                     metadata.level() <= log::max_level()
                 }
             }
-            // CLI logs ( the default )
-            _ => {
+            // CLI logs
+            LogMode::Cli => {
                 if let Ok(level) = std::env::var("LUCKY_CLI_LOG_LEVEL") {
                     metadata.level() <= level.parse().unwrap_or(LevelFilter::Trace)
                 } else {
@@ -45,9 +73,10 @@ impl log::Log for LuckyLogger {
         }
 
         let buffer_error = "Could not write to internal string buffer";
-        match record.target() {
+        let log_mode = self.log_mode.read().unwrap();
+        match *log_mode {
             // Daemon logs
-            target if target.starts_with("lucky::daemon") => {
+            LogMode::Daemon => {
                 let mut message = String::new();
 
                 // Write module path if available
@@ -78,8 +107,8 @@ impl log::Log for LuckyLogger {
                 log_stderr(&message);
                 log_juju(&message, record.level() >= LevelFilter::Debug);
             }
-            // Cli Logs ( the default )
-            _ => {
+            // Cli Logs
+            LogMode::Cli => {
                 // Format message
                 let mut message = String::new();
                 match record.level() {
@@ -169,11 +198,13 @@ fn log_juju(message: &str, debug: bool) {
     }
 }
 
-static LUCKY_LOGGER: LuckyLogger = LuckyLogger;
+lazy_static! {
+    static ref LUCKY_LOGGER: LuckyLogger = LuckyLogger::new();
+}
 
 /// Initialize the logger and set the max log level from the `LUCKY_LOG_LEVEL` environment variable
 pub(crate) fn init_logger() {
-    match log::set_logger(&LUCKY_LOGGER) {
+    match log::set_logger(&*LUCKY_LOGGER) {
         Ok(()) => {
             if let Ok(level) = std::env::var("LUCKY_LOG_LEVEL") {
                 log::set_max_level(level.parse().unwrap_or(log::LevelFilter::Debug));
@@ -183,6 +214,11 @@ pub(crate) fn init_logger() {
         }
         Err(e) => panic!("Could not set logger: {}", e),
     }
+}
+
+/// Set the logging mode for Lucky
+pub(crate) fn set_log_mode(mode: LogMode) {
+    LUCKY_LOGGER.set_log_mode(mode);
 }
 
 //

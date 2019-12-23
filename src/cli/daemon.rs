@@ -1,12 +1,14 @@
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
 
+use std::sync::{Arc, RwLock};
+
 mod start;
 mod stop;
 mod trigger_hook;
 
 use crate::cli::*;
-use std::sync::{Arc, RwLock};
+use crate::log::{set_log_mode, LogMode::Daemon};
 
 pub(super) struct DaemonSubcommand;
 
@@ -36,6 +38,7 @@ impl<'a> CliCommand<'a> for DaemonSubcommand {
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
+        set_log_mode(Daemon);
         Ok(data)
     }
 }
