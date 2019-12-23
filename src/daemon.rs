@@ -136,6 +136,7 @@ impl LuckyDaemon {
                     }
                 }
 
+                // TODO: Don't apply container config when `docker: false` in lucky.yaml
                 // Apply any container configuration changed by the script
                 tools::apply_container_updates(self)?;
             }
@@ -365,6 +366,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
     }
 
     fn container_apply(&self, call: &mut dyn rpc::Call_ContainerApply) -> varlink::Result<()> {
+        // TODO: Don't apply container config when `docker: false` in lucky.yaml
         tools::apply_container_updates(self).or_else(|e| {
             let e = format!("{:?}", e);
             log::error!("{}", e);
