@@ -196,6 +196,14 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             ));
         }
 
+        // Add the LXD profile
+        // TODO: Allow users to include a profile to override/modify/extend this one
+        // TODO: Only add the security.nested=true when Docker support is not disabled in lucky.yaml
+        write_file(
+            &target_dir.join("lxd-profile.yaml"),
+            include_str!("build/lxd-profile.yaml"),
+        )?;
+
         // Create stop hook
         let stop_hook_path = hook_dir.join("stop");
         write_file(&stop_hook_path, include_str!("build/stop-hook.sh"))?;
