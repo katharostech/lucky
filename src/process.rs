@@ -3,6 +3,23 @@ use subprocess::{Exec, ExitStatus, PopenError, Redirection};
 
 use std::collections::HashMap;
 use std::io::ErrorKind as IoErrorKind;
+use std::thread::sleep;
+use std::time::Duration;
+
+/// Data on how many times and with what delay to try running a command
+pub(crate) struct Retries {
+    count: u16,
+    delay: Duration,
+}
+
+impl Default for Retries {
+    fn default() -> Self {
+        Retries {
+            count: 5,
+            delay: Duration::from_secs(2),
+        }
+    }
+}
 
 /// Test that a program exists and that running it succeeds
 ///
@@ -78,6 +95,46 @@ fn _run_cmd(
     }
 }
 
+/// Run a command on the system with proper error handling and messages
 pub(crate) fn run_cmd(command: &str, args: &[&str]) -> anyhow::Result<String> {
     _run_cmd(command, args, None)
+}
+
+/// Run a command on the system with a configurable number of retries upon failure
+pub(crate) fn run_cmd_with_retries(
+    command: &str,
+    args: &[&str],
+    retries: &Retries,
+) -> anyhow::Result<String> {
+    log::trace!("Run cmd with retries: {} {}", command, args.join(" "));
+    let mut retries_left = retries.count;
+    while retries_left > 0 {
+        match _run_cmd(command, args, None) {
+            // If command was successful, return Ok
+            Ok(s) => return Ok(s),
+            // If the command failed
+            Err(e) => {
+                log::error!("{:?}", e);
+
+                // If this is the last retry
+                if retries_left == 1 {
+                    // Return the error
+                    return Err(e);
+                // If there are more retries left
+                } else {
+                    log::debug!(
+                        "Trying to run previously failed command again. Retries left: {}",
+                        retries_left
+                    );
+                    // Subtract the available retries
+                    retries_left -= 1;
+                    // Sleep for the retry delay
+                    sleep(retries.delay);
+                }
+            }
+        };
+    }
+
+    // The code above should return either Ok or Err before reaching here
+    unreachable!();
 }

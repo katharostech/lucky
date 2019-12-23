@@ -4,7 +4,7 @@ use subprocess::{Exec, ExitStatus, Redirection};
 use std::env;
 use std::io::{BufRead, BufReader};
 
-use crate::process::run_cmd;
+use crate::process::run_cmd_with_retries;
 use crate::types::{ScriptState, ScriptStatus};
 
 use super::*;
@@ -216,7 +216,7 @@ fn apply_updates(container: &mut Cd<Container>) -> anyhow::Result<()> {
     if let Some(id) = &container.id {
         log::debug!("Removing container: {}", id);
         // Remove the container
-        run_cmd("docker", &["rm", id])?;
+        run_cmd_with_retries("docker", &["rm", id], &Default::default())?;
     }
 
     // Deploy the container
@@ -225,7 +225,7 @@ fn apply_updates(container: &mut Cd<Container>) -> anyhow::Result<()> {
 
     log::debug!("Running container: docker {}", docker_args.join(" "));
 
-    let output = run_cmd("docker", docker_args.as_slice())?;
+    let output = run_cmd_with_retries("docker", docker_args.as_slice(), &Default::default())?;
 
     // Get new container ID
     let id = output.trim();

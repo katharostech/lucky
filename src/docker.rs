@@ -5,7 +5,7 @@ use anyhow::{bail, Context};
 use std::fs;
 use std::io::Write;
 
-use crate::process::{cmd_exists, run_cmd};
+use crate::process::{cmd_exists, run_cmd, run_cmd_with_retries};
 
 /// Docker related types
 mod types;
@@ -19,7 +19,7 @@ pub(crate) fn ensure_docker() -> anyhow::Result<()> {
     };
 
     // Install the Docker snap
-    run_cmd("snap", &["install", "docker"])?;
+    run_cmd_with_retries("snap", &["install", "docker"], &Default::default())?;
     // Make sure docker is installed
     if !cmd_exists("docker", &["--version"])? {
         bail!("Could not install Docker");
