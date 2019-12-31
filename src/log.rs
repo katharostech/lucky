@@ -44,6 +44,13 @@ pub(crate) enum LogMode {
 impl log::Log for LuckyLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
         let log_mode = self.log_mode.read().unwrap();
+
+        // Only log messages from Lucky itself, not dependent libraries.
+        // Might want to change this later.
+        if !metadata.target().starts_with("lucky::") {
+            return false;
+        }
+
         // Filter based on specific log level environment variables
         match *log_mode {
             // Daemon logs
