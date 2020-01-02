@@ -1,15 +1,55 @@
 //! Contains tools for installing and interracting with Docker
-
 use anyhow::{bail, Context};
+use serde::{Deserialize, Serialize};
+use shiplift::builder::ContainerOptions;
 
 use std::fs;
 use std::io::Write;
 
 use crate::process::{cmd_exists, run_cmd, run_cmd_with_retries};
 
-/// Docker related types
-mod types;
-pub(crate) use types::*;
+/// A struct made of a container definition and the container id
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub(crate) struct ContainerInfo {
+    /// The id of the Docker container. Will be none if the container has not yet been run
+    pub id: Option<String>,
+    /// Marks this container as pending removal
+    pub pending_removal: bool,
+    /// The definition for the desired state of the container. This should match the actual state
+    /// of the container if `dirty` is `false`.
+    pub config: ContainerConfig,
+}
+
+impl ContainerInfo {
+    pub fn new(image: &str) -> Self {
+        ContainerInfo {
+            id: None,
+            pending_removal: false,
+            config: ContainerConfig::new(image),
+        }
+    }
+}
+
+/// The container configuration options such as image, volumes, ports, etc.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub(crate) struct ContainerConfig {
+    pub image: String,
+}
+
+impl ContainerConfig {
+    pub fn new(image: &str) -> Self {
+        ContainerConfig {
+            image: image.to_owned(),
+        }
+    }
+
+    /// Get a `ContainerOptions` struct that can be given to shiplift to run the container
+    pub fn to_container_options(&self) -> ContainerOptions {
+        let options = ContainerOptions::builder(&self.image);
+
+        options.build()
+    }
+}
 
 /// Make sure Docker is installed an available
 pub(crate) fn ensure_docker() -> anyhow::Result<()> {

@@ -1,6 +1,7 @@
 //! Contains the Lucky Daemon and RPC implementaiton used for client->daemon communication.
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
+use shiplift::Docker;
 
 use std::collections::HashMap;
 use std::fs::OpenOptions;
@@ -8,10 +9,10 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
-    Arc, RwLock,
+    Arc, Mutex, RwLock,
 };
 
-use crate::docker::Container;
+use crate::docker::ContainerInfo;
 use crate::types::{HookScript, LuckyMetadata, ScriptStatus};
 
 #[allow(clippy::all)]
@@ -37,9 +38,9 @@ struct DaemonState {
     script_statuses: HashMap<String, ScriptStatus>,
     /// The unit-local key-value store
     kv: HashMap<String, Cd<String>>,
-    default_container: Option<Cd<Container>>,
+    default_container: Option<Cd<ContainerInfo>>,
     /// Other containers that the daemon is supervising
-    named_containers: HashMap<String, Cd<Container>>,
+    named_containers: HashMap<String, Cd<ContainerInfo>>,
 }
 
 /// The Lucky Daemon RPC service
@@ -56,6 +57,8 @@ struct LuckyDaemon {
     /// The daemon state. This will be serialized and written to disc for persistance when the
     /// daemon crashes or is shutdown.  
     state: Arc<RwLock<DaemonState>>,
+    /// The docker daemon connection if it has been loaded
+    docker_conn: Arc<Mutex<Option<Arc<Mutex<Docker>>>>>,
 }
 
 impl LuckyDaemon {
@@ -75,6 +78,7 @@ impl LuckyDaemon {
             state_dir,
             stop_listening,
             state: Default::default(),
+            docker_conn: Arc::new(Mutex::new(None)),
         };
 
         // Load daemon state
@@ -108,6 +112,33 @@ impl LuckyDaemon {
         crate::juju::set_status(tools::get_juju_status(&self))?;
 
         Ok(())
+    }
+
+    /// Gets a handle to the daemon's Docker connection, creating a new one if one doesn't already
+    /// exist.
+    fn get_docker_conn(&self) -> anyhow::Result<Arc<Mutex<Docker>>> {
+        let mut docker_conn = self.docker_conn.lock().unwrap();
+
+        // If we have a connection already, return it
+        if let Some(docker_conn) = &*docker_conn {
+            Ok(docker_conn.clone())
+        // If there is no connection
+        } else {
+            // Connect to docker
+            log::debug!("Connecting to Docker");
+            let conn = Docker::new();
+
+            // Test getting Docker info
+            log::trace!("Docker info: {:?}", {
+                let mut rt = crate::RT.lock().unwrap();
+                rt.block_on(conn.info())?
+            });
+
+            // Return connection
+            let conn = Arc::new(Mutex::new(conn));
+            *docker_conn = Some(conn.clone());
+            Ok(conn)
+        }
     }
 
     #[allow(clippy::needless_pass_by_value)]
@@ -308,13 +339,12 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             if let Some(container) = state.named_containers.get_mut(&name) {
                 log::debug!("Set Docker image [{}]: {}", name, image);
                 // Set the image on existing container
-                container.def.image = image;
+                container.config.image = image;
             } else {
                 log::debug!("Adding new docker container: {}", name);
                 log::debug!("Set Docker image [{}]: {}", name, image);
                 // Create a new container with the given image
-                let mut new_container = Container::default();
-                new_container.def.image = image;
+                let new_container = ContainerInfo::new(&image);
                 state.named_containers.insert(name, new_container.into());
             }
         // If this is for the default container
@@ -322,13 +352,12 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             if let Some(container) = &mut state.default_container {
                 log::debug!("Set container image: {}", image);
                 // Set the image on existing container
-                container.def.image = image;
+                container.config.image = image;
             } else {
                 log::debug!("Adding container");
                 log::debug!("Set container image: {}", image);
                 // Create a new container with the given image
-                let mut new_container = Container::default();
-                new_container.def.image = image;
+                let new_container = ContainerInfo::new(&image);
                 state.default_container = Some(new_container.into());
             }
         }
@@ -349,14 +378,14 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // If this is for a named container
         if let Some(name) = container_name {
             if let Some(container) = state.named_containers.get(&name) {
-                call.reply(Some(container.def.image.clone()))?;
+                call.reply(Some(container.config.image.clone()))?;
             } else {
                 call.reply(None)?;
             }
         // If this is for the default container
         } else {
             if let Some(container) = &state.default_container {
-                call.reply(Some(container.def.image.clone()))?;
+                call.reply(Some(container.config.image.clone()))?;
             } else {
                 call.reply(None)?;
             }

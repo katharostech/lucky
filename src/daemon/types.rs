@@ -34,10 +34,10 @@ impl<T> Cd<T> {
         self.dirty = false;
     }
 
-    /// Get whether or not this object has been mutably borrowed since the last
-    /// run of `clean()`.
-    pub fn is_dirty(&self) -> bool {
-        self.dirty
+    /// Returns `true` if the inner type has **not** been modified since the last run of
+    /// `clean()`.
+    pub fn is_clean(&self) -> bool {
+        !self.dirty
     }
 
     /// Consumes the `Cd` and converts to the inner type

@@ -3,8 +3,9 @@ use subprocess::{Exec, ExitStatus, Redirection};
 
 use std::env;
 use std::io::{BufRead, BufReader};
+use std::time::Duration;
 
-use crate::process::run_cmd_with_retries;
+use crate::docker::ContainerInfo;
 use crate::types::{ScriptState, ScriptStatus};
 
 use super::*;
@@ -188,12 +189,12 @@ pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()
 
     // Apply changes for any updated named containers
     for mut container in state.named_containers.values_mut() {
-        apply_updates(&mut container)?;
+        apply_updates(daemon, &mut container)?;
     }
 
     // Apply changes for the default container
     if let Some(container) = &mut state.default_container {
-        apply_updates(container)?;
+        apply_updates(daemon, container)?;
     }
 
     daemon.set_script_status(
@@ -206,35 +207,39 @@ pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()
     Ok(())
 }
 
-fn apply_updates(container: &mut Cd<Container>) -> anyhow::Result<()> {
+fn apply_updates(
+    daemon: &LuckyDaemon,
+    container_info: &mut Cd<ContainerInfo>,
+) -> anyhow::Result<()> {
     // Skip apply if container config is unchanged since last apply
-    if !container.is_dirty() {
+    if container_info.is_clean() {
         return Ok(());
     }
 
+    // Get the async runtime for running Docker commands
+    let mut rt = crate::RT.lock().unwrap();
+    // Get the docker connection
+    let docker_conn = daemon.get_docker_conn()?;
+    let docker_conn = docker_conn.lock().unwrap();
+    let containers = docker_conn.containers();
+
     // If the container has already been deployed
-    if let Some(id) = &container.id {
-        log::debug!("Removing container: {}", id);
+    if let Some(id) = &container_info.id {
         // Remove the container
-        run_cmd_with_retries("docker", &["rm", id], &Default::default())?;
+        log::debug!("Removing container: {}", id);
+        let container = containers.get(&id);
+
+        rt.block_on(container.stop(Some(Duration::from_secs(10))))?;
+        rt.block_on(container.delete())?
     }
 
     // Deploy the container
-    let docker_args = container.def.to_docker_args();
-    let docker_args: Vec<&str> = docker_args.iter().map(AsRef::as_ref).collect();
+    let docker_options = container_info.config.to_container_options();
 
-    log::debug!("Running container: docker {}", docker_args.join(" "));
-
-    let output = run_cmd_with_retries("docker", docker_args.as_slice(), &Default::default())?;
-
-    // Get new container ID
-    let id = output.trim();
-    container.id = Some(id.into());
-
-    log::debug!("New container id: {}", id);
+    log::debug!("Running container: docker {:?}", docker_options);
 
     // Mark container as "clean" and up-to-date with the config
-    container.clean();
+    container_info.clean();
 
     Ok(())
 }
