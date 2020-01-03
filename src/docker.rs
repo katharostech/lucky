@@ -58,8 +58,15 @@ pub(crate) fn ensure_docker() -> anyhow::Result<()> {
         return Ok(());
     };
 
-    // Install the Docker snap
-    run_cmd_with_retries("snap", &["install", "docker"], &Default::default())?;
+    // Install Docker
+    // TODO: We need to figure out whether or not to use the Docker snap, which doesn't work on
+    // LXD. We will also want to support Centos, but we might just have to install different
+    // packages depending on the system.
+    run_cmd_with_retries(
+        "apt-get",
+        &["install", "-y", "docker.io"],
+        &Default::default(),
+    )?;
     // Make sure docker is installed
     if !cmd_exists("docker", &["--version"])? {
         bail!("Could not install Docker");
@@ -78,14 +85,14 @@ pub(crate) fn ensure_docker() -> anyhow::Result<()> {
     // If there are any proxy settings
     if proxy_settings != "" {
         // Create the Docker service drop-in dir
-        let dropin_dir = "/etc/systemd/system/snap.docker.dockerd.service.d/";
+        let dropin_dir = "/etc/systemd/system/docker.service.d/";
         fs::create_dir_all(dropin_dir).context(format!(
             "Could not create docker service drop-in config dir: {:?}",
             dropin_dir
         ))?;
 
         // Open the drop-in file
-        let file_path = "/etc/systemd/system/snap.docker.dockerd.service.d/http-proxy.conf";
+        let file_path = "/etc/systemd/system/docker.service.d/http-proxy.conf";
         let mut file = fs::OpenOptions::new()
             .write(true)
             .truncate(true)
@@ -104,7 +111,7 @@ pub(crate) fn ensure_docker() -> anyhow::Result<()> {
 
         // Reload Docker config
         run_cmd("systemctl", &["daemon-reload"])?;
-        run_cmd("snap", &["restart", "docker"])?;
+        run_cmd("systemctl", &["restart", "docker"])?;
     }
 
     Ok(())
