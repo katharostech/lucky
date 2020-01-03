@@ -1,10 +1,13 @@
 use anyhow::format_err;
+use futures::prelude::*;
+use shiplift::PullOptions;
 use subprocess::{Exec, ExitStatus, Redirection};
 
 use std::env;
 use std::io::{BufRead, BufReader};
 use std::time::Duration;
 
+use crate::block_on;
 use crate::docker::ContainerInfo;
 use crate::types::{ScriptState, ScriptStatus};
 
@@ -197,6 +200,9 @@ pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()
         apply_updates(daemon, container)?;
     }
 
+    // Drop state to avoid deadlock on daemon state
+    drop(state);
+
     daemon.set_script_status(
         "__apply_container_updates__",
         ScriptStatus {
@@ -216,12 +222,11 @@ fn apply_updates(
         return Ok(());
     }
 
-    // Get the async runtime for running Docker commands
-    let mut rt = crate::RT.lock().unwrap();
     // Get the docker connection
     let docker_conn = daemon.get_docker_conn()?;
     let docker_conn = docker_conn.lock().unwrap();
     let containers = docker_conn.containers();
+    let images = docker_conn.images();
 
     // If the container has already been deployed
     if let Some(id) = &container_info.id {
@@ -229,17 +234,35 @@ fn apply_updates(
         log::debug!("Removing container: {}", id);
         let container = containers.get(&id);
 
-        rt.block_on(container.stop(Some(Duration::from_secs(10))))?;
-        rt.block_on(container.delete())?
+        block_on(container.stop(Some(Duration::from_secs(10))))?;
+        block_on(container.delete())?
     }
 
-    // Deploy the container
-    let docker_options = container_info.config.to_container_options();
+    if !container_info.pending_removal {
+        // Pull the image
+        // TODO: Add `latest` tag if tag is missing
+        let image_name = &container_info.config.image;
+        log::debug!("Pulling container image: {}", image_name);
+        block_on(
+            images
+                .pull(&PullOptions::builder().image(image_name).build())
+                .collect(),
+        )?;
 
-    log::debug!("Running container: docker {:?}", docker_options);
+        // Create the container
+        let docker_options = container_info.config.to_container_options();
+        log::debug!("Creating container: docker {:#?}", docker_options);
+        let create_info = block_on(containers.create(&docker_options))?;
 
-    // Mark container as "clean" and up-to-date with the config
-    container_info.clean();
+        // Start the container
+        log::debug!("Starting container: {}", create_info.id);
+        let container = containers.get(&create_info.id);
+        block_on(container.start())?;
+
+        // Mark container_info as "clean" and up-to-date with the system config
+        container_info.id = Some(create_info.id);
+        container_info.clean();
+    }
 
     Ok(())
 }

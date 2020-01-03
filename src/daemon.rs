@@ -130,8 +130,7 @@ impl LuckyDaemon {
 
             // Test getting Docker info
             log::trace!("Docker info: {:?}", {
-                let mut rt = crate::RT.lock().unwrap();
-                rt.block_on(conn.info())?
+                crate::block_on(conn.info())?
             });
 
             // Return connection
