@@ -3,9 +3,9 @@
 use crate::cli::CliError;
 use anyhow::Context;
 use crossterm::{
+    QueueableCommand,
     cursor::{Hide, MoveTo, Show},
     event::{self, Event, KeyCode::*, KeyEvent},
-    queue,
     style::{style, Attribute::*, Color::*, ResetColor, SetBackgroundColor, SetForegroundColor},
     terminal::{self, size, Clear, ClearType::All, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -88,9 +88,9 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
     } // if cli_doc.is_some()
 
     // Switch to the Pager Screen
-    queue!(w, EnterAlternateScreen)?;
+    w.queue(EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
-    queue!(w, Hide)?;
+    w.queue(Hide)?;
 
     // // Keep track of changes to scroll, screensize, and first view
     let mut scroll = 0;
@@ -206,7 +206,7 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
                     _ => (),
                 }
             }
-            Ok(Event::Resize(_, _)) => queue!(w, Clear(All))?,
+            Ok(Event::Resize(_, _)) => { w.queue(Clear(All))?; },
             _ => (),
         }
 
@@ -232,8 +232,8 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
 
     // Clean up and revert screen
     terminal::disable_raw_mode()?;
-    queue!(w, Show)?;
-    queue!(w, LeaveAlternateScreen)?;
+    w.queue(Show)?;
+    w.queue(LeaveAlternateScreen)?;
     w.flush()?;
 
     // Exit process
@@ -244,11 +244,11 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
 fn write_help_bar(w: &mut impl Write, message: &str) -> anyhow::Result<()> {
     let screen_size = size()?;
 
-    queue!(w, MoveTo(0, screen_size.1))?;
-    queue!(w, SetBackgroundColor(Grey))?;
-    queue!(w, SetForegroundColor(Black))?;
+    w.queue(MoveTo(0, screen_size.1))?;
+    w.queue(SetBackgroundColor(Grey))?;
+    w.queue(SetForegroundColor(Black))?;
     write!(w, "{}", message)?;
-    queue!(w, ResetColor)?;
+    w.queue(ResetColor)?;
 
     Ok(())
 }
@@ -267,7 +267,7 @@ fn print_raw_doc(w: &mut impl Write, cli_doc: Option<CliDoc>) -> anyhow::Result<
 /// Show the pager controls help page
 fn show_pager_help(mut w: &mut impl Write) -> anyhow::Result<()> {
     // Clear screen
-    queue!(w, Clear(All))?;
+    w.queue(Clear(All))?;
 
     let mut scroll = 0;
     loop {
@@ -319,13 +319,13 @@ fn show_pager_help(mut w: &mut impl Write) -> anyhow::Result<()> {
 
                 scroll = view.scroll;
             }
-            Ok(Event::Resize(_, _)) => queue!(w, Clear(All))?,
+            Ok(Event::Resize(_, _)) => { w.queue(Clear(All))?; },
             _ => (),
         }
     }
 
     // Clear screen
-    queue!(w, Clear(All))?;
+    w.queue(Clear(All))?;
 
     Ok(())
 }
