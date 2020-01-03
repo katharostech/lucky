@@ -95,7 +95,7 @@ impl log::Log for LuckyLogger {
                 write!(message, "[{}]", record.level()).expect(buffer_error);
 
                 // Write file and line for trace messages
-                if record.level() == Level::Trace
+                if (record.level() == Level::Trace || record.level() == Level::Debug)
                     && record.file().is_some()
                     && record.line().is_some()
                 {
@@ -134,7 +134,25 @@ impl log::Log for LuckyLogger {
                     }
                     // Print debug with dark blue `Debug:` prefix
                     Level::Debug => {
-                        write!(message, "{} {}", dark_blue("Debug:"), record.args())
+                        // Add `Debug`
+                        write!(message, "{}", dark_blue("Debug")).expect(buffer_error);
+
+                        // Add source and line
+                        if record.file().is_some() && record.line().is_some() {
+                            write!(
+                                message,
+                                "{}",
+                                dark_blue(&format!(
+                                    "[{}:{}]",
+                                    record.file().unwrap(),
+                                    record.line().unwrap()
+                                )),
+                            )
+                            .expect(buffer_error);
+                        }
+
+                        // Add message
+                        write!(message, "{} {}", dark_blue(":"), record.args())
                             .expect(buffer_error);
                     }
                     // Print trace with grey `Trace:` prefix
