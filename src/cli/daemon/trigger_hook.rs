@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use crate::cli::daemon::{get_daemon_client, get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::*;
-use crate::daemon::rpc::VarlinkClientInterface;
+use crate::rpc::VarlinkClientInterface;
 
 pub(super) struct TriggerHookSubcommand;
 

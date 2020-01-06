@@ -39,6 +39,20 @@ pub(crate) trait CliCommand<'a>: CliCommandExt<'a> {
     /// The `data` value is meant to allow subcommands to recieve data from their parent commands
     /// and the return value is to allow parent commands to pass the data to the subcommand.
     fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData>;
+    /// If this function returns `true`, the command will only be executed if Lucky has been built
+    /// with the "daemon" feature. This allows commands to be present for documentation's sake, but
+    /// only functional when running as a part of a deployed charm.
+    ///
+    /// Instead of executing the command, a message will be displayed that says that the command is
+    /// only for use in a running charm. This will stop any execution of subcommands.
+    ///
+    /// Note that when Lucky *is* compiled with the "daemon" feature, the commands are executed
+    /// normally regardless of the return value of this function.
+    ///
+    /// This function's default implementation is to return false.
+    fn only_with_daemon(&self) -> bool {
+        false
+    }
 }
 
 /// Extension trait to the `CliCommand` trait
@@ -69,14 +83,29 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
     }
 
     fn run(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<()> {
-        // Run the command
-        let out_data = self.execute_command(args, data)?;
+        let mut data = data;
+
+        // If Lucky was built with the daemon or if this command doesn't need the daemon
+        if cfg!(feature = "daemon") || !self.only_with_daemon() {
+            // Run the command
+            data = self.execute_command(args, data)?;
+
+        // If Lucky was built without the daemon, i.e. for the charm developer, then this command is
+        // only available with the daemon.
+        } else {
+            log::error!(concat!(
+                "This command is only available when running as a part of a charm script and is ",
+                "not available when developing Lucky charms. You can still run the command with ",
+                "the \"--doc\" flag if you want to see the command's documentation."
+            ));
+            return Ok(());
+        }
 
         // Run the selected subcommand if any
         if let (subcmd_name, Some(args)) = args.subcommand() {
             for subcommand in self.get_subcommands() {
                 if subcommand.get_name() == subcmd_name {
-                    return subcommand.run(args, out_data);
+                    return subcommand.run(args, data);
                 }
             }
         }

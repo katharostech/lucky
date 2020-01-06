@@ -11,6 +11,7 @@ pub mod doc;
 // Subcommands
 mod charm;
 mod client;
+#[cfg(feature = "daemon")]
 mod daemon;
 
 /// Run the CLI
@@ -26,6 +27,7 @@ fn run_cli() -> anyhow::Result<()> {
         // Use the specified subcommand instead
         match context.as_ref() {
             "charm" => cli = Box::new(charm::CharmSubcommand),
+            #[cfg(feature = "daemon")]
             "daemon" => cli = Box::new(daemon::DaemonSubcommand),
             "client" => cli = Box::new(client::ClientSubcommand),
             other => anyhow::bail!("Unrecognized LUCKY_CONTEXT: {}", other),
@@ -131,7 +133,7 @@ pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
                 }
 
             // Print varlink errors without the extra debug printing
-            } else if let Some(varlink_error) = e.downcast_ref::<crate::daemon::rpc::Error>() {
+            } else if let Some(varlink_error) = e.downcast_ref::<crate::rpc::Error>() {
                 let e = format_err!("Response from Lucky daemon: {}", varlink_error.kind());
                 log::error!("{}", e);
                 std::process::exit(1);

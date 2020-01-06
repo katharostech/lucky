@@ -16,16 +16,13 @@ fn generate_varlink_code() {
     let cargo_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 
     // Generate Rust source from Varlink RPC interface definition
-    varlink_generator::cargo_build_tosource(
-        "src/daemon/lucky.rpc.varlink",
-        /* rustfmt */ true,
-    );
+    varlink_generator::cargo_build_tosource("src/rpc/lucky.rpc.varlink", /* rustfmt */ true);
 
     // Open output file
     let mut output_file = OpenOptions::new()
         .read(true)
         .write(true)
-        .open(cargo_dir.join("src/daemon/lucky_rpc.rs"))
+        .open(cargo_dir.join("src/rpc/lucky_rpc.rs"))
         .unwrap();
 
     // Replace `Display` impl for the varlink Error types with our own

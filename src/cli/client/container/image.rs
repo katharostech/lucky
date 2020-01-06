@@ -3,7 +3,7 @@ use clap::{App, Arg, ArgMatches};
 use std::io::Write;
 
 use crate::cli::*;
-use crate::daemon::rpc::{VarlinkClient, VarlinkClientInterface};
+use crate::rpc::{VarlinkClient, VarlinkClientInterface};
 
 pub(super) struct ImageSubcommand;
 

@@ -5,6 +5,7 @@ use anyhow::{format_err, Context};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+#[cfg(feature = "daemon")]
 /// Gets the charm directory path
 pub(crate) fn get_charm_dir() -> anyhow::Result<PathBuf> {
     match std::env::var("JUJU_CHARM_DIR") {

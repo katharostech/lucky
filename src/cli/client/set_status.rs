@@ -1,7 +1,7 @@
 use clap::{App, Arg, ArgMatches};
 
 use crate::cli::*;
-use crate::daemon::rpc::{VarlinkClient, VarlinkClientInterface};
+use crate::rpc::{VarlinkClient, VarlinkClientInterface};
 
 use crate::types::{ScriptState, ScriptStatus};
 

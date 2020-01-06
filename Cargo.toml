@@ -45,13 +45,19 @@ subprocess = "0.1.0"
 git-version = "0.3.0"
 thiserror = "1.0.0"
 regex = "1.3.0"
-shiplift = "0.6.0"
-tokio = "0.1.22"
-futures = "0.1.29"
+shiplift =  { version = "0.6.0", default-features = false, features = ["chrono", "unix-socket"], optional = true }
+tokio = { version = "0.1.22", optional = true }
+futures = { version = "0.1.29", optional = true }
 
 [features]
-default = ["color-backtrace"]
+default = ["color-backtrace", "daemon"]
 doc-gen = []
+daemon = ["shiplift", "tokio", "futures"]
+
+# The `default_devkit` feature enables the default features used when building Lucky for the charm
+# developer. To build for the charm developer you should run
+# `cargo build --release --no-default-features --features default_devkit`
+default_devkit = ["color-backtrace"]
 
 [build-dependencies]
 regex = "1.3"

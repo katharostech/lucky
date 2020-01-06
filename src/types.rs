@@ -5,8 +5,11 @@ use std::collections::HashMap;
 
 use strum_macros::{AsRefStr, EnumString, EnumVariantNames};
 
-use crate::daemon::rpc::ScriptStatus as RpcScriptStatus;
-use crate::daemon::rpc::ScriptStatus_state as RpcScriptState;
+use crate::rpc::ScriptStatus as RpcScriptStatus;
+use crate::rpc::ScriptStatus_state as RpcScriptState;
+
+/// Juju related types
+pub(crate) mod juju;
 
 #[derive(
     Copy,

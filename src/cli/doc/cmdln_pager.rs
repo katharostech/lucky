@@ -3,11 +3,11 @@
 use crate::cli::CliError;
 use anyhow::Context;
 use crossterm::{
-    QueueableCommand,
     cursor::{Hide, MoveTo, Show},
     event::{self, Event, KeyCode::*, KeyEvent},
     style::{style, Attribute::*, Color::*, ResetColor, SetBackgroundColor, SetForegroundColor},
     terminal::{self, size, Clear, ClearType::All, EnterAlternateScreen, LeaveAlternateScreen},
+    QueueableCommand,
 };
 use lazy_static::lazy_static;
 use minimad::TextTemplate;
@@ -206,7 +206,9 @@ pub(crate) fn show_doc_page<'a>(command: &impl CliCommand<'a>) -> anyhow::Result
                     _ => (),
                 }
             }
-            Ok(Event::Resize(_, _)) => { w.queue(Clear(All))?; },
+            Ok(Event::Resize(_, _)) => {
+                w.queue(Clear(All))?;
+            }
             _ => (),
         }
 
@@ -319,7 +321,9 @@ fn show_pager_help(mut w: &mut impl Write) -> anyhow::Result<()> {
 
                 scroll = view.scroll;
             }
-            Ok(Event::Resize(_, _)) => { w.queue(Clear(All))?; },
+            Ok(Event::Resize(_, _)) => {
+                w.queue(Clear(All))?;
+            }
             _ => (),
         }
     }

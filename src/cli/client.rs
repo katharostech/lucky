@@ -7,7 +7,9 @@ mod container;
 mod kv;
 mod set_status;
 
+#[cfg(feature = "daemon")]
 use crate::cli::daemon::get_daemon_client;
+#[cfg(feature = "daemon")]
 use crate::cli::daemon::{get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::*;
 
@@ -19,11 +21,14 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
     }
 
     fn get_app(&self) -> App<'a> {
-        self.get_base_app()
-            .about("Communicate with the Lucky daemon in charm scripts")
-            // TODO: FIXME: Causes issue where client subcommands --doc flag will not work because
-            // of required `unit_name` arg.
-            .args(&get_daemon_connection_args())
+        let app = self
+            .get_base_app()
+            .about("Communicate with the Lucky daemon in charm scripts");
+
+        #[cfg(feature = "daemon")]
+        let app = app.args(&get_daemon_connection_args());
+
+        app
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -38,6 +43,12 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
         None
     }
 
+    // Client commands are only available when Lucky is built with the "daemon" feature
+    fn only_with_daemon(&self) -> bool {
+        true
+    }
+
+    #[cfg(feature = "daemon")]
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
         let socket_path = get_daemon_socket_path(args);
 
@@ -63,6 +74,12 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
         // Add environment to data for use in subcommands
         data.insert("environment".into(), Box::new(environment));
 
+        Ok(data)
+    }
+
+    #[cfg(not(feature = "daemon"))]
+    /// Do nothing if built without "daemon" feature
+    fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
         Ok(data)
     }
 }

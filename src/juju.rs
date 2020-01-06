@@ -4,9 +4,6 @@
 use crate::process::run_cmd;
 use crate::types::ScriptStatus;
 
-mod types;
-pub(crate) use types::*;
-
 /// Set the Juju status
 ///
 /// Returns the command output

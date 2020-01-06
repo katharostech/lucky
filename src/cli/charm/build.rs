@@ -8,7 +8,7 @@ use std::path::Path;
 
 use crate::cli::*;
 use crate::config::load_yaml;
-use crate::juju::{
+use crate::types::juju::{
     CharmMetadata, RelationDef, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS,
 };
 

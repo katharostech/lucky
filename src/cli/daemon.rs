@@ -129,9 +129,7 @@ pub(crate) fn try_connect_daemon(
 }
 
 /// Get the daemon varlink client from the socket path to connect to
-pub(crate) fn get_daemon_client(
-    socket_path: &str,
-) -> anyhow::Result<crate::daemon::rpc::VarlinkClient> {
+pub(crate) fn get_daemon_client(socket_path: &str) -> anyhow::Result<crate::rpc::VarlinkClient> {
     let connection = try_connect_daemon(socket_path)?;
     Ok(crate::daemon::get_client(connection))
 }
