@@ -1,10 +1,13 @@
+# The awesomest two lines that should be in every .gitignore file
 *gitignore*
 !.gitignore
 
-#Added by cargo
-#
-#already existing elements are commented out
-
+# Cargo
 /target
 **/*.rs.bk
 /build
+
+# Snapcraft
+parts
+prime
+stage
