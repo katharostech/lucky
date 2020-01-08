@@ -12,4 +12,14 @@ The Lucky framework will provide a CLI that will be installed on the developers 
 
 ## Development
 
-We are very early in development. We have just started work on the proof of concept. We have a [design](./design.md) document outlining our current plan for the framework. This may change as we get into development. If you have any questions or thoughts don't hesitate to open an issue.
+We are very early in development. We have just started work on the proof of concept. We have a [design](./design.md) document outlining our current plan for the framework. This may change as we get into development. If you have any questions or thoughts don't hesitate to [contact us](#bugs-features-and-questions).
+
+## Bugs, Features, and Questions
+
+If you have any bug reports or feature requests you can create a [Taiga issue][taiga_issue] and we'll see what we can do to help.
+
+For questions or general discussion there is also a [Lucky category][category] on the [Juju forum][juju_forum].
+
+[category]: https://discourse.jujucharms.com/c/related-software/lucky
+[juju_forum]: https://discourse.jujucharms.com
+[taiga_issue]: https://tree.taiga.io/project/zicklag-lucky/issues
