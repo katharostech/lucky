@@ -1,11 +1,7 @@
 #!/bin/bash
-set -e # Exit immediately if a command fails
 
 # Set the lucky log level
 export LUCKY_LOG_LEVEL={log_level}
-
-# The Lucky executable 
-lucky=./bin/lucky
 
 # If Lucky was not bundled
 if [ ! -f ./bin/lucky ]; then
@@ -15,8 +11,8 @@ if [ ! -f ./bin/lucky ]; then
     lucky="/var/lib/lucky/$unit_dir_name/lucky"
 fi
 
-# Start the Lucky daemon
-LUCKY_CONTEXT=daemon $lucky start --ignore-already-running
+# Trigger the `stop` hook
+LUCKY_CONTEXT=daemon $lucky trigger-hook stop
 
-# Trigger the `{hook_name}` hook
-LUCKY_CONTEXT=daemon $lucky trigger-hook {hook_name}
+# Stop the lucky daemon
+LUCKY_CONTEXT=daemon $lucky stop

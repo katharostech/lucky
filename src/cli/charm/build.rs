@@ -21,20 +21,22 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
 
     #[rustfmt::skip]
     fn get_app(&self) -> App<'a> {
-        self.get_base_app()
+        let app = self.get_base_app()
             .about("Build a Lucky charm and make it ready for deployment")
             .long_about(concat!(
                 "Build a Lucky charm and make it ready for deployment to the Juju ",
-                "server or charm store"))
+                "server or charm store"));
 
-            .help_heading("LUCKY_INSTALL_SOURCE")
-            .arg(Arg::with_name("use_local_lucky")
+        // On unix systems built with the daemon, you can use the local Lucky binary instead
+        // of having Lucky installed from the snap.
+        #[cfg(all(unix, feature = "daemon"))]
+        let app = app.arg(Arg::with_name("use_local_lucky")
                 .help("Build the charm with the local copy of lucky included")
                 .long_help(include_str!("build/arg_use-local-lucky.txt"))
                 .long("use-local-lucky")
-                .short('l'))
-            .stop_custom_headings()
-            .arg(Arg::with_name("log_level")
+                .short('l'));
+
+        app.arg(Arg::with_name("log_level")
                 .help("The log level to build the charm with")
                 .long_help(concat!(
                     "The log level to build the charm with. Build with the log level set to",
@@ -180,20 +182,12 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             create_dir_all(&hook_dir)?;
         }
 
-        // Copy in Lucky binary
+        // If we are using the local build of Lucky ( only works on linux )
         if args.is_present("use_local_lucky") {
             // Copy in the Lucky executable
             let lucky_path = bin_dir.join("lucky");
             let executable_path = std::env::current_exe()?;
             fs::copy(&executable_path, &lucky_path)?;
-        } else {
-            // We will require the -l flag until our first release
-            anyhow::bail!(concat!(
-                "Currently the --use-local-lucky or -l flag is required to build a charm. Once we ",
-                "have made our first release, lucky will be able to automatically download the ",
-                "required version from GitHub so that it can run on whatever architecture the charm ",
-                "is deployed to"
-            ));
         }
 
         // Add the LXD profile
@@ -206,13 +200,30 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
 
         // Create stop hook
         let stop_hook_path = hook_dir.join("stop");
-        write_file(&stop_hook_path, include_str!("build/stop-hook.sh"))?;
+        write_file(
+            &stop_hook_path,
+            &format!(
+                include_str!("build/stop-hook-template.sh"),
+                log_level = log_level
+            ),
+        )?;
         set_file_mode(&stop_hook_path, 0o755)?;
+
+        // Create install hook
+        let install_hook_path = hook_dir.join("install");
+        write_file(
+            &install_hook_path,
+            &format!(
+                include_str!("build/install-hook-template.sh"),
+                log_level = log_level
+            ),
+        )?;
+        set_file_mode(&install_hook_path, 0o755)?;
 
         // Create normal Juju hooks ( those not specific to a relation or storage )
         for &hook in JUJU_NORMAL_HOOKS {
-            // Skip the stop hooks because we have already created them
-            if hook == "stop" {
+            // Skip the stop and install hooks because we have already created them
+            if hook == "stop" || hook == "install" {
                 continue;
             }
             let new_hook_path = hook_dir.join(hook);
