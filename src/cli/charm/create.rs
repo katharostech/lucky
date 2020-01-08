@@ -90,7 +90,7 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
                 .expect("Missing required argument: target_dir"),
         );
         if target_dir.exists() {
-            anyhow::bail!("Error: target directory already exists");
+            anyhow::bail!("Target directory already exists");
         }
 
         // Create handlebars tempate engine
