@@ -93,7 +93,7 @@ def linux_pipeline(config, arch):
             steps.append({
                 "name": "publish-book",
                 "image": "plugins/gh-pages",
-                "depends_on": ["build_book"],
+                "depends_on": ["build-book"],
                 "settings": {
                     "pages_directory": "docs/book/build",
                     "username": {
