@@ -89,8 +89,7 @@ def linux_pipeline(config, arch):
         })
 
         # Publish documentation if pushed to master
-        if config["ctx"].build.branch == "master" and \
-                config["ctx"].build.event == "push":
+        if config["ctx"].build.branch == "master":
             steps.append({
                 "name": "publish-book",
                 "image": "plugins/gh-pages",
