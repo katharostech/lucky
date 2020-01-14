@@ -9,10 +9,15 @@
 #![allow(clippy::default_trait_access)]
 #![allow(clippy::use_self)]
 #![allow(clippy::too_many_lines)]
+// TODO: This is simply because of the `function_name` macro and we might want to fix it there
+// instead of ignoring the warning here.
+#![allow(clippy::empty_enum)]
 
 pub mod cli;
 pub(crate) mod config;
 pub(crate) mod log;
+#[macro_use]
+pub(crate) mod macros;
 pub(crate) mod rpc;
 pub(crate) mod types;
 

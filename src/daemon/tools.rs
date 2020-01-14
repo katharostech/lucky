@@ -178,16 +178,15 @@ pub(super) fn run_host_script(
     }
 }
 
+#[function_name::named]
 /// Apply any updates to container configuration for the charm by running
 pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     log::debug!("Applying container configuration");
-    daemon.set_script_status(
-        "__apply_container_updates__",
-        ScriptStatus {
-            state: ScriptState::Maintenance,
-            message: Some("Applying Docker configuration updates".into()),
-        },
-    )?;
+    daemon_set_status!(
+        daemon,
+        ScriptState::Maintenance,
+        "Applying Docker configuration updates"
+    );
     let mut state = daemon.state.write().unwrap();
 
     // Apply changes for any updated named containers
@@ -203,13 +202,7 @@ pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()
     // Drop state to avoid deadlock on daemon state
     drop(state);
 
-    daemon.set_script_status(
-        "__apply_container_updates__",
-        ScriptStatus {
-            state: ScriptState::Active,
-            message: None,
-        },
-    )?;
+    daemon_set_status!(daemon, ScriptState::Active);
     Ok(())
 }
 
