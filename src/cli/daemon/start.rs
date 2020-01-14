@@ -45,7 +45,7 @@ impl<'a> CliCommand<'a> for StartSubcommand {
                     "The directory to store the unit state in. If this is left unspecified the ",
                     "state directory will be automatically determined from the unit name. For ",
                     "example, for a unit named `mysql/2`, the state dir will be ",
-                    "`/var/lib/lucky/mysql_2_state`"
+                    "`/var/lib/lucky/mysql_2/state`"
                 ))
                 .env("LUCKY_STATE_DIR"))
             .args(&get_daemon_connection_args())
@@ -81,7 +81,7 @@ impl<'a> CliCommand<'a> for StartSubcommand {
         let state_dir = args.value_of("state_dir").map_or_else(
             || {
                 PathBuf::from(format!(
-                    "/var/lib/lucky/{}_state",
+                    "/var/lib/lucky/{}/state",
                     unit_name.replace("/", "_")
                 ))
             },
