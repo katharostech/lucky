@@ -106,6 +106,7 @@ def linux_pipeline(config, arch):
             })
 
     # Pre-release steps
+    # TODO: This is not working consistantly on Drone cloud for some reason
     if config["ctx"].build.ref == "refs/tags/pre-release":
         steps.append({
             "name": "publish-github-pre-release",
