@@ -82,31 +82,14 @@ impl LuckyDaemon {
             .unwrap_or_else(|e| log::error!("{:?}", e));
 
         // Update the Juju status
-        crate::juju::set_status(tools::get_juju_status(&daemon)).unwrap_or_else(|e| {
-            log::warn!("{:?}", e.context("Could not set juju status"));
-        });
+        crate::juju::set_status(tools::get_juju_status(&daemon.state.read().unwrap()))
+            .unwrap_or_else(|e| {
+                log::warn!("{:?}", e.context("Could not set juju status"));
+            });
 
         log::trace!("Loaded daemon state: {:#?}", daemon.state.read().unwrap());
 
         daemon
-    }
-
-    pub(crate) fn set_script_status(
-        &self,
-        script_id: &str,
-        status: ScriptStatus,
-    ) -> anyhow::Result<()> {
-        log::info!(r#"Set status[{}]: {}"#, script_id, status);
-        self.state
-            .write()
-            .unwrap()
-            .script_statuses
-            .insert(script_id.into(), status);
-
-        // Set the Juju status to the consolidated script statuses
-        crate::juju::set_status(tools::get_juju_status(&self))?;
-
-        Ok(())
     }
 
     /// Gets a handle to the daemon's Docker connection, creating a new one if one doesn't already
@@ -159,14 +142,11 @@ impl LuckyDaemon {
                     }
                 }
 
-                // TODO: Don't apply container config when `docker: false` in lucky.yaml
-                // Apply any container configuration changed by the script
-                tools::apply_container_updates(self)?;
+                // If docker is enabled, update container configuration
+                if self.lucky_metadata.use_docker {
+                    tools::apply_container_updates(self)?;
+                }
             }
-
-            // Update the Juju status as Juju will clear it if we don't re-set it after hook
-            // execution
-            crate::juju::set_status(tools::get_juju_status(&self))?;
 
             // Finish reply
             call.set_continues(false);
@@ -174,10 +154,6 @@ impl LuckyDaemon {
 
         // If the hook is not handled by the charm
         } else {
-            // Update the Juju status
-            crate::juju::set_status(tools::get_juju_status(&self))
-                .or_else(|e| call.reply_error(e.to_string()))?;
-
             // Just reply without doing anything ( setting exit code to 0 )
             call.reply(None)?;
         }
@@ -240,11 +216,13 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // Add status to script statuses
         let status: ScriptStatus = status.into();
 
-        self.set_script_status(&script_id, status).or_else(|e| {
-            let e = format!("{:?}", e);
-            log::error!("{}", e);
-            call.reply_error(e)
-        })?;
+        tools::set_script_status(&mut self.state.write().unwrap(), &script_id, status).or_else(
+            |e| {
+                let e = format!("{:?}", e);
+                log::error!("{}", e);
+                call.reply_error(e)
+            },
+        )?;
 
         // Reply
         call.reply()?;

@@ -63,14 +63,31 @@ pub(super) fn flush_state(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Set the status of a script
+pub(super) fn set_script_status(
+    state: &mut DaemonState,
+    script_id: &str,
+    status: ScriptStatus,
+) -> anyhow::Result<()> {
+    log::info!(r#"Set status[{}]: {}"#, script_id, status);
+
+    // Insert script status
+    state.script_statuses.insert(script_id.into(), status);
+
+    // Set the Juju status to the consolidated script statuses
+    crate::juju::set_status(tools::get_juju_status(state))?;
+
+    Ok(())
+}
+
 /// Consolidate script statuses into one status that can be used as the global Juju Status
-pub(super) fn get_juju_status(daemon: &LuckyDaemon) -> ScriptStatus {
+pub(super) fn get_juju_status(state: &DaemonState) -> ScriptStatus {
     // The resulting Juju state
     let mut juju_state = ScriptState::default();
     // The resulting Juju status message
     let mut juju_message = None;
 
-    for status in daemon.state.read().unwrap().script_statuses.values() {
+    for status in state.script_statuses.values() {
         // If this script state has a higher precedence
         if status.state > juju_state {
             // Set the Juju state to the more precedent state
@@ -182,12 +199,12 @@ pub(super) fn run_host_script(
 /// Apply any updates to container configuration for the charm by running
 pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     log::debug!("Applying container configuration");
+    let mut state = daemon.state.write().unwrap();
     daemon_set_status!(
-        daemon,
+        &mut state,
         ScriptState::Maintenance,
         "Applying Docker configuration updates"
     );
-    let mut state = daemon.state.write().unwrap();
 
     // Apply changes for any updated named containers
     for mut container in state.named_containers.values_mut() {
@@ -199,10 +216,7 @@ pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()
         apply_updates(daemon, container)?;
     }
 
-    // Drop state to avoid deadlock on daemon state
-    drop(state);
-
-    daemon_set_status!(daemon, ScriptState::Active);
+    daemon_set_status!(&mut state, ScriptState::Active);
     Ok(())
 }
 

@@ -7,33 +7,42 @@
 /// This macro uses the function path to set the `script_id` of the status so that it is local to
 /// the function.
 ///
-/// This require that the function it is used in is annotated with `#[function_name::named]` from
-/// the `function_name` crate.
+/// This require that the function calling the macro is annotated with `#[function_name::named]`
+/// from the `function_name` crate.
 ///
 /// # Example
 ///
 /// ```
 /// #[function_name::named]
 /// fn do_something_for_daemon(daemon: &LuckyDaemon) {
-///     daemon_set_status!(daemon, ScriptState::Maintenance, "Doing something");
+///     // Get a lock of the daemon state
+///     let state = daemon.state.write().unwrap();
+///
+///     // Set the status
+///     daemon_set_status!(&mut state, ScriptState::Maintenance, "Doing something");
+///
 ///     // Do stuff
-///     daemon_set_status!(daemon, ScriptState::Active);
+///
+///     // Clear the status
+///     daemon_set_status!(&mut state, ScriptState::Active);
 /// }
 macro_rules! daemon_set_status {
-    ($daemon:expr, $state:expr) => {
-        $daemon.set_script_status(
+    ($daemon_state:expr, $script_state:expr) => {
+        crate::daemon::tools::set_script_status(
+            $daemon_state,
             concat!("__", module_path!(), "::", function_name!(), "__"),
             ScriptStatus {
-                state: $state,
+                state: $script_state,
                 message: None,
             },
         )?;
     };
-    ($daemon:expr, $state:expr, $message:expr) => {
-        $daemon.set_script_status(
+    ($daemon_state:expr, $script_state:expr, $message:expr) => {
+        crate::daemon::tools::set_script_status(
+            $daemon_state,
             concat!("__", module_path!(), "::", function_name!(), "__"),
             ScriptStatus {
-                state: $state,
+                state: $script_state,
                 message: Some($message.into()),
             },
         )?;
