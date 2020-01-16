@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io::Write;
 use std::sync::{Arc, RwLock};
 
+#[cfg(feature = "daemon")]
 use crate::juju::juju_log;
 
 /// The Lucky logging implementation
@@ -127,6 +128,7 @@ impl log::Log for LuckyLogger {
                     log_to_file(&message, file)
                 }
                 // Log to juju
+                #[cfg(feature = "daemon")]
                 juju_log(&message, record.level() >= LevelFilter::Debug);
             }
             // Cli Logs
