@@ -39,14 +39,14 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
         app.arg(Arg::with_name("log_level")
                 .help("The log level to build the charm with")
                 .long_help(concat!(
-                    "The log level to build the charm with. Build with the log level set to",
-                    "\"debug\" or \"trace\" to get more verbose logging from Lucky while the",
-                    "charm is running"))
+                    "The log level to build the charm with. Build with the log level set to ",
+                    "\"trace\" to get more verbose logging from Lucky while the charm is ",
+                    "running"))
                 .long("log-level")
                 .short('L')
                 .possible_values(&["trace", "debug", "info", "warn", "error"])
                 .case_insensitive(true)
-                .default_value("info"))
+                .default_value("debug"))
             .arg(Arg::with_name("build_dir")
                 .help(concat!(
                     "The directory to put the built charm in. Defaults to the `build` ",

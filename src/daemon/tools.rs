@@ -182,7 +182,7 @@ pub(super) fn run_host_script(
     // Loop through lines of output
     for line in output_buffer.lines() {
         let line = line?;
-        log::info!("output: {}", line);
+        log::debug!("output: {}", line);
 
         // Send caller output if they asked for it
         if call.wants_more() {
