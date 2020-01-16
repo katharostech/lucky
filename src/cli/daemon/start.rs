@@ -16,6 +16,7 @@ use crate::cli::daemon::{
 };
 use crate::cli::*;
 use crate::config;
+use crate::log::{set_log_mode, LogMode::Daemon};
 
 pub(super) struct StartSubcommand;
 
@@ -106,6 +107,8 @@ impl<'a> CliCommand<'a> for StartSubcommand {
 
         // If we are running in the forground
         if args.is_present("foreground") {
+            // Set log mode to daemon
+            set_log_mode(Daemon);
             log::info!("Starting daemon in foreground");
 
             // The stop_listening flag is used to shutdown the server by setting it to `false`
