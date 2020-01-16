@@ -278,7 +278,7 @@ fn apply_updates(
 
         // Create the container
         let docker_options = container_info.config.to_container_options();
-        log::debug!("Creating container: docker {:#?}", docker_options);
+        log::trace!("Creating container: docker {:#?}", docker_options);
         let create_info = block_on(containers.create(&docker_options))?;
 
         // Start the container

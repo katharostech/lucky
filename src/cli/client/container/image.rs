@@ -46,7 +46,8 @@ impl<'a> CliCommand<'a> for GetSubcommand {
             .arg(Arg::with_name("name")
                 .help("The name of the container to get the image of if not the default")
                 .short('n')
-                .long("name"))
+                .long("name")
+                .takes_value(true))
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -98,7 +99,8 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .arg(Arg::with_name("name")
                 .help("The name of the container to set the image for if not the default")
                 .short('n')
-                .long("name"))
+                .long("name")
+                .takes_value(true))
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
