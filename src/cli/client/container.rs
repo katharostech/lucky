@@ -3,6 +3,7 @@ use clap::{App, ArgMatches};
 use crate::cli::*;
 
 mod apply;
+mod env;
 mod image;
 
 pub(super) struct ContainerSubcommand;
@@ -22,6 +23,7 @@ impl<'a> CliCommand<'a> for ContainerSubcommand {
         vec![
             Box::new(image::ImageSubcommand),
             Box::new(apply::ApplySubcommand),
+            Box::new(env::EnvSubcommand),
         ]
     }
 

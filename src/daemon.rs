@@ -308,6 +308,17 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    fn container_apply(&self, call: &mut dyn rpc::Call_ContainerApply) -> varlink::Result<()> {
+        // TODO: Don't apply container config when `docker: false` in lucky.yaml
+        tools::apply_container_updates(self).or_else(|e| {
+            let e = format!("{:?}", e);
+            log::error!("{}", e);
+            call.reply_error(e)
+        })?;
+
+        Ok(())
+    }
+
     // The uncollapsed if is easier to understand in this case
     #[allow(clippy::collapsible_if)]
     fn container_image_set(
@@ -378,13 +389,119 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
-    fn container_apply(&self, call: &mut dyn rpc::Call_ContainerApply) -> varlink::Result<()> {
-        // TODO: Don't apply container config when `docker: false` in lucky.yaml
-        tools::apply_container_updates(self).or_else(|e| {
-            let e = format!("{:?}", e);
-            log::error!("{}", e);
-            call.reply_error(e)
-        })?;
+    fn container_env_get(
+        &self,
+        call: &mut dyn rpc::Call_ContainerEnvGet,
+        key: String,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let state = self.state.read().unwrap();
+
+        // Get the config for the requested container
+        let container = match &container_name {
+            Some(container_name) => state.named_containers.get(container_name),
+            None => state.default_container.as_ref(),
+        };
+
+        // If the specified container exists
+        if let Some(container) = container {
+            // Reply with the environment variable's value
+            call.reply(container.config.env_vars.get(&key).map(ToOwned::to_owned))?;
+        } else {
+            // Reply with None
+            call.reply(None)?;
+        }
+
+        Ok(())
+    }
+
+    fn container_env_get_all(
+        &self,
+        call: &mut dyn rpc::Call_ContainerEnvGetAll,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let state = self.state.read().unwrap();
+
+        // This call must be called with more
+        if !call.wants_more() {
+            call.reply_requires_more()?;
+            return Ok(());
+        }
+
+        // Get the config for the requested container
+        let container = match &container_name {
+            Some(container_name) => state.named_containers.get(container_name),
+            None => state.default_container.as_ref(),
+        };
+
+        // If the container exists
+        if let Some(container) = container {
+            // Loop through key-value pairs and return result to client
+            let pairs: Vec<(&String, &String)> = container.config.env_vars.iter().collect();
+            let mut i = 0;
+            let len = pairs.len();
+            if len > 0 {
+                call.set_continues(true);
+                while i < len {
+                    // If this is the last pair
+                    if i == len - 1 {
+                        // Tell client not to expect more after this one
+                        call.set_continues(false);
+                    }
+                    // Reply with the pair
+                    call.reply(Some(rpc::ContainerEnvGetAll_Reply_pair {
+                        key: pairs[i].0.clone(),
+                        value: pairs[i].1.clone(),
+                    }))?;
+                    i += 1;
+                }
+            // If there are no environment variables
+            } else {
+                // Return None
+                call.set_continues(false);
+                call.reply(None)?;
+            }
+
+        // If the container doesn't exist
+        } else {
+            // Reply None
+            call.reply(None)?;
+        }
+
+        Ok(())
+    }
+
+    /// Set a value in the unit local key-value store
+    fn container_env_set(
+        &self,
+        call: &mut dyn rpc::Call_ContainerEnvSet,
+        key: String,
+        value: Option<String>,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Get the config for the requested container
+        let mut container = match &container_name {
+            Some(container_name) => state.named_containers.get_mut(container_name),
+            None => state.default_container.as_mut(),
+        };
+
+        if let Some(container) = &mut container {
+            // If a value has been provided
+            if let Some(value) = value {
+                log::debug!("Container env set: {} = {}", key, value);
+                // Set key to value
+                container.config.env_vars.insert(key, value);
+            } else {
+                log::debug!("Container env deleted: {}", key);
+                // Erase key
+                container.config.env_vars.remove(&key);
+            }
+
+            // Reply empty
+            call.reply()?;
+        }
 
         Ok(())
     }
