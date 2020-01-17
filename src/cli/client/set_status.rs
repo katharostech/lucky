@@ -24,10 +24,8 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
                     "The ID of the script that is being run. Allows each script to have a status ",
                     "independent of the other scripts in the charm."
                 ))
-                .env("LUCKY_SCRIPT_ID")
-                .required_unless("doc"))
+                .env("LUCKY_SCRIPT_ID"))
             .arg(Arg::with_name("state")
-                .required_unless("doc")
                 .help("The enumerated state of the service")
                 .possible_values(&ScriptState::variants())
                 .case_insensitive(true))

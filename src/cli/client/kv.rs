@@ -113,11 +113,9 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         self.get_base_app()
             .about("Set a value")
             .arg(Arg::with_name("key")
-                .help("The key to set in the store")
-                .required_unless("doc"))
+                .help("The key to set in the store"))
             .arg(Arg::with_name("value")
-                .help(r#"The value to set "key" to"#)
-                .required_unless("doc"))
+                .help(r#"The value to set "key" to"#))
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -162,8 +160,7 @@ impl<'a> CliCommand<'a> for DeleteSubcommand {
         self.get_base_app()
             .about("Delete a value")
             .arg(Arg::with_name("key")
-                .help("The key to delete from the store")
-                .required_unless("doc"))
+                .help("The key to delete from the store"))
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {

@@ -27,8 +27,7 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
                     "viewed with `juju debug-log`."
                 )))
             .arg(Arg::with_name("hook_name")
-                .help("The name of the hook to trigger")
-                .required_unless("doc"))
+                .help("The name of the hook to trigger"))
             .args(&get_daemon_connection_args())
     }
 
