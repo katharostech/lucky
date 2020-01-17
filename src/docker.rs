@@ -3,8 +3,10 @@ use anyhow::{bail, Context};
 use serde::{Deserialize, Serialize};
 use shiplift::builder::ContainerOptions;
 
+use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
+use std::path::Path;
 
 use crate::process::{cmd_exists, run_cmd, run_cmd_with_retries};
 
@@ -31,23 +33,73 @@ impl ContainerInfo {
 }
 
 /// The container configuration options such as image, volumes, ports, etc.
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub(crate) struct ContainerConfig {
     pub image: String,
+    pub env_vars: HashMap<String, String>,
 }
 
 impl ContainerConfig {
     pub fn new(image: &str) -> Self {
         ContainerConfig {
             image: image.to_owned(),
+            ..Default::default()
         }
     }
 
     /// Get a `ContainerOptions` struct that can be given to shiplift to run the container
-    pub fn to_container_options(&self) -> ContainerOptions {
-        let options = ContainerOptions::builder(&self.image);
+    ///
+    /// The `charm_dir` is used as reference when mounting the container scripts into the container
+    /// and the `socket_path` is used to mount the Lucky Daemon socket inside the container.
+    pub fn to_container_options(
+        &self,
+        charm_dir: &Path,
+        socket_path: &Path,
+    ) -> anyhow::Result<ContainerOptions> {
+        let mut options = ContainerOptions::builder(&self.image);
+        let mut volumes: Vec<String> = vec![];
+        let mut env: Vec<String> = vec![];
 
-        options.build()
+        // Mount container scripts into the container
+        volumes.push(format!(
+            "{}:{}",
+            charm_dir.join("container_scripts").to_string_lossy(),
+            "/lucky/container_scripts"
+        ));
+
+        // Mount Lucky into the container
+        let lucky_path = std::env::current_exe().context("Could not determine Lucky exe path")?;
+        volumes.push(format!(
+            "{}:{}",
+            lucky_path.to_string_lossy(),
+            "/usr/bin/lucky"
+        ));
+
+        // Mount the Lucky daemon socket into the container
+        let container_socket_path = "/run/lucky.sock";
+        volumes.push(format!(
+            "{}:{}",
+            socket_path.to_string_lossy(),
+            container_socket_path
+        ));
+
+        // Add Socket path environment variable
+        env.push(format!("LUCKY_DAEMON_SOCKET={}", container_socket_path));
+        // Set lucky context to client
+        env.push("LUCKY_CONTEXT=client".into());
+
+        // Add the rest of the environment variables
+        for (var, value) in &self.env_vars {
+            env.push(format!("{}={}", var, value));
+        }
+
+        // Add volumes
+        options.volumes(volumes.iter().map(AsRef::as_ref).collect());
+        // Add environment
+        options.env(env.iter().map(AsRef::as_ref).collect());
+
+        // Build options
+        Ok(options.build())
     }
 }
 

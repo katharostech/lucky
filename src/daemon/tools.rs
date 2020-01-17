@@ -231,9 +231,19 @@ pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()
         apply_updates(daemon, &mut container)?;
     }
 
+    // Remove named containers that are pending removal
+    state
+        .named_containers
+        .retain(|_name, container| container.pending_removal == false);
+
     // Apply changes for the default container
     if let Some(container) = &mut state.default_container {
         apply_updates(daemon, container)?;
+
+        // Remove container if pending removal
+        if container.pending_removal == true {
+            state.default_container = None;
+        }
     }
 
     daemon_set_status!(&mut state, ScriptState::Active);
@@ -258,13 +268,18 @@ fn apply_updates(
     // If the container has already been deployed
     if let Some(id) = &container_info.id {
         // Remove the container
-        log::debug!("Removing container: {}", id);
         let container = containers.get(&id);
 
+        log::debug!("Stopping container: {}", id);
         block_on(container.stop(Some(Duration::from_secs(10))))?;
-        block_on(container.delete())?
+        log::debug!("Removing container: {}", id);
+        block_on(container.delete())?;
+
+        // Clear the containers ID
+        container_info.id = None;
     }
 
+    // If this contianer was not meant to be removed
     if !container_info.pending_removal {
         // Pull the image
         // TODO: Add `latest` tag if tag is missing
@@ -277,7 +292,9 @@ fn apply_updates(
         )?;
 
         // Create the container
-        let docker_options = container_info.config.to_container_options();
+        let docker_options = container_info
+            .config
+            .to_container_options(&daemon.charm_dir, &daemon.socket_path)?;
         log::trace!("Creating container: docker {:#?}", docker_options);
         let create_info = block_on(containers.create(&docker_options))?;
 

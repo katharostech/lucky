@@ -51,16 +51,20 @@ pub(crate) fn get_daemon_connection_args<'a>() -> [Arg<'a>; 2] {
         Arg::with_name("unit_name")
             .long("unit-name")
             .short('u')
-            .help("The name of the Juju unit that this daemon is running for")
+            .help("The name of the Juju unit this charm is running for")
+            .long_help(concat!(
+                "The name of the Juju unit that this charm is running for. This is not ",
+                "required if `socket-path` has been specified."
+            ))
             .takes_value(true)
             .env("JUJU_UNIT_NAME")
-            .required_unless("doc"),
+            .required_unless("socket_path"),
         Arg::with_name("socket_path")
             .long("socket-path")
             .short('s')
             .help("The path to the socket to listen on")
             .long_help(concat!(
-                "The path of the socket to listen on. If this is left unspecified the socket path ",
+                "The path to the daemon socket. If this is left unspecified the socket path ",
                 "will be automatically determined from the unit name. For example, for a unit ",
                 "named `mysql/2`, the socket path will be `/run/lucky_mysql_2.sock`"
             ))

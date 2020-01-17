@@ -16,6 +16,7 @@ use crate::cli::daemon::{
 };
 use crate::cli::*;
 use crate::config;
+use crate::daemon::LuckyDaemonOptions;
 use crate::log::{set_log_mode, LogMode::Daemon};
 
 pub(super) struct StartSubcommand;
@@ -127,12 +128,13 @@ impl<'a> CliCommand<'a> for StartSubcommand {
             log::trace!("loaded lucky.yml: {:#?}", lucky_metadata);
 
             // Get daemon service
-            let service = crate::daemon::get_service(
+            let service = crate::daemon::get_service(LuckyDaemonOptions {
                 lucky_metadata,
                 charm_dir,
                 state_dir,
-                stop_listening.clone(),
-            );
+                stop_listening: stop_listening.clone(),
+                socket_path: PathBuf::from(socket_path),
+            });
 
             // Set signal handler for SIGINT/SIGTERM
             let stop = stop_listening.clone();

@@ -44,6 +44,8 @@ struct LuckyDaemon {
     charm_dir: PathBuf,
     /// The directory in which to store the daemon state
     state_dir: PathBuf,
+    /// The path to the socket that the daemon is listening on
+    socket_path: PathBuf,
     /// The contents of the charm's lucky.yaml config
     lucky_metadata: LuckyMetadata,
     /// Used to indicate that the server should stop listening.
@@ -56,22 +58,26 @@ struct LuckyDaemon {
     docker_conn: Arc<Mutex<Option<Arc<Mutex<Docker>>>>>,
 }
 
+pub(crate) struct LuckyDaemonOptions {
+    pub lucky_metadata: LuckyMetadata,
+    pub charm_dir: PathBuf,
+    pub state_dir: PathBuf,
+    pub socket_path: PathBuf,
+    pub stop_listening: Arc<AtomicBool>,
+}
+
 impl LuckyDaemon {
     /// Create a new daemon instance
     ///
     /// `stop_listening` will be set to `true` by the daemon if it recieves a `StopDaemon` RPC. The
     /// actual stopping of the server itself is not handled by the daemon.
-    fn new(
-        lucky_metadata: LuckyMetadata,
-        charm_dir: PathBuf,
-        state_dir: PathBuf,
-        stop_listening: Arc<AtomicBool>,
-    ) -> Self {
+    fn new(options: LuckyDaemonOptions) -> Self {
         let daemon = LuckyDaemon {
-            lucky_metadata,
-            charm_dir,
-            state_dir,
-            stop_listening,
+            lucky_metadata: options.lucky_metadata,
+            charm_dir: options.charm_dir,
+            state_dir: options.state_dir,
+            socket_path: options.socket_path,
+            stop_listening: options.stop_listening,
             state: Default::default(),
             docker_conn: Arc::new(Mutex::new(None)),
         };
@@ -255,19 +261,19 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         let len = pairs.len();
         if len > 0 {
             call.set_continues(true);
-        while i < len {
-            // If this is the last pair
-            if i == len - 1 {
-                // Tell client not to expect more after this one
-                call.set_continues(false);
-            }
-            // Reply with the pair
+            while i < len {
+                // If this is the last pair
+                if i == len - 1 {
+                    // Tell client not to expect more after this one
+                    call.set_continues(false);
+                }
+                // Reply with the pair
                 call.reply(Some(rpc::UnitKvGetAll_Reply_pair {
                     key: pairs[i].0.clone(),
                     value: pairs[i].1.clone().into_inner(),
                 }))?;
-            i += 1;
-        }
+                i += 1;
+            }
         } else {
             call.set_continues(false);
             call.reply(None)?;
@@ -396,14 +402,9 @@ impl Drop for LuckyDaemon {
 //
 
 /// Get the server service
-pub(crate) fn get_service(
-    lucky_metadata: LuckyMetadata,
-    charm_dir: PathBuf,
-    state_dir: PathBuf,
-    stop_listening: Arc<AtomicBool>,
-) -> varlink::VarlinkService {
+pub(crate) fn get_service(options: LuckyDaemonOptions) -> varlink::VarlinkService {
     // Create a new daemon instance
-    let daemon_instance = LuckyDaemon::new(lucky_metadata, charm_dir, state_dir, stop_listening);
+    let daemon_instance = LuckyDaemon::new(options);
 
     // Return the varlink service
     varlink::VarlinkService::new(
