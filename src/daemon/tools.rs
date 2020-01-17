@@ -234,14 +234,14 @@ pub(super) fn apply_container_updates(daemon: &LuckyDaemon) -> anyhow::Result<()
     // Remove named containers that are pending removal
     state
         .named_containers
-        .retain(|_name, container| container.pending_removal == false);
+        .retain(|_name, container| !container.pending_removal);
 
     // Apply changes for the default container
     if let Some(container) = &mut state.default_container {
         apply_updates(daemon, container)?;
 
         // Remove container if pending removal
-        if container.pending_removal == true {
+        if container.pending_removal {
             state.default_container = None;
         }
     }
