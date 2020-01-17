@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="affix"><a href="overview.html">Overview</a></li><li class="spacer"></li><li><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="development.html"><strong aria-hidden="true">2.</strong> Development</a></li><li class="spacer"></li><li><a href="cli/lucky.html"><strong aria-hidden="true">3.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="cli/lucky/charm.html"><strong aria-hidden="true">3.1.</strong> charm</a></li><li><ol class="section"><li><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">3.1.1.</strong> build</a></li><li><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">3.1.2.</strong> create</a></li></ol></li><li><a href="cli/lucky/client.html"><strong aria-hidden="true">3.2.</strong> client</a></li><li><ol class="section"><li><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">3.2.1.</strong> set-status</a></li><li><a href="cli/lucky/client/kv.html"><strong aria-hidden="true">3.2.2.</strong> kv</a></li><li><ol class="section"><li><a href="cli/lucky/client/kv/get.html"><strong aria-hidden="true">3.2.2.1.</strong> get</a></li><li><a href="cli/lucky/client/kv/set.html"><strong aria-hidden="true">3.2.2.2.</strong> set</a></li><li><a href="cli/lucky/client/kv/delete.html"><strong aria-hidden="true">3.2.2.3.</strong> delete</a></li></ol></li><li><a href="cli/lucky/client/container.html"><strong aria-hidden="true">3.2.3.</strong> container</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/image.html"><strong aria-hidden="true">3.2.3.1.</strong> image</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/image/get.html"><strong aria-hidden="true">3.2.3.1.1.</strong> get</a></li><li><a href="cli/lucky/client/container/image/set.html"><strong aria-hidden="true">3.2.3.1.2.</strong> set</a></li></ol></li><li><a href="cli/lucky/client/container/apply.html"><strong aria-hidden="true">3.2.3.2.</strong> apply</a></li></ol></li></ol></li></ol></li></ol>
+                <ol class="chapter"><li class="affix"><a href="overview.html">Overview</a></li><li class="spacer"></li><li><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="development.html"><strong aria-hidden="true">2.</strong> Development</a></li><li class="spacer"></li><li><a href="cli/lucky.html"><strong aria-hidden="true">3.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="cli/lucky/charm.html"><strong aria-hidden="true">3.1.</strong> charm</a></li><li><ol class="section"><li><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">3.1.1.</strong> build</a></li><li><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">3.1.2.</strong> create</a></li></ol></li><li><a href="cli/lucky/client.html"><strong aria-hidden="true">3.2.</strong> client</a></li><li><ol class="section"><li><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">3.2.1.</strong> set-status</a></li><li><a href="cli/lucky/client/kv.html"><strong aria-hidden="true">3.2.2.</strong> kv</a></li><li><ol class="section"><li><a href="cli/lucky/client/kv/get.html"><strong aria-hidden="true">3.2.2.1.</strong> get</a></li><li><a href="cli/lucky/client/kv/set.html"><strong aria-hidden="true">3.2.2.2.</strong> set</a></li><li><a href="cli/lucky/client/kv/delete.html"><strong aria-hidden="true">3.2.2.3.</strong> delete</a></li></ol></li><li><a href="cli/lucky/client/container.html"><strong aria-hidden="true">3.2.3.</strong> container</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/image.html"><strong aria-hidden="true">3.2.3.1.</strong> image</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/image/get.html"><strong aria-hidden="true">3.2.3.1.1.</strong> get</a></li><li><a href="cli/lucky/client/container/image/set.html"><strong aria-hidden="true">3.2.3.1.2.</strong> set</a></li></ol></li><li><a href="cli/lucky/client/container/apply.html"><strong aria-hidden="true">3.2.3.2.</strong> apply</a></li><li><a href="cli/lucky/client/container/env.html"><strong aria-hidden="true">3.2.3.3.</strong> env</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/env/get.html"><strong aria-hidden="true">3.2.3.3.1.</strong> get</a></li><li><a href="cli/lucky/client/container/env/set.html"><strong aria-hidden="true">3.2.3.3.2.</strong> set</a></li><li><a href="cli/lucky/client/container/env/delete.html"><strong aria-hidden="true">3.2.3.3.3.</strong> delete</a></li></ol></li></ol></li></ol></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -347,7 +347,7 @@ $ charm push build/charm_name
 <p><code>kv [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands-3" id="subcommands-3">Subcommands</a></h3>
 <ul>
-<li><a href="cli/lucky/client/./kv/get.html">get</a>: Get a value</li>
+<li><a href="cli/lucky/client/./kv/get.html">get</a>: Get a value from the key-value store. If you leave <code>key</code> unspecified, all key-value pairs will be printed out, one per line, in the format <code>key=value</code>.</li>
 <li><a href="cli/lucky/client/./kv/set.html">set</a>: Set a value</li>
 <li><a href="cli/lucky/client/./kv/delete.html">delete</a>: Delete a value</li>
 </ul>
@@ -389,6 +389,7 @@ $ charm push build/charm_name
 <ul>
 <li><a href="cli/lucky/client/./container/image.html">image</a>: Get and set the Docker image</li>
 <li><a href="cli/lucky/client/./container/apply.html">apply</a>: Apply pending container configuration updates</li>
+<li><a href="cli/lucky/client/./container/env.html">env</a>: Get and set container environment variables</li>
 </ul>
 <h1><a class="header" href="#image" id="image">image</a></h1>
 <h2><a class="header" href="#usage-11" id="usage-11">Usage</a></h2>
@@ -428,6 +429,67 @@ $ charm push build/charm_name
 <h1><a class="header" href="#apply" id="apply">apply</a></h1>
 <h2><a class="header" href="#usage-14" id="usage-14">Usage</a></h2>
 <p><code>apply [FLAGS]</code></p>
+<h1><a class="header" href="#env" id="env">env</a></h1>
+<h2><a class="header" href="#usage-15" id="usage-15">Usage</a></h2>
+<p><code>env [FLAGS] [SUBCOMMAND]</code></p>
+<h3><a class="header" href="#subcommands-6" id="subcommands-6">Subcommands</a></h3>
+<ul>
+<li><a href="cli/lucky/client/container/./env/get.html">get</a>: Get an environmetn variable from the container. If you leave <code>key</code> unspecified, all environment variables will be printed out, one per line, in the format <code>key=value</code>.</li>
+<li><a href="cli/lucky/client/container/./env/set.html">set</a>: Set a value</li>
+<li><a href="cli/lucky/client/container/./env/delete.html">delete</a>: Delete a value</li>
+</ul>
+<h1><a class="header" href="#get-2" id="get-2">get</a></h1>
+<h2><a class="header" href="#usage-16" id="usage-16">Usage</a></h2>
+<p><code>get [FLAGS] [OPTIONS] [key]</code></p>
+<h3><a class="header" href="#options-6" id="options-6">Options</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>-c</code>, <code>--container</code><code>&lt;container&gt;</code></td><td></td><td>The name of the container to get the environment variable for</td></tr>
+</tbody>
+</table>
+<h3><a class="header" href="#positionals-7" id="positionals-7">Positionals</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>&lt;key&gt;</code></td><td></td><td>The environment variable to get</td></tr>
+</tbody>
+</table>
+<h1><a class="header" href="#set-2" id="set-2">set</a></h1>
+<h2><a class="header" href="#usage-17" id="usage-17">Usage</a></h2>
+<p><code>set [FLAGS] [OPTIONS] [ARGS]</code></p>
+<h3><a class="header" href="#options-7" id="options-7">Options</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>-c</code>, <code>--container</code><code>&lt;container&gt;</code></td><td></td><td>The name of the container to set the environment variable for</td></tr>
+</tbody>
+</table>
+<h3><a class="header" href="#positionals-8" id="positionals-8">Positionals</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>&lt;key&gt;</code></td><td></td><td>The key to set in the store</td></tr>
+<tr><td><code>&lt;value&gt;</code></td><td></td><td>The value to set "key" to</td></tr>
+</tbody>
+</table>
+<h1><a class="header" href="#delete-1" id="delete-1">delete</a></h1>
+<h2><a class="header" href="#usage-18" id="usage-18">Usage</a></h2>
+<p><code>delete [FLAGS] [OPTIONS] [key]</code></p>
+<h3><a class="header" href="#options-8" id="options-8">Options</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>-c</code>, <code>--container</code><code>&lt;container&gt;</code></td><td></td><td>The name of the container to delete the environment variable for</td></tr>
+</tbody>
+</table>
+<h3><a class="header" href="#positionals-9" id="positionals-9">Positionals</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>&lt;key&gt;</code></td><td></td><td>The key to delete from the store</td></tr>
+</tbody>
+</table>
 
                     </main>
 
