@@ -1,6 +1,6 @@
 //! Commandline interface module
 use anyhow::format_err;
-use clap::{App, ArgMatches};
+use clap::{App, AppSettings, ArgMatches};
 
 mod types;
 use types::*;
@@ -62,6 +62,7 @@ impl<'a> CliCommand<'a> for LuckyCli {
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .version(crate::GIT_VERSION)
+            .setting(AppSettings::ArgRequiredElseHelp)
             .about("The Lucky charm framework for Juju.")
     }
 
