@@ -314,8 +314,8 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this daemon is running for</td></tr>
-<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path of the socket to listen on. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
+<tr><td><code>-u</code>, <code>--unit-name</code><code>&lt;unit_name&gt;</code></td><td><code>JUJU_UNIT_NAME</code></td><td>The name of the Juju unit that this charm is running for. This is not required if <code>socket-path</code> has been specified.</td></tr>
+<tr><td><code>-s</code>, <code>--socket-path</code><code>&lt;socket_path&gt;</code></td><td><code>LUCKY_DAEMON_SOCKET</code></td><td>The path to the daemon socket. If this is left unspecified the socket path will be automatically determined from the unit name. For example, for a unit named <code>mysql/2</code>, the socket path will be <code>/run/lucky_mysql_2.sock</code></td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#subcommands-2" id="subcommands-2">Subcommands</a></h3>
