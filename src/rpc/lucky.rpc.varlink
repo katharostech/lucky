@@ -33,8 +33,9 @@ method SetStatus(script_id: string, status: ScriptStatus) -> ()
 method UnitKvGet(key: string) -> (value: ?string)
 
 # Get all of the key-value pairs that have been set. Must be called with --more or it will return
-# a `RequiresMore` error.
-method UnitKvGetAll() -> (key: string, value: string)
+# a `RequiresMore` error. If there are no key-value pairs, a single reply will be made with `pair`
+# being null.
+method UnitKvGetAll() -> (pair: ?(key: string, value: string))
 
 # Set a value in the Unit's local Key-Value store. Setting `value` to null will erase the value.
 method UnitKvSet(key: string, value: ?string) -> ()

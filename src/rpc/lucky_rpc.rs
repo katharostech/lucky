@@ -257,16 +257,21 @@ pub trait Call_UnitKvGet: VarlinkCallError {
 }
 impl<'a> Call_UnitKvGet for varlink::Call<'a> {}
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct UnitKvGetAll_Reply {
+pub struct r#UnitKvGetAll_Reply_pair {
     pub r#key: String,
     pub r#value: String,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct UnitKvGetAll_Reply {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#pair: Option<UnitKvGetAll_Reply_pair>,
 }
 impl varlink::VarlinkReply for UnitKvGetAll_Reply {}
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct UnitKvGetAll_Args {}
 pub trait Call_UnitKvGetAll: VarlinkCallError {
-    fn reply(&mut self, r#key: String, r#value: String) -> varlink::Result<()> {
-        self.reply_struct(UnitKvGetAll_Reply { r#key, r#value }.into())
+    fn reply(&mut self, r#pair: Option<UnitKvGetAll_Reply_pair>) -> varlink::Result<()> {
+        self.reply_struct(UnitKvGetAll_Reply { r#pair }.into())
     }
 }
 impl<'a> Call_UnitKvGetAll for varlink::Call<'a> {}
@@ -484,7 +489,7 @@ pub fn new(inner: Box<dyn VarlinkInterface + Send + Sync>) -> VarlinkInterfacePr
 }
 impl varlink::Interface for VarlinkInterfaceProxy {
     fn get_description(&self) -> &'static str {
-        "# The Lucky charm frameowrk for Juju.\n#\n# This is the varlink RPC schema definition for the Lucky daemon and client communication\n# protocol.\ninterface lucky.rpc\n\n# General catch-all error type\nerror Error(message: string)\n# Returned when a method must be called with `more`\nerror RequiresMore()\n\n# Trigger a Juju hook\n# \n# If this hook is called with --more it will return once for each line of output from the hook.\n#\n# If hook execution failed this will throw a `HookFailed` error\nmethod TriggerHook(hook_name: String, environment: [string]string)\n    -> (output: ?string)\n\n# Stops the deamon service\nmethod StopDaemon() -> ()\n\n# The status of a Lucky script\ntype ScriptStatus (\n    state: (Maintenance, Blocked, Waiting, Active),\n    message: ?string\n)\n\n# Sets a script's status\nmethod SetStatus(script_id: string, status: ScriptStatus) -> ()\n\n# Get a value in the Unit's local Key-Value store. Value will be null if the key is not set.\nmethod UnitKvGet(key: string) -> (value: ?string)\n\n# Get all of the key-value pairs that have been set. Must be called with --more or it will return\n# a `RequiresMore` error.\nmethod UnitKvGetAll() -> (key: string, value: string)\n\n# Set a value in the Unit's local Key-Value store. Setting `value` to null will erase the value.\nmethod UnitKvSet(key: string, value: ?string) -> ()\n\n# Set a container's image\nmethod ContainerImageSet(image: string, container_name: ?string) -> ()\n# Get a container's image. Image will be none if container doesn't exist.\nmethod ContainerImageGet(container_name: ?string) -> (image: ?string)\n# Apply updates to the container configuration\nmethod ContainerApply() -> ()"
+        "# The Lucky charm frameowrk for Juju.\n#\n# This is the varlink RPC schema definition for the Lucky daemon and client communication\n# protocol.\ninterface lucky.rpc\n\n# General catch-all error type\nerror Error(message: string)\n# Returned when a method must be called with `more`\nerror RequiresMore()\n\n# Trigger a Juju hook\n# \n# If this hook is called with --more it will return once for each line of output from the hook.\n#\n# If hook execution failed this will throw a `HookFailed` error\nmethod TriggerHook(hook_name: String, environment: [string]string)\n    -> (output: ?string)\n\n# Stops the deamon service\nmethod StopDaemon() -> ()\n\n# The status of a Lucky script\ntype ScriptStatus (\n    state: (Maintenance, Blocked, Waiting, Active),\n    message: ?string\n)\n\n# Sets a script's status\nmethod SetStatus(script_id: string, status: ScriptStatus) -> ()\n\n# Get a value in the Unit's local Key-Value store. Value will be null if the key is not set.\nmethod UnitKvGet(key: string) -> (value: ?string)\n\n# Get all of the key-value pairs that have been set. Must be called with --more or it will return\n# a `RequiresMore` error. If there are no key-value pairs, a single reply will be made with `pair`\n# being null.\nmethod UnitKvGetAll() -> (pair: ?(key: string, value: string))\n\n# Set a value in the Unit's local Key-Value store. Setting `value` to null will erase the value.\nmethod UnitKvSet(key: string, value: ?string) -> ()\n\n# Set a container's image\nmethod ContainerImageSet(image: string, container_name: ?string) -> ()\n# Get a container's image. Image will be none if container doesn't exist.\nmethod ContainerImageGet(container_name: ?string) -> (image: ?string)\n# Apply updates to the container configuration\nmethod ContainerApply() -> ()"
     }
     fn get_name(&self) -> &'static str {
         "lucky.rpc"

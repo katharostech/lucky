@@ -251,9 +251,10 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // Loop through key-value pairs and return result to client
         let state = self.state.read().unwrap();
         let pairs: Vec<(&String, &Cd<String>)> = state.kv.iter().collect();
-        call.set_continues(true);
         let mut i = 0;
         let len = pairs.len();
+        if len > 0 {
+            call.set_continues(true);
         while i < len {
             // If this is the last pair
             if i == len - 1 {
@@ -261,8 +262,15 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 call.set_continues(false);
             }
             // Reply with the pair
-            call.reply(pairs[i].0.clone(), pairs[i].1.clone().into_inner())?;
+                call.reply(Some(rpc::UnitKvGetAll_Reply_pair {
+                    key: pairs[i].0.clone(),
+                    value: pairs[i].1.clone().into_inner(),
+                }))?;
             i += 1;
+        }
+        } else {
+            call.set_continues(false);
+            call.reply(None)?;
         }
 
         Ok(())

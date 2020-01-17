@@ -86,7 +86,9 @@ impl<'a> CliCommand<'a> for GetSubcommand {
             for response in client.unit_kv_get_all().more()? {
                 let response = response?;
 
-                writeln!(std::io::stdout(), "{}={}", response.key, response.value)?;
+                if let Some(pair) = response.pair {
+                    writeln!(std::io::stdout(), "{}={}", pair.key, pair.value)?;
+                }
             }
         }
 
