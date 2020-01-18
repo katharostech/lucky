@@ -10,6 +10,7 @@ use crate::types::{ScriptState, ScriptStatus};
 pub(super) fn handle_hook(daemon: &LuckyDaemon, hook_name: &str) -> anyhow::Result<()> {
     match hook_name {
         "install" => handle_install(daemon),
+        "config-changed" => handle_config_changed(daemon),
         "stop" => handle_stop(daemon),
         _ => Ok(()),
     }
@@ -18,6 +19,9 @@ pub(super) fn handle_hook(daemon: &LuckyDaemon, hook_name: &str) -> anyhow::Resu
 #[function_name::named]
 fn handle_install(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     let mut state = daemon.state.write().unwrap();
+
+    // Update the config cache
+    update_config_cache(&mut state)?;
 
     // If Docker support is enabled
     if daemon.lucky_metadata.use_docker {
@@ -28,6 +32,15 @@ fn handle_install(daemon: &LuckyDaemon) -> anyhow::Result<()> {
 
         daemon_set_status!(&mut state, ScriptState::Active);
     }
+
+    Ok(())
+}
+
+fn handle_config_changed(daemon: &LuckyDaemon) -> anyhow::Result<()> {
+    let mut state = daemon.state.write().unwrap();
+
+    // Update the configuration cache
+    update_config_cache(&mut state)?;
 
     Ok(())
 }
@@ -61,6 +74,30 @@ fn handle_stop(daemon: &LuckyDaemon) -> anyhow::Result<()> {
 //
 // Helpers
 //
+
+/// Update the daemons charm configuration cache with the valu
+fn update_config_cache(state: &mut DaemonState) -> anyhow::Result<()> {
+    log::debug!("Updating config cache");
+    let charm_config = &mut state.charm_config;
+
+    // Get updated charm config
+    let latest_config = juju::config_get()?;
+
+    // Loop through config
+    for (k, v) in latest_config {
+        // If it already exists
+        if let Some(value) = charm_config.get_mut(&k) {
+            // Update the value
+            **value = v;
+        // If key does not already exist
+        } else {
+            // Insert the key
+            charm_config.insert(k, Cd::new(v));
+        }
+    }
+
+    Ok(())
+}
 
 /// Helper to remove a given container
 fn remove_container(

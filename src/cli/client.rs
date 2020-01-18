@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 // Subcommands
 mod container;
+mod get_config;
 mod kv;
 mod private_address;
 mod public_address;
@@ -41,6 +42,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
             Box::new(container::ContainerSubcommand),
             Box::new(public_address::PublicAddressSubcommand),
             Box::new(private_address::PrivateAddressSubcommand),
+            Box::new(get_config::GetConfigSubcommand),
         ]
     }
 

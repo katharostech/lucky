@@ -1,4 +1,4 @@
-use clap::{App, Arg, ArgMatches};
+use clap::{App, Arg, ArgMatches, ArgSettings};
 
 use crate::cli::*;
 use crate::rpc::{VarlinkClient, VarlinkClientInterface};
@@ -31,6 +31,7 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
                 .case_insensitive(true))
             .arg(Arg::with_name("message")
                 .help("An optional message to provide with the state")
+                .setting(ArgSettings::AllowEmptyValues)
                 .required(false))
     }
 

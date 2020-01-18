@@ -1,6 +1,9 @@
 //! Contains functions used to interact with Juju through the hook environment
 //! tools. Also contains Juju specific types such as the Juju metadata.yaml struct.
 
+use anyhow::Context;
+
+use std::collections::HashMap;
 use std::io::Write;
 use std::process::Command;
 
@@ -28,6 +31,13 @@ pub(crate) fn unit_get_private_address() -> anyhow::Result<String> {
 
 pub(crate) fn unit_get_public_address() -> anyhow::Result<String> {
     Ok(run_cmd("unit-get", &["public-address"])?)
+}
+
+pub(crate) fn config_get() -> anyhow::Result<HashMap<String, serde_json::Value>> {
+    let config_json = run_cmd("config-get", &["--format", "json", "--all"])?;
+    let config = serde_json::from_str(&config_json).context("Could not parse config json")?;
+
+    Ok(config)
 }
 
 /// Write out a message to the Juju Log. Setting `debug` to `true` will tell Juju the log is a

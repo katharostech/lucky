@@ -1,6 +1,7 @@
 //! Contains the Lucky Daemon and RPC implementaiton used for client->daemon communication.
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
+use serde_json::Value as JsonValue;
 use shiplift::Docker;
 
 use std::collections::HashMap;
@@ -37,6 +38,8 @@ struct DaemonState {
     default_container: Option<Cd<ContainerInfo>>,
     /// Other containers that the daemon is supervising
     named_containers: HashMap<String, Cd<ContainerInfo>>,
+    /// The cached charm config obtained from Juju's `config-get` hook tool
+    charm_config: HashMap<String, Cd<JsonValue>>,
 }
 
 /// The Lucky Daemon RPC service
@@ -266,13 +269,32 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         let pairs: Vec<rpc::UnitKvGetAll_Reply_pairs> = state
             .kv
             .iter()
-            .map(|(x, y)| rpc::UnitKvGetAll_Reply_pairs {
-                key: x.clone(),
-                value: y.clone().into_inner(),
+            .map(|(k, v)| rpc::UnitKvGetAll_Reply_pairs {
+                key: k.clone(),
+                value: v.clone().into_inner(),
             })
             .collect();
         // Reply with pairs
         call.reply(pairs)?;
+
+        Ok(())
+    }
+
+    fn get_config(&self, call: &mut dyn rpc::Call_GetConfig) -> varlink::Result<()> {
+        let state = self.state.read().unwrap();
+
+        // Return all of the key-value config pairs
+        call.reply(
+            state
+                .charm_config
+                .iter()
+                .map(|(k, v)| rpc::GetConfig_Reply_config {
+                    key: k.clone(),
+                    // Value is the string representation of the JSON value
+                    value: v.clone().into_inner().to_string(),
+                })
+                .collect(),
+        )?;
 
         Ok(())
     }
@@ -449,9 +471,9 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 .config
                 .env_vars
                 .iter()
-                .map(|(x, y)| rpc::ContainerEnvGetAll_Reply_pairs {
-                    key: x.clone(),
-                    value: y.clone(),
+                .map(|(k, v)| rpc::ContainerEnvGetAll_Reply_pairs {
+                    key: k.clone(),
+                    value: v.clone(),
                 })
                 .collect();
 

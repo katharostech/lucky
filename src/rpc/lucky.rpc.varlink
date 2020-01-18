@@ -35,6 +35,9 @@ method GetPrivateAddress() -> (address: string)
 # Get the public network address ( may be a DNS name)
 method GetPublicAddress() -> (address: string)
 
+# Get juju config. Value will be the JSON-encoded value.
+method GetConfig() -> (config: [](key: string, value: string))
+
 #
 # Unit Key-Value
 #
