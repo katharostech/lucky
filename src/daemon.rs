@@ -331,9 +331,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
     }
 
     fn container_apply(&self, call: &mut dyn rpc::Call_ContainerApply) -> varlink::Result<()> {
-        // TODO: Don't apply container config when `docker: false` in lucky.yaml
-        handle_err!(tools::apply_container_updates(self), call);
+        if self.lucky_metadata.use_docker {
+            handle_err!(tools::apply_container_updates(self), call);
+        }
 
+        call.reply()?;
         Ok(())
     }
 
