@@ -263,28 +263,16 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
         // Loop through key-value pairs and return result to client
         let state = self.state.read().unwrap();
-        let pairs: Vec<(&String, &Cd<String>)> = state.kv.iter().collect();
-        let mut i = 0;
-        let len = pairs.len();
-        if len > 0 {
-            call.set_continues(true);
-            while i < len {
-                // If this is the last pair
-                if i == len - 1 {
-                    // Tell client not to expect more after this one
-                    call.set_continues(false);
-                }
-                // Reply with the pair
-                call.reply(Some(rpc::UnitKvGetAll_Reply_pair {
-                    key: pairs[i].0.clone(),
-                    value: pairs[i].1.clone().into_inner(),
-                }))?;
-                i += 1;
-            }
-        } else {
-            call.set_continues(false);
-            call.reply(None)?;
-        }
+        let pairs: Vec<rpc::UnitKvGetAll_Reply_pairs> = state
+            .kv
+            .iter()
+            .map(|(x, y)| rpc::UnitKvGetAll_Reply_pairs {
+                key: x.clone(),
+                value: y.clone().into_inner(),
+            })
+            .collect();
+        // Reply with pairs
+        call.reply(pairs)?;
 
         Ok(())
     }
@@ -457,35 +445,23 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // If the container exists
         if let Some(container) = container {
             // Loop through key-value pairs and return result to client
-            let pairs: Vec<(&String, &String)> = container.config.env_vars.iter().collect();
-            let mut i = 0;
-            let len = pairs.len();
-            if len > 0 {
-                call.set_continues(true);
-                while i < len {
-                    // If this is the last pair
-                    if i == len - 1 {
-                        // Tell client not to expect more after this one
-                        call.set_continues(false);
-                    }
-                    // Reply with the pair
-                    call.reply(Some(rpc::ContainerEnvGetAll_Reply_pair {
-                        key: pairs[i].0.clone(),
-                        value: pairs[i].1.clone(),
-                    }))?;
-                    i += 1;
-                }
-            // If there are no environment variables
-            } else {
-                // Return None
-                call.set_continues(false);
-                call.reply(None)?;
-            }
+            let pairs: Vec<rpc::ContainerEnvGetAll_Reply_pairs> = container
+                .config
+                .env_vars
+                .iter()
+                .map(|(x, y)| rpc::ContainerEnvGetAll_Reply_pairs {
+                    key: x.clone(),
+                    value: y.clone(),
+                })
+                .collect();
+
+            // Reply with pairs
+            call.reply(pairs)?;
 
         // If the container doesn't exist
         } else {
-            // Reply None
-            call.reply(None)?;
+            // Reply with empty array
+            call.reply(vec![])?;
         }
 
         Ok(())

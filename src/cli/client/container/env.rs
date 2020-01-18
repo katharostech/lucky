@@ -96,15 +96,12 @@ impl<'a> CliCommand<'a> for GetSubcommand {
         // If no key was given
         } else {
             // Return all of the key-value pairs
-            for response in client
+            for pair in client
                 .container_env_get_all(container.map(Into::into))
-                .more()?
+                .call()?
+                .pairs
             {
-                let response = response?;
-
-                if let Some(pair) = response.pair {
-                    writeln!(std::io::stdout(), "{}={}", pair.key, pair.value)?;
-                }
+                writeln!(std::io::stdout(), "{}={}", pair.key, pair.value)?;
             }
         }
 

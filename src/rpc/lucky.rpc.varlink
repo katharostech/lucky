@@ -41,10 +41,8 @@ method GetPublicAddress() -> (address: string)
 
 # Get a value in the Unit's local Key-Value store. Value will be null if the key is not set.
 method UnitKvGet(key: string) -> (value: ?string)
-# Get all of the key-value pairs that have been set. Must be called with --more or it will return
-# a `RequiresMore` error. If there are no key-value pairs, a single reply will be made with `pair`
-# being null.
-method UnitKvGetAll() -> (pair: ?(key: string, value: string))
+# Get all of the key-value pairs that have been set.
+method UnitKvGetAll() -> (pairs: [](key: string, value: string))
 # Set a value in the Unit's local Key-Value store. Setting `value` to null will erase the value.
 method UnitKvSet(key: string, value: ?string) -> ()
 
@@ -72,7 +70,5 @@ method ContainerImageGet(container_name: ?string) -> (image: ?string)
 method ContainerEnvGet(key: string, container_name: ?string) -> (value: ?string)
 # Set the value of a container environment variable. Setting value to null will delete the variable.
 method ContainerEnvSet(key: string, value: ?string, container_name: ?string) -> ()
-# Get the value of all container environment variables. Must be called with --more or it will return
-# a `RequiresMore` error. If there are no environment variables, a single reply will be made with
-# `pair` being null.
-method ContainerEnvGetAll(container_name: ?string) -> (pair: ?(key: string, value: string))
+# Get the value of all container environment variables.
+method ContainerEnvGetAll(container_name: ?string) -> (pairs: [](key: string, value: string))

@@ -88,12 +88,9 @@ impl<'a> CliCommand<'a> for GetSubcommand {
         // If no key was given
         } else {
             // Return all of the key-value pairs
-            for response in client.unit_kv_get_all().more()? {
-                let response = response?;
-
-                if let Some(pair) = response.pair {
-                    writeln!(std::io::stdout(), "{}={}", pair.key, pair.value)?;
-                }
+            for pair in client.unit_kv_get_all().call()?.pairs {
+                // Print out key-value pair
+                writeln!(std::io::stdout(), "{}={}", pair.key, pair.value)?;
             }
         }
 
