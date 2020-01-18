@@ -48,7 +48,7 @@ impl<'a> CliCommand<'a> for GetSubcommand {
             .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
             .about("Get an environment variable")
             .long_about(concat!(
-                "Get an environmetn variable from the container. ",
+                "Get an environment variable from the container. ",
                 "If you leave `key` unspecified, all environment variables will be printed out, ",
                 "one per line, in the format `key=value`."
             ))

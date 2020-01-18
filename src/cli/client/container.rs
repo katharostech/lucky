@@ -2,7 +2,7 @@ use clap::{App, ArgMatches};
 
 use crate::cli::*;
 
-mod apply;
+mod apply_updates;
 mod env;
 mod image;
 
@@ -22,7 +22,7 @@ impl<'a> CliCommand<'a> for ContainerSubcommand {
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
         vec![
             Box::new(image::ImageSubcommand),
-            Box::new(apply::ApplySubcommand),
+            Box::new(apply_updates::ApplyUpdatesSubcommand),
             Box::new(env::EnvSubcommand),
         ]
     }

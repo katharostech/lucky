@@ -3,11 +3,11 @@ use clap::{App, ArgMatches};
 use crate::cli::*;
 use crate::rpc::{VarlinkClient, VarlinkClientInterface};
 
-pub(super) struct ApplySubcommand;
+pub(super) struct ApplyUpdatesSubcommand;
 
-impl<'a> CliCommand<'a> for ApplySubcommand {
+impl<'a> CliCommand<'a> for ApplyUpdatesSubcommand {
     fn get_name(&self) -> &'static str {
-        "apply"
+        "apply-updates"
     }
 
     #[rustfmt::skip]
