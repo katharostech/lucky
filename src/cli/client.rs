@@ -1,10 +1,12 @@
-use clap::{App, ArgMatches};
+use clap::{App, AppSettings, ArgMatches};
 
 use std::collections::HashMap;
 
 // Subcommands
 mod container;
 mod kv;
+mod private_address;
+mod public_address;
 mod set_status;
 
 #[cfg(feature = "daemon")]
@@ -23,6 +25,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
     fn get_app(&self) -> App<'a> {
         let app = self
             .get_base_app()
+            .setting(AppSettings::SubcommandRequiredElseHelp)
             .about("Communicate with the Lucky daemon in charm scripts");
 
         #[cfg(feature = "daemon")]
@@ -36,6 +39,8 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
             Box::new(set_status::SetStatusSubcommand),
             Box::new(kv::KvSubcommand),
             Box::new(container::ContainerSubcommand),
+            Box::new(public_address::PublicAddressSubcommand),
+            Box::new(private_address::PrivateAddressSubcommand),
         ]
     }
 

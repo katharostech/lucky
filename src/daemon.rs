@@ -13,6 +13,7 @@ use std::sync::{
 };
 
 use crate::docker::ContainerInfo;
+use crate::juju;
 use crate::rpc;
 use crate::types::{HookScript, LuckyMetadata, ScriptStatus};
 
@@ -64,6 +65,20 @@ pub(crate) struct LuckyDaemonOptions {
     pub state_dir: PathBuf,
     pub socket_path: PathBuf,
     pub stop_listening: Arc<AtomicBool>,
+}
+
+// Utility macro for handling anyhow results with `handle_err!(function_that_returns_anyhow_err())`
+macro_rules! handle_err {
+    ($expr:expr, $call:ident) => {
+        match $expr {
+            Ok(v) => v,
+            Err(e) => {
+                let e = format!("{:?}", e);
+                log::error!("{}", e);
+                return $call.reply_error(e);
+            }
+        }
+    };
 }
 
 impl LuckyDaemon {
@@ -194,13 +209,8 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
         log::info!("Triggering hook: {}", hook_name);
 
-        // Trigger hook and handle error
-        self._trigger_hook(call, &hook_name, &environment)
-            .or_else(|e| {
-                let e = format!("{:?}", e);
-                log::error!("{}", e);
-                call.reply_error(e)
-            })?;
+        // Trigger hook
+        handle_err!(self._trigger_hook(call, &hook_name, &environment), call);
 
         // Unset the hook environment variables as they will be invalid when the hook exits
         for var in environment.keys() {
@@ -222,13 +232,10 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // Add status to script statuses
         let status: ScriptStatus = status.into();
 
-        tools::set_script_status(&mut self.state.write().unwrap(), &script_id, status).or_else(
-            |e| {
-                let e = format!("{:?}", e);
-                log::error!("{}", e);
-                call.reply_error(e)
-            },
-        )?;
+        handle_err!(
+            tools::set_script_status(&mut self.state.write().unwrap(), &script_id, status),
+            call
+        );
 
         // Reply
         call.reply()?;
@@ -282,6 +289,21 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    fn get_private_address(
+        &self,
+        call: &mut dyn rpc::Call_GetPrivateAddress,
+    ) -> varlink::Result<()> {
+        call.reply(handle_err!(juju::unit_get_private_address(), call))?;
+
+        Ok(())
+    }
+
+    fn get_public_address(&self, call: &mut dyn rpc::Call_GetPublicAddress) -> varlink::Result<()> {
+        call.reply(handle_err!(juju::unit_get_public_address(), call))?;
+
+        Ok(())
+    }
+
     /// Set a value in the unit local key-value store
     fn unit_kv_set(
         &self,
@@ -310,11 +332,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
     fn container_apply(&self, call: &mut dyn rpc::Call_ContainerApply) -> varlink::Result<()> {
         // TODO: Don't apply container config when `docker: false` in lucky.yaml
-        tools::apply_container_updates(self).or_else(|e| {
-            let e = format!("{:?}", e);
-            log::error!("{}", e);
-            call.reply_error(e)
-        })?;
+        handle_err!(tools::apply_container_updates(self), call);
 
         Ok(())
     }

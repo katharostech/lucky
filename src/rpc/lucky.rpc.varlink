@@ -29,6 +29,12 @@ type ScriptStatus (
 # Sets a script's status
 method SetStatus(script_id: string, status: ScriptStatus) -> ()
 
+# Get the private IP address
+method GetPrivateAddress() -> (address: string)
+
+# Get the public network address ( may be a DNS name)
+method GetPublicAddress() -> (address: string)
+
 #
 # Unit Key-Value
 #

@@ -22,13 +22,21 @@ pub(crate) fn set_status(status: ScriptStatus) -> anyhow::Result<()> {
     Ok(())
 }
 
+pub(crate) fn unit_get_private_address() -> anyhow::Result<String> {
+    Ok(run_cmd("unit-get", &["private-address"])?)
+}
+
+pub(crate) fn unit_get_public_address() -> anyhow::Result<String> {
+    Ok(run_cmd("unit-get", &["public-address"])?)
+}
+
 /// Write out a message to the Juju Log. Setting `debug` to `true` will tell Juju the log is a
 /// debug log.
 ///
 /// If `juju-log` is not in the path, this function will silently ignore it.
 ///
 /// If there is a problem while running `juju-log` the error will be printed to stderr.
-/// 
+///
 /// This function blocks until the command exits.
 pub(crate) fn juju_log(message: &str, debug: bool) {
     // build the juju-log command
