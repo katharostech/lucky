@@ -37,6 +37,9 @@ impl ContainerInfo {
 pub(crate) struct ContainerConfig {
     pub image: String,
     pub env_vars: HashMap<String, String>,
+    pub entrypoint: Option<String>,
+    pub command: Option<Vec<String>>,
+    pub volumes: Vec<LuckyDataVolume>,
 }
 
 impl ContainerConfig {
@@ -54,6 +57,7 @@ impl ContainerConfig {
     pub fn to_container_options(
         &self,
         charm_dir: &Path,
+        lucky_data_dir: &Path,
         socket_path: &Path,
     ) -> anyhow::Result<ContainerOptions> {
         let mut options = ContainerOptions::builder(&self.image);
@@ -93,6 +97,36 @@ impl ContainerConfig {
             env.push(format!("{}={}", var, value));
         }
 
+        // Add entrypoint
+        if let Some(entrypoint) = &self.entrypoint {
+            options.entrypoint(&entrypoint);
+        }
+
+        // Add command
+        if let Some(cmd) = &self.command {
+            options.cmd(cmd.iter().map(AsRef::as_ref).collect());
+        }
+
+        // Add other specified volumes
+        for lucky_volume in &self.volumes {
+            let host_path = lucky_data_dir.join("volumes").join(&lucky_volume.name);
+
+            // Create the host path
+            if !host_path.exists() {
+                fs::create_dir_all(&host_path).context(format!(
+                    "Could not create dir: {}",
+                    host_path.to_string_lossy()
+                ))?;
+            }
+
+            // Add volume to container
+            volumes.push(format!(
+                "{}:{}",
+                host_path.to_string_lossy(),
+                lucky_volume.container_path
+            ));
+        }
+
         // Add volumes
         options.volumes(volumes.iter().map(AsRef::as_ref).collect());
         // Add environment
@@ -101,6 +135,12 @@ impl ContainerConfig {
         // Build options
         Ok(options.build())
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub(crate) struct LuckyDataVolume {
+    pub name: String,
+    pub container_path: String,
 }
 
 /// Make sure Docker is installed an available

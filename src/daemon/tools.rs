@@ -15,7 +15,7 @@ use super::*;
 
 /// Load the daemon state from the filesystem
 pub(super) fn load_state(daemon: &LuckyDaemon) -> anyhow::Result<()> {
-    let state_file_path = daemon.state_dir.join("state.yaml");
+    let state_file_path = daemon.lucky_data_dir.join("state.yaml");
     if !state_file_path.exists() {
         return Ok(());
     }
@@ -37,7 +37,7 @@ pub(super) fn load_state(daemon: &LuckyDaemon) -> anyhow::Result<()> {
 /// Write out the daemon state to fileystem
 pub(super) fn flush_state(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     log::debug!("Flushing daemon state to disk");
-    let state_file_path = daemon.state_dir.join("state.yaml");
+    let state_file_path = daemon.lucky_data_dir.join("state.yaml");
     let mut state_file = OpenOptions::new()
         .write(true)
         .truncate(true)
@@ -292,9 +292,11 @@ fn apply_updates(
         )?;
 
         // Create the container
-        let docker_options = container_info
-            .config
-            .to_container_options(&daemon.charm_dir, &daemon.socket_path)?;
+        let docker_options = container_info.config.to_container_options(
+            &daemon.charm_dir,
+            &daemon.lucky_data_dir,
+            &daemon.socket_path,
+        )?;
         log::trace!("Creating container: docker {:#?}", docker_options);
         let create_info = block_on(containers.create(&docker_options))?;
 

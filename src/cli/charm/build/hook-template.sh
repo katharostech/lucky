@@ -16,12 +16,12 @@ lucky=./bin/lucky
 unit_name=$(echo $JUJU_UNIT_NAME | sed 's/\//_/' )
 log_dir="/var/log/lucky"
 mkdir -p $log_dir
-unit_state_dir="/var/lib/lucky/$unit_name"
+lucky_data_dir="/var/lib/lucky/$unit_name"
 
 # If Lucky was not bundled
 if [ ! -f ./bin/lucky ]; then
     # Use lucky as downloaded by the install script
-    lucky="/var/lib/lucky/$unit_name/bin/lucky"
+    lucky="$lucky_data_dir/bin/lucky"
 fi
 
 # Start the Lucky daemon

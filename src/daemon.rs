@@ -47,7 +47,7 @@ struct LuckyDaemon {
     /// The charm directory
     charm_dir: PathBuf,
     /// The directory in which to store the daemon state
-    state_dir: PathBuf,
+    lucky_data_dir: PathBuf,
     /// The path to the socket that the daemon is listening on
     socket_path: PathBuf,
     /// The contents of the charm's lucky.yaml config
@@ -65,7 +65,7 @@ struct LuckyDaemon {
 pub(crate) struct LuckyDaemonOptions {
     pub lucky_metadata: LuckyMetadata,
     pub charm_dir: PathBuf,
-    pub state_dir: PathBuf,
+    pub data_dir: PathBuf,
     pub socket_path: PathBuf,
     pub stop_listening: Arc<AtomicBool>,
 }
@@ -93,7 +93,7 @@ impl LuckyDaemon {
         let daemon = LuckyDaemon {
             lucky_metadata: options.lucky_metadata,
             charm_dir: options.charm_dir,
-            state_dir: options.state_dir,
+            lucky_data_dir: options.data_dir,
             socket_path: options.socket_path,
             stop_listening: options.stop_listening,
             state: Default::default(),
@@ -343,6 +343,82 @@ impl rpc::VarlinkInterface for LuckyDaemon {
     fn container_apply(&self, call: &mut dyn rpc::Call_ContainerApply) -> varlink::Result<()> {
         if self.lucky_metadata.use_docker {
             handle_err!(tools::apply_container_updates(self), call);
+        }
+
+        call.reply()?;
+        Ok(())
+    }
+
+    fn container_set_entrypoint(
+        &self,
+        call: &mut dyn rpc::Call_ContainerSetEntrypoint,
+        entrypoint: Option<String>,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // If a container was specified
+        if let Some(name) = container_name {
+            // If specified container exists
+            if let Some(container) = state.named_containers.get_mut(&name) {
+                log::debug!(
+                    "Set Docker entrypoint [{}]: {}",
+                    name,
+                    entrypoint.as_ref().unwrap_or(&"unset".to_string())
+                );
+                // Set entrypoint
+                container.config.entrypoint = entrypoint;
+            }
+
+        // If no container was specified
+        } else {
+            // If default container exists
+            if let Some(container) = &mut state.default_container {
+                log::debug!(
+                    "Set Docker entrypoint: {}",
+                    entrypoint.as_ref().unwrap_or(&"unset".to_string())
+                );
+                // Set entrypoint
+                container.config.entrypoint = entrypoint;
+            }
+        }
+
+        call.reply()?;
+        Ok(())
+    }
+
+    fn container_set_command(
+        &self,
+        call: &mut dyn rpc::Call_ContainerSetCommand,
+        command: Option<Vec<String>>,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // If a container was specified
+        if let Some(name) = container_name {
+            // If specified container exists
+            if let Some(container) = state.named_containers.get_mut(&name) {
+                log::debug!(
+                    "Set Docker command [{}]: {}",
+                    name,
+                    command.as_ref().map_or("unset".into(), |x| x.join(" "))
+                );
+                // Set entrypoint
+                container.config.command = command;
+            }
+
+        // If no container was specified
+        } else {
+            // If default container exists
+            if let Some(container) = &mut state.default_container {
+                log::debug!(
+                    "Set Docker command: {}",
+                    command.as_ref().map_or("unset".into(), |x| x.join(" "))
+                );
+                // Set entrypoint
+                container.config.command = command;
+            }
         }
 
         call.reply()?;

@@ -43,11 +43,7 @@ impl<'a> CliCommand<'a> for GetSubcommand {
         self.get_base_app()
             .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
             .about("Get the container image")
-            .arg(Arg::with_name("name")
-                .help("The name of the container to get the image of if not the default")
-                .short('n')
-                .long("name")
-                .takes_value(true))
+            .arg(super::container_arg())
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -59,7 +55,7 @@ impl<'a> CliCommand<'a> for GetSubcommand {
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        let name = args.value_of("name");
+        let container = args.value_of("container");
 
         // Get client connection
         let mut client: Box<VarlinkClient> = data
@@ -69,7 +65,9 @@ impl<'a> CliCommand<'a> for GetSubcommand {
             .expect("Invalid type");
 
         // Get the image for the specified container
-        let response = client.container_image_get(name.map(Into::into)).call()?;
+        let response = client
+            .container_image_get(container.map(Into::into))
+            .call()?;
 
         // Write response
         writeln!(
@@ -96,11 +94,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .arg(Arg::with_name("image")
                 .help("The container image")
                 .required(true))
-            .arg(Arg::with_name("name")
-                .help("The name of the container to set the image for if not the default")
-                .short('n')
-                .long("name")
-                .takes_value(true))
+            .arg(super::container_arg())
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -115,7 +109,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         let image = args
             .value_of("image")
             .expect("Missing required argument `image`");
-        let name = args.value_of("name");
+        let container = args.value_of("container");
 
         // Get client connection
         let mut client: Box<VarlinkClient> = data
@@ -126,7 +120,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
 
         // Set the image for the specified container
         client
-            .container_image_set(image.into(), name.map(Into::into))
+            .container_image_set(image.into(), container.map(Into::into))
             .call()?;
 
         Ok(data)

@@ -54,11 +54,7 @@ impl<'a> CliCommand<'a> for GetSubcommand {
             ))
             .arg(Arg::with_name("key")
                 .help("The environment variable to get"))
-            .arg(Arg::with_name("container")
-                .help("The name of the container to get the environment variable for")
-                .short('c')
-                .long("container")
-                .takes_value(true))
+            .arg(super::container_arg())
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -124,11 +120,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
                 .help("The key to set in the store"))
             .arg(Arg::with_name("value")
                 .help(r#"The value to set "key" to"#))
-            .arg(Arg::with_name("container")
-                .help("The name of the container to set the environment variable for")
-                .short('c')
-                .long("container")
-                .takes_value(true))
+            .arg(super::container_arg())
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {

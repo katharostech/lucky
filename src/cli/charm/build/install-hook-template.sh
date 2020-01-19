@@ -14,8 +14,8 @@ lucky=./bin/lucky
 
 # Replace "/" with "_" in unit name
 unit_name=$(echo $JUJU_UNIT_NAME | sed 's/\//_/' )
-unit_state_dir="/var/lib/lucky/$unit_name"
-bin_dir="$unit_state_dir/bin"
+lucky_data_dir="/var/lib/lucky/$unit_name"
+bin_dir="$lucky_data_dir/bin"
 log_dir="/var/log/lucky"
 mkdir -p $log_dir
 

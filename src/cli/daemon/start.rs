@@ -39,23 +39,24 @@ impl<'a> CliCommand<'a> for StartSubcommand {
                 .long("foreground")
                 .short('F')
                 .help("Run in the foreground"))
-            .arg(Arg::with_name("state_dir")
-                .long("state-dir")
+            .arg(Arg::with_name("data_dir")
+                .long("data-dir")
                 .short('S')
                 .takes_value(true)
-                .help("The directory to store the unit state in")
+                .help("The directory to store the unit data in")
                 .long_help(concat!(
-                    "The directory to store the unit state in. If this is left unspecified the ",
-                    "state directory will be automatically determined from the unit name. For ",
-                    "example, for a unit named `mysql/2`, the state dir will be ",
-                    "`/var/lib/lucky/mysql_2/state`"
+                    "The directory to store the unit data in. If this is left unspecified the ",
+                    "data directory will be automatically determined from the unit name. For ",
+                    "example, for a unit named `mysql/2`, the data dir will be ",
+                    "`/var/lib/lucky/mysql_2/`"
                 ))
-                .env("LUCKY_STATE_DIR"))
+                .env("LUCKY_DATA_DIR"))
             .arg(Arg::with_name("log_file")
                 .long("log-file")
                 .short('L')
                 .takes_value(true)
-                .help("File to write daemon logs to"))
+                .help("File to write daemon logs to")
+                .env("LUCKY_LOG_FILE"))
             .args(&get_daemon_connection_args())
     }
 
@@ -95,14 +96,9 @@ impl<'a> CliCommand<'a> for StartSubcommand {
             }
         }
 
-        // Get the state dir
-        let state_dir = args.value_of("state_dir").map_or_else(
-            || {
-                PathBuf::from(format!(
-                    "/var/lib/lucky/{}/state",
-                    unit_name.replace("/", "_")
-                ))
-            },
+        // Get the data dir
+        let data_dir = args.value_of("data_dir").map_or_else(
+            || PathBuf::from(format!("/var/lib/lucky/{}", unit_name.replace("/", "_"))),
             PathBuf::from,
         );
 
@@ -115,10 +111,10 @@ impl<'a> CliCommand<'a> for StartSubcommand {
             // The stop_listening flag is used to shutdown the server by setting it to `false`
             let stop_listening = Arc::new(AtomicBool::new(false));
 
-            // Create state dir
-            if !state_dir.exists() {
-                std::fs::create_dir_all(&state_dir)
-                    .context(format!("Could not create unit state dir: {:?}", state_dir))?;
+            // Create data dir
+            if !data_dir.exists() {
+                std::fs::create_dir_all(&data_dir)
+                    .context(format!("Could not create unit data dir: {:?}", data_dir))?;
             }
 
             // Get charm dir and lucky metadata
@@ -131,7 +127,7 @@ impl<'a> CliCommand<'a> for StartSubcommand {
             let service = crate::daemon::get_service(LuckyDaemonOptions {
                 lucky_metadata,
                 charm_dir,
-                state_dir,
+                data_dir,
                 stop_listening: stop_listening.clone(),
                 socket_path: PathBuf::from(socket_path),
             });
@@ -171,27 +167,24 @@ impl<'a> CliCommand<'a> for StartSubcommand {
         } else {
             log::info!("Starting the lucky daemon");
 
-            // Spawn another process for running the daemon in the background
-            let state_dir = state_dir.to_string_lossy();
-            let mut daemon_args = vec![
-                "start",
-                "--socket-path",
-                &socket_path,
-                "--unit-name",
-                &unit_name,
-                "--state-dir",
-                &state_dir,
-                "-F",
-            ];
-            if let Some(log_file) = args.value_of("log_file") {
-                daemon_args.extend(&["--log-file", &log_file])
-            }
-            let mut output: Box<dyn Read> = Exec::cmd(std::env::current_exe()?)
+            let data_dir = data_dir.to_string_lossy();
+
+            // Create the daemon process to run in the background
+            let mut cmd = Exec::cmd(std::env::current_exe()?)
                 .env("LUCKY_CONTEXT", "daemon")
-                .args(daemon_args.as_slice())
+                .env("LUCKY_DATA_DIR", &*data_dir)
+                .env("JUJU_UNIT_NAME", &unit_name)
+                .env("LUCKY_DAEMON_SOCKET", &socket_path)
+                .args(&["start", "-F"])
                 .stdout(Redirection::Pipe)
                 .stderr(Redirection::Merge)
-                .detached()
+                .detached();
+            if let Some(log_file) = args.value_of("log_file") {
+                cmd = cmd.env("LUCKY_LOG_FILE", log_file);
+            }
+
+            // Spawn process and stream output
+            let mut output: Box<dyn Read> = cmd
                 .stream_stdout()
                 .context("Could not start lucky daemon")?;
 

@@ -56,6 +56,11 @@ method UnitKvSet(key: string, value: ?string) -> ()
 # Apply updates to the container configuration for all containers
 method ContainerApply() -> ()
 
+# Set the container entrypoint. If set to null, the container will use its default
+method ContainerSetEntrypoint(entrypoint: ?string, container_name: ?string) -> ()
+# Set the container command. If set to null, the container will use its default
+method ContainerSetCommand(command: ?[]string, container_name: ?string) -> ()
+
 #
 # Container Image
 #
