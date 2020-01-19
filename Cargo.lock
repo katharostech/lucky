@@ -865,6 +865,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f56a2d0bc861f9165be4eb3442afd3c236d8a98afd426f65d92324ae1091a484"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -948,6 +957,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "shiplift",
+ "shrinkwraprs",
  "strum",
  "strum_macros",
  "subprocess",
@@ -1618,6 +1628,19 @@ dependencies = [
  "tokio-codec",
  "tokio-io",
  "url",
+]
+
+[[package]]
+name = "shrinkwraprs"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e63e6744142336dfb606fe2b068afa2e1cca1ee6a5d8377277a92945d81fa331"
+dependencies = [
+ "bitflags",
+ "itertools",
+ "proc-macro2 1.0.7",
+ "quote 1.0.2",
+ "syn 1.0.13",
 ]
 
 [[package]]

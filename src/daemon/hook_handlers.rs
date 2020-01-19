@@ -7,17 +7,23 @@ use crate::docker::ContainerInfo;
 use crate::rt::block_on;
 use crate::types::{ScriptState, ScriptStatus};
 
-pub(super) fn handle_hook(daemon: &LuckyDaemon, hook_name: &str) -> anyhow::Result<()> {
+pub(super) fn handle_pre_hook(daemon: &LuckyDaemon, hook_name: &str) -> anyhow::Result<()> {
     match hook_name {
-        "install" => handle_install(daemon),
-        "config-changed" => handle_config_changed(daemon),
-        "stop" => handle_stop(daemon),
+        "install" => handle_pre_install(daemon),
+        "config-changed" => handle_pre_config_changed(daemon),
+        _ => Ok(()),
+    }
+}
+
+pub(super) fn handle_post_hook(daemon: &LuckyDaemon, hook_name: &str) -> anyhow::Result<()> {
+    match hook_name {
+        "stop" => handle_post_stop(daemon),
         _ => Ok(()),
     }
 }
 
 #[function_name::named]
-fn handle_install(daemon: &LuckyDaemon) -> anyhow::Result<()> {
+fn handle_pre_install(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     let mut state = daemon.state.write().unwrap();
 
     // Update the config cache
@@ -36,7 +42,7 @@ fn handle_install(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn handle_config_changed(daemon: &LuckyDaemon) -> anyhow::Result<()> {
+fn handle_pre_config_changed(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     let mut state = daemon.state.write().unwrap();
 
     // Update the configuration cache
@@ -46,7 +52,7 @@ fn handle_config_changed(daemon: &LuckyDaemon) -> anyhow::Result<()> {
 }
 
 #[function_name::named]
-fn handle_stop(daemon: &LuckyDaemon) -> anyhow::Result<()> {
+fn handle_post_stop(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     let mut state = daemon.state.write().unwrap();
     let docker_conn = daemon.get_docker_conn()?;
     let docker_conn = docker_conn.lock().unwrap();

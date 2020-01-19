@@ -2,13 +2,16 @@
 use anyhow::{bail, Context};
 use serde::{Deserialize, Serialize};
 use shiplift::builder::ContainerOptions;
+use shrinkwraprs::Shrinkwrap;
 
 use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::process::{cmd_exists, run_cmd, run_cmd_with_retries};
+
+use crate::VOLUME_DIR;
 
 /// A struct made of a container definition and the container id
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -32,6 +35,18 @@ impl ContainerInfo {
     }
 }
 
+#[derive(Shrinkwrap, Serialize, Deserialize, PartialEq, Eq, Hash, Default, Clone, Debug)]
+#[shrinkwrap(mutable)]
+#[serde(transparent)]
+/// A volume source path wrapper type to make it more difficult to mix-up sources and targets
+pub struct VolumeSource(pub String);
+
+#[derive(Shrinkwrap, Serialize, Deserialize, PartialEq, Eq, Hash, Default, Clone, Debug)]
+#[shrinkwrap(mutable)]
+#[serde(transparent)]
+/// A volume target path wrapper type to make it more difficult to mix-up sources and targets
+pub struct VolumeTarget(pub String);
+
 /// The container configuration options such as image, volumes, ports, etc.
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub(crate) struct ContainerConfig {
@@ -39,7 +54,8 @@ pub(crate) struct ContainerConfig {
     pub env_vars: HashMap<String, String>,
     pub entrypoint: Option<String>,
     pub command: Option<Vec<String>>,
-    pub volumes: Vec<LuckyDataVolume>,
+    /// Volume mapping from target to source
+    pub volumes: HashMap<VolumeTarget, VolumeSource>,
 }
 
 impl ContainerConfig {
@@ -108,8 +124,12 @@ impl ContainerConfig {
         }
 
         // Add other specified volumes
-        for lucky_volume in &self.volumes {
-            let host_path = lucky_data_dir.join("volumes").join(&lucky_volume.name);
+        for (target, source) in &self.volumes {
+            let host_path = if source.starts_with("/") {
+                PathBuf::from(&**source)
+            } else {
+                lucky_data_dir.join(VOLUME_DIR).join(&**source)
+            };
 
             // Create the host path
             if !host_path.exists() {
@@ -120,11 +140,7 @@ impl ContainerConfig {
             }
 
             // Add volume to container
-            volumes.push(format!(
-                "{}:{}",
-                host_path.to_string_lossy(),
-                lucky_volume.container_path
-            ));
+            volumes.push(format!("{}:{}", host_path.to_string_lossy(), &**target));
         }
 
         // Add volumes
@@ -135,12 +151,6 @@ impl ContainerConfig {
         // Build options
         Ok(options.build())
     }
-}
-
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
-pub(crate) struct LuckyDataVolume {
-    pub name: String,
-    pub container_path: String,
 }
 
 /// Make sure Docker is installed an available

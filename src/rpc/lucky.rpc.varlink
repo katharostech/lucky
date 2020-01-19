@@ -55,6 +55,8 @@ method UnitKvSet(key: string, value: ?string) -> ()
 
 # Apply updates to the container configuration for all containers
 method ContainerApply() -> ()
+# Delete a container
+method ContainerDelete(container_name: ?string) -> ()
 
 # Set the container entrypoint. If set to null, the container will use its default
 method ContainerSetEntrypoint(entrypoint: ?string, container_name: ?string) -> ()
@@ -80,3 +82,22 @@ method ContainerEnvGet(key: string, container_name: ?string) -> (value: ?string)
 method ContainerEnvSet(key: string, value: ?string, container_name: ?string) -> ()
 # Get the value of all container environment variables.
 method ContainerEnvGetAll(container_name: ?string) -> (pairs: [](key: string, value: string))
+
+#
+# Container volumes
+#
+
+# Add a docker volume to the container. If the source does not start with a `/` it is taken as
+# a volume name and put in the Lucky data dir for the charm unit. If it does start with a `/` it
+# is bind mounted to the host at that location.
+method ContainerVolumeAdd(source: string, target: string, container_name: ?string) -> ()
+# Remove a volume from the container. The container path is the path of the volume in the container.
+# If `delete_data` is true, the volume source data will be deleted as well as the mount being removed
+# from the container.
+#
+# `data_deleted` will be true if the source data was deleted. `data_deleted` may be false, even if
+# `delete_data` was set to true, if the source path was mounted to more than one container path and
+# would still be mounted even after removing the specified mount.
+method ContainerVolumeRemove(container_path: string, delete_data: bool, container_name: ?string) -> (data_deleted: bool)
+# Get the list of volumes in the format of `source:target`
+method ContainerVolumeGetAll(container_name: ?string) -> (volumes: [](source: string, target: string))

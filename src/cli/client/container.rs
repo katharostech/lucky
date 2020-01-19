@@ -3,10 +3,12 @@ use clap::{App, Arg, ArgMatches};
 use crate::cli::*;
 
 mod apply_updates;
+mod delete;
 mod env;
 mod image;
 mod set_command;
 mod set_entrypoint;
+mod volume;
 
 pub(super) struct ContainerSubcommand;
 
@@ -29,6 +31,8 @@ impl<'a> CliCommand<'a> for ContainerSubcommand {
             Box::new(env::EnvSubcommand),
             Box::new(set_entrypoint::SetEntrypointSubcommand),
             Box::new(set_command::SetCommandSubcommand),
+            Box::new(volume::VolumeSubcommand),
+            Box::new(delete::DeleteSubcommand),
         ]
     }
 

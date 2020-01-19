@@ -13,10 +13,12 @@ use std::sync::{
     Arc, Mutex, RwLock,
 };
 
-use crate::docker::ContainerInfo;
+use crate::docker::{ContainerInfo, VolumeSource, VolumeTarget};
 use crate::juju;
 use crate::rpc;
 use crate::types::{HookScript, LuckyMetadata, ScriptStatus};
+
+use crate::VOLUME_DIR;
 
 /// Daemon tools
 mod tools;
@@ -148,7 +150,7 @@ impl LuckyDaemon {
         environment: &HashMap<String, String>,
     ) -> anyhow::Result<()> {
         // Run any built-in hook handler
-        hook_handlers::handle_hook(&self, &hook_name).context(format!(
+        hook_handlers::handle_pre_hook(&self, &hook_name).context(format!(
             r#"Error running internal hook handler for hook "{}""#,
             hook_name
         ))?;
@@ -159,12 +161,20 @@ impl LuckyDaemon {
             for hook_script in hook_scripts {
                 match hook_script {
                     HookScript::HostScript(script_name) => {
+                        // TODO: Find out whether or not it makes sense that, upon removal, if a remove charm
+                        // script fails, all other scripts will be skipped including the built-in one that cleans
+                        // up the docker containers.
                         tools::run_host_script(self, call, script_name, &environment)?;
                     }
                     HookScript::ContainerScript(_script_name) => {
                         log::warn!("Container scripts not yet implemented");
                     }
                 }
+
+                hook_handlers::handle_post_hook(&self, &hook_name).context(format!(
+                    r#"Error running internal hook handler for hook "{}""#,
+                    hook_name
+                ))?;
 
                 // If docker is enabled, update container configuration
                 if self.lucky_metadata.use_docker {
@@ -346,6 +356,30 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         call.reply()?;
+        Ok(())
+    }
+
+    fn container_delete(
+        &self,
+        call: &mut dyn rpc::Call_ContainerDelete,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Get the config for the requested container
+        let container = match &container_name {
+            Some(container_name) => state.named_containers.get_mut(container_name),
+            None => state.default_container.as_mut(),
+        };
+
+        if let Some(container) = container {
+            // Mark container as needing removal
+            container.pending_removal = true;
+        }
+
+        // Reply empty
+        call.reply()?;
+
         Ok(())
     }
 
@@ -592,9 +626,147 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 // Erase key
                 container.config.env_vars.remove(&key);
             }
+        }
 
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
+    fn container_volume_add(
+        &self,
+        call: &mut dyn rpc::Call_ContainerVolumeAdd,
+        source: String,
+        target: String,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Get the config for the requested container
+        let mut container_log_name = None;
+        let mut container = match &container_name {
+            Some(container_name) => {
+                container_log_name = Some(container_name.clone());
+                state.named_containers.get_mut(container_name)
+            }
+            None => state.default_container.as_mut(),
+        };
+
+        if let Some(container) = &mut container {
+            log::debug!(
+                "Creating container volume{}: {}:{}",
+                container_log_name.map_or("".into(), |x| format!("[{}]", x)),
+                source,
+                target
+            );
+            // Add volume to container config
+            container
+                .config
+                .volumes
+                .insert(VolumeTarget(target), VolumeSource(source));
+        }
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
+    fn container_volume_remove(
+        &self,
+        call: &mut dyn rpc::Call_ContainerVolumeRemove,
+        target: String,
+        delete_data: bool,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Get the config for the requested container
+        let mut container_log_name = None;
+        let mut container = match &container_name {
+            Some(container_name) => {
+                container_log_name = Some(container_name.clone());
+                state.named_containers.get_mut(container_name)
+            }
+            None => state.default_container.as_mut(),
+        };
+
+        if let Some(container) = &mut container {
+            log::debug!(
+                "Deleting container volume{}: {}",
+                container_log_name.map_or("".into(), |x| format!("[{}]", x)),
+                target
+            );
+            let volumes = &mut container.config.volumes;
+
+            // Get source and remove from volume list
+            let source = volumes.remove(&VolumeTarget(target));
+
+            // If there is a volume for the given target path
+            if let Some(source) = source {
+                // If we should delete the source data
+                if delete_data {
+                    // If there are no other volumes with the same source
+                    if let None = volumes.values().find(|&x| *x == source) {
+                        log::debug!("Deleting volume data source: {}", &*source);
+
+                        // Delete data
+                        if source.starts_with("/") {
+                            handle_err!(std::fs::remove_dir_all(&*source), call);
+                        } else {
+                            handle_err!(
+                                std::fs::remove_dir_all(PathBuf::from(
+                                    self.lucky_data_dir.join(VOLUME_DIR).join(&*source),
+                                )),
+                                call
+                            );
+                        }
+
+                        call.reply(true /* data deleted */)?;
+                        return Ok(());
+                    }
+                }
+            }
+        }
+
+        call.reply(false /* no data deleted */)?;
+
+        Ok(())
+    }
+
+    fn container_volume_get_all(
+        &self,
+        call: &mut dyn rpc::Call_ContainerVolumeGetAll,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Get the config for the requested container
+        let mut container = match &container_name {
+            Some(container_name) => state.named_containers.get_mut(container_name),
+            None => state.default_container.as_mut(),
+        };
+
+        // If the container exists
+        if let Some(container) = &mut container {
+            // Reply wth volumes
+            call.reply(
+                container
+                    .config
+                    .volumes
+                    .iter()
+                    .map(
+                        |(target, source)| rpc::ContainerVolumeGetAll_Reply_volumes {
+                            source: (**source).clone(),
+                            target: (**target).clone(),
+                        },
+                    )
+                    .collect(),
+            )?;
+        } else {
             // Reply empty
-            call.reply()?;
+            call.reply(vec![])?;
         }
 
         Ok(())
