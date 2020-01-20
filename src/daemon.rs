@@ -309,6 +309,37 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    fn port_open(&self, call: &mut dyn rpc::Call_PortOpen, port: String) -> varlink::Result<()> {
+        log::debug!("Opening port: {}", port);
+
+        // Open the port
+        handle_err!(juju::open_port(&port), call);
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
+    fn port_close(&self, call: &mut dyn rpc::Call_PortClose, port: String) -> varlink::Result<()> {
+        log::debug!("Closing port: {}", port);
+
+        // Close the port
+        handle_err!(juju::close_port(&port), call);
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
+    fn port_get_opened(&self, call: &mut dyn rpc::Call_PortGetOpened) -> varlink::Result<()> {
+        // Reply with port list
+        call.reply(handle_err!(juju::opened_ports(), call))?;
+
+        Ok(())
+    }
+
     fn get_private_address(
         &self,
         call: &mut dyn rpc::Call_GetPrivateAddress,

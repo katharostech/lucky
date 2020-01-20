@@ -15,6 +15,7 @@ impl<'a> CliCommand<'a> for KvSubcommand {
     #[rustfmt::skip]
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
+            .setting(AppSettings::SubcommandRequiredElseHelp)
             .about("Get and set values in the unit key-value store")
     }
 

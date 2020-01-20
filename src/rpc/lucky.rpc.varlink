@@ -38,6 +38,13 @@ method GetPublicAddress() -> (address: string)
 # Get juju config. Value will be the JSON-encoded value.
 method GetConfig() -> (config: [](key: string, value: string))
 
+# Opens up the provided port or port range in the firewall ( assuming the charm is exposed )
+method PortOpen(port: string) -> ()
+# Opens up the provided port or port range in the firewall ( assuming the charm is exposed )
+method PortClose(port: string) -> ()
+# Gets the list of ports opened *by this running charm*
+method PortGetOpened() -> (ports: []string)
+
 #
 # Unit Key-Value
 #

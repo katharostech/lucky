@@ -6,6 +6,7 @@ use std::collections::HashMap;
 mod container;
 mod get_config;
 mod kv;
+mod port;
 mod private_address;
 mod public_address;
 mod set_status;
@@ -43,6 +44,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
             Box::new(public_address::PublicAddressSubcommand),
             Box::new(private_address::PrivateAddressSubcommand),
             Box::new(get_config::GetConfigSubcommand),
+            Box::new(port::PortSubcommand),
         ]
     }
 

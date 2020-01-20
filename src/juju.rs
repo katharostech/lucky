@@ -40,6 +40,21 @@ pub(crate) fn config_get() -> anyhow::Result<HashMap<String, serde_json::Value>>
     Ok(config)
 }
 
+pub(crate) fn open_port(port_def: &str) -> anyhow::Result<String> {
+    Ok(run_cmd("open-port", &[port_def])?)
+}
+
+pub(crate) fn close_port(port_def: &str) -> anyhow::Result<String> {
+    Ok(run_cmd("close-port", &[port_def])?)
+}
+
+pub(crate) fn opened_ports() -> anyhow::Result<Vec<String>> {
+    Ok(
+        serde_json::from_str(&run_cmd("opened-ports", &["--format", "json"])?)
+            .context("Could not parse json output of `opened-ports` command")?,
+    )
+}
+
 /// Write out a message to the Juju Log. Setting `debug` to `true` will tell Juju the log is a
 /// debug log.
 ///
