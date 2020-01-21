@@ -276,7 +276,7 @@ fn apply_updates(
         block_on(container.delete())?;
 
         // Clear the containers ID
-        container_info.id = None;
+        container_info.update(|info| info.id = None);
     }
 
     // If this contianer was not meant to be removed
@@ -306,7 +306,7 @@ fn apply_updates(
         block_on(container.start())?;
 
         // Mark container_info as "clean" and up-to-date with the system config
-        container_info.id = Some(create_info.id);
+        container_info.update(|info| info.id = Some(create_info.id));
         container_info.clean();
     }
 

@@ -36,6 +36,8 @@ struct DaemonState {
     #[serde(rename = "script-statuses")]
     /// The statuses of all of the scripts
     script_statuses: HashMap<String, ScriptStatus>,
+    // TODO: Key-value store implementation is not currently sufficient for detecting changes for
+    // reactive.
     /// The unit-local key-value store
     kv: HashMap<String, Cd<String>>,
     default_container: Option<Cd<ContainerInfo>>,
@@ -268,6 +270,32 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    /// Set a value in the unit local key-value store
+    fn unit_kv_set(
+        &self,
+        call: &mut dyn rpc::Call_UnitKvSet,
+        key: String,
+        value: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // If a value has been provided
+        if let Some(value) = value {
+            log::debug!("Key-Value set: {} = {}", key, value);
+            // Set key to value
+            state.kv.insert(key, value.into());
+        } else {
+            log::debug!("Key-Value delete: {}", key);
+            // Erase key
+            state.kv.remove(&key);
+        }
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
     fn unit_kv_get_all(&self, call: &mut dyn rpc::Call_UnitKvGetAll) -> varlink::Result<()> {
         // This call must be called with more
         if !call.wants_more() {
@@ -356,32 +384,6 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
-    /// Set a value in the unit local key-value store
-    fn unit_kv_set(
-        &self,
-        call: &mut dyn rpc::Call_UnitKvSet,
-        key: String,
-        value: Option<String>,
-    ) -> varlink::Result<()> {
-        let mut state = self.state.write().unwrap();
-
-        // If a value has been provided
-        if let Some(value) = value {
-            log::debug!("Key-Value set: {} = {}", key, value);
-            // Set key to value
-            state.kv.insert(key, value.into());
-        } else {
-            log::debug!("Key-Value delete: {}", key);
-            // Erase key
-            state.kv.remove(&key);
-        }
-
-        // Reply empty
-        call.reply()?;
-
-        Ok(())
-    }
-
     fn container_apply(&self, call: &mut dyn rpc::Call_ContainerApply) -> varlink::Result<()> {
         if self.lucky_metadata.use_docker {
             handle_err!(tools::apply_container_updates(self), call);
@@ -406,7 +408,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
         if let Some(container) = container {
             // Mark container as needing removal
-            container.pending_removal = true;
+            container.update(|c| c.pending_removal = true);
         }
 
         // Reply empty
@@ -433,7 +435,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     entrypoint.as_ref().unwrap_or(&"unset".to_string())
                 );
                 // Set entrypoint
-                container.config.entrypoint = entrypoint;
+                container.update(|c| c.config.entrypoint = entrypoint);
             }
 
         // If no container was specified
@@ -445,7 +447,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     entrypoint.as_ref().unwrap_or(&"unset".to_string())
                 );
                 // Set entrypoint
-                container.config.entrypoint = entrypoint;
+                container.update(|c| c.config.entrypoint = entrypoint);
             }
         }
 
@@ -471,7 +473,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     command.as_ref().map_or("unset".into(), |x| x.join(" "))
                 );
                 // Set entrypoint
-                container.config.command = command;
+                container.update(|c| c.config.command = command);
             }
 
         // If no container was specified
@@ -483,7 +485,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     command.as_ref().map_or("unset".into(), |x| x.join(" "))
                 );
                 // Set entrypoint
-                container.config.command = command;
+                container.update(|c| c.config.command = command);
             }
         }
 
@@ -506,7 +508,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             if let Some(container) = state.named_containers.get_mut(&name) {
                 log::debug!("Set Docker image [{}]: {}", name, image);
                 // Set the image on existing container
-                container.config.image = image;
+                container.update(|c| c.config.image = image);
             } else {
                 log::debug!("Adding new docker container: {}", name);
                 log::debug!("Set Docker image [{}]: {}", name, image);
@@ -519,7 +521,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             if let Some(container) = &mut state.default_container {
                 log::debug!("Set container image: {}", image);
                 // Set the image on existing container
-                container.config.image = image;
+                container.update(|c| c.config.image = image);
             } else {
                 log::debug!("Adding container");
                 log::debug!("Set container image: {}", image);
@@ -652,11 +654,15 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             if let Some(value) = value {
                 log::debug!("Container env set: {} = {}", key, value);
                 // Set key to value
-                container.config.env_vars.insert(key, value);
+                container.update(|c| {
+                    c.config.env_vars.insert(key, value);
+                });
             } else {
                 log::debug!("Container env deleted: {}", key);
                 // Erase key
-                container.config.env_vars.remove(&key);
+                container.update(|c| {
+                    c.config.env_vars.remove(&key);
+                });
             }
         }
 
@@ -693,10 +699,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 target
             );
             // Add volume to container config
-            container
-                .config
-                .volumes
-                .insert(VolumeTarget(target), VolumeSource(source));
+            container.update(|c| {
+                c.config
+                    .volumes
+                    .insert(VolumeTarget(target), VolumeSource(source));
+            });
         }
 
         // Reply empty
@@ -724,47 +731,56 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             None => state.default_container.as_mut(),
         };
 
+        // If the specified container exists
         if let Some(container) = &mut container {
             log::debug!(
                 "Deleting container volume{}: {}",
                 container_log_name.map_or("".into(), |x| format!("[{}]", x)),
                 target
             );
-            let volumes = &mut container.config.volumes;
 
-            // Get source and remove from volume list
-            let source = volumes.remove(&VolumeTarget(target));
+            // Remove the container volume
+            container.update(|container| {
+                let volumes = &mut container.config.volumes;
 
-            // If there is a volume for the given target path
-            if let Some(source) = source {
-                // If we should delete the source data
-                if delete_data {
-                    // If there are no other volumes with the same source
-                    if let None = volumes.values().find(|&x| *x == source) {
-                        log::debug!("Deleting volume data source: {}", &*source);
+                // Get source and remove from volume list
+                let source = volumes.remove(&VolumeTarget(target));
 
-                        // Delete data
-                        if source.starts_with("/") {
-                            handle_err!(std::fs::remove_dir_all(&*source), call);
-                        } else {
-                            handle_err!(
-                                std::fs::remove_dir_all(PathBuf::from(
-                                    self.lucky_data_dir.join(VOLUME_DIR).join(&*source),
-                                )),
-                                call
-                            );
+                // If there is a volume for the given target path
+                if let Some(source) = source {
+                    // If we should delete the source data
+                    if delete_data {
+                        // If there are no other volumes with the same source
+                        if let None = volumes.values().find(|&x| *x == source) {
+                            log::debug!("Deleting volume data source: {}", &*source);
+
+                            // Delete data
+                            if source.starts_with("/") {
+                                handle_err!(std::fs::remove_dir_all(&*source), call);
+                            } else {
+                                handle_err!(
+                                    std::fs::remove_dir_all(PathBuf::from(
+                                        self.lucky_data_dir.join(VOLUME_DIR).join(&*source),
+                                    )),
+                                    call
+                                );
+                            }
+
+                            call.reply(true /* data deleted */)?;
+                            return Ok(());
                         }
-
-                        call.reply(true /* data deleted */)?;
-                        return Ok(());
                     }
                 }
-            }
+
+                call.reply(false /* no data deleted */)?;
+                Ok(())
+            })
+
+        // If the specified container didn't exist
+        } else {
+            call.reply(false /* no data deleted */)?;
+            Ok(())
         }
-
-        call.reply(false /* no data deleted */)?;
-
-        Ok(())
     }
 
     fn container_volume_get_all(
@@ -833,14 +849,20 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 protocol
             );
 
-            container.config.ports.insert(ContainerPort {
-                host_port: handle_err!(host_port.try_into().context("Invalid port number"), call),
-                container_port: handle_err!(
-                    container_port.try_into().context("Invalid port number"),
-                    call
-                ),
-                protocol,
-            });
+            container.update(|c| {
+                c.config.ports.insert(ContainerPort {
+                    host_port: handle_err!(
+                        host_port.try_into().context("Invalid port number"),
+                        call
+                    ),
+                    container_port: handle_err!(
+                        container_port.try_into().context("Invalid port number"),
+                        call
+                    ),
+                    protocol,
+                });
+                Ok(())
+            })?;
         }
 
         // Reply empty
@@ -878,14 +900,21 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 protocol
             );
 
-            container.config.ports.remove(&ContainerPort {
-                host_port: handle_err!(host_port.try_into().context("Invalid port number"), call),
-                container_port: handle_err!(
-                    container_port.try_into().context("Invalid port number"),
-                    call
-                ),
-                protocol,
-            });
+            container.update(|c| {
+                c.config.ports.remove(&ContainerPort {
+                    host_port: handle_err!(
+                        host_port.try_into().context("Invalid port number"),
+                        call
+                    ),
+                    container_port: handle_err!(
+                        container_port.try_into().context("Invalid port number"),
+                        call
+                    ),
+                    protocol,
+                });
+
+                Ok(())
+            })?;
         }
 
         // Reply empty

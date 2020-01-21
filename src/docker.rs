@@ -14,7 +14,7 @@ use crate::process::{cmd_exists, run_cmd, run_cmd_with_retries};
 use crate::VOLUME_DIR;
 
 /// A struct made of a container definition and the container id
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub(crate) struct ContainerInfo {
     /// The id of the Docker container. Will be none if the container has not yet been run
     pub id: Option<String>,
@@ -55,7 +55,7 @@ pub struct ContainerPort {
 }
 
 /// The container configuration options such as image, volumes, ports, etc.
-#[derive(Serialize, Deserialize, Default, Clone, Debug)]
+#[derive(Serialize, Deserialize, Default, PartialEq, Clone, Debug)]
 pub(crate) struct ContainerConfig {
     pub image: String,
     pub env_vars: HashMap<String, String>,

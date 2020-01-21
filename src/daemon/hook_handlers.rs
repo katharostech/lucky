@@ -94,7 +94,7 @@ fn update_config_cache(state: &mut DaemonState) -> anyhow::Result<()> {
         // If it already exists
         if let Some(value) = charm_config.get_mut(&k) {
             // Update the value
-            **value = v;
+            value.update(|value| std::mem::replace(value, v));
         // If key does not already exist
         } else {
             // Insert the key
@@ -123,7 +123,7 @@ fn remove_container(
         block_on(container.delete())?;
 
         // Unset the container id
-        container_info.id = None;
+        container_info.update(|info| info.id = None);
     }
 
     Ok(())
