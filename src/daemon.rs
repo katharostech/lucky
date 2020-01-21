@@ -14,7 +14,7 @@ use std::sync::{
     Arc, Mutex, RwLock,
 };
 
-use crate::docker::{ContainerInfo, ContainerPort, VolumeSource, VolumeTarget};
+use crate::docker::{ContainerInfo, PortBinding, VolumeSource, VolumeTarget};
 use crate::juju;
 use crate::rpc;
 use crate::types::{HookScript, LuckyMetadata, ScriptStatus};
@@ -864,20 +864,51 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 protocol
             );
 
+            let host_port = handle_err!(host_port.try_into().context("Invalid port number"), call);
+            let container_port = handle_err!(
+                container_port.try_into().context("Invalid port number"),
+                call
+            );
+
+            let port_binding = PortBinding {
+                host_port,
+                container_port,
+                protocol,
+            };
+
+            // If there are other port bindings with the same protocol and host or container port
+            // but isn't the exact same port binding
+            if let Some(offending_binding) = container
+                .config
+                .ports
+                .iter()
+                .filter(|&b| {
+                    // With the same host port
+                    (b.host_port == port_binding.host_port
+                        // or with the same container port
+                        || b.container_port == port_binding.container_port)
+                        // and with the same protocol
+                        && b.protocol == port_binding.protocol
+                        // and not the same exact port binding
+                        && b != &port_binding
+                })
+                .next()
+            {
+                // Throw an error because we can't add port binding that has the same port as
+                // another.
+                call.reply_error(format!(
+                    concat!(
+                        "Not adding port binding `{}` because it conflicts with a port binding ",
+                        "already added to the container: {}"
+                    ),
+                    port_binding, offending_binding
+                ))?;
+                return Ok(());
+            }
+
             container.update(|c| {
-                c.config.ports.insert(ContainerPort {
-                    host_port: handle_err!(
-                        host_port.try_into().context("Invalid port number"),
-                        call
-                    ),
-                    container_port: handle_err!(
-                        container_port.try_into().context("Invalid port number"),
-                        call
-                    ),
-                    protocol,
-                });
-                Ok(())
-            })?;
+                c.config.ports.insert(port_binding);
+            });
         }
 
         // Reply empty
@@ -916,7 +947,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             );
 
             container.update(|c| {
-                c.config.ports.remove(&ContainerPort {
+                c.config.ports.remove(&PortBinding {
                     host_port: handle_err!(
                         host_port.try_into().context("Invalid port number"),
                         call

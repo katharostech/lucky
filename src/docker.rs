@@ -1,13 +1,16 @@
 //! Contains tools for installing and interracting with Docker
 use anyhow::{bail, Context};
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use shiplift::builder::ContainerOptions;
 use shrinkwraprs::Shrinkwrap;
 
 use std::collections::{HashMap, HashSet};
+use std::fmt;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 
 use crate::process::{cmd_exists, run_cmd, run_cmd_with_retries};
 
@@ -48,10 +51,52 @@ pub struct VolumeSource(pub String);
 pub struct VolumeTarget(pub String);
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Hash, Default, Clone, Debug)]
-pub struct ContainerPort {
+pub struct PortBinding {
     pub container_port: u32,
     pub host_port: u32,
     pub protocol: String,
+}
+
+impl std::fmt::Display for PortBinding {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}:{}/{}",
+            self.host_port, self.container_port, self.protocol
+        )
+    }
+}
+
+impl FromStr for PortBinding {
+    type Err = anyhow::Error;
+
+    fn from_str(port_string: &str) -> Result<Self, Self::Err> {
+        let re = Regex::new(
+            r"^(?P<host_port>[0-9]{1,5}):(?P<container_port>[0-9]{1,5})(/(?P<protocol>(tcp|udp)))?$",
+        ).expect("Could not compile regex");
+
+        if let Some(captures) = re.captures(port_string) {
+            Ok(PortBinding {
+                host_port: captures
+                    .name("host_port")
+                    .expect("Expected host port")
+                    .as_str()
+                    .parse()
+                    .expect("Could not parse int"),
+                container_port: captures
+                    .name("container_port")
+                    .expect("expected container port")
+                    .as_str()
+                    .parse()
+                    .expect("Could not parse int"),
+                protocol: captures
+                    .name("protocol")
+                    .map_or("tcp".into(), |x| x.as_str().into()),
+            })
+        } else {
+            Err(anyhow::format_err!("Could not parse port binding"))
+        }
+    }
 }
 
 /// The container configuration options such as image, volumes, ports, etc.
@@ -64,7 +109,7 @@ pub(crate) struct ContainerConfig {
     /// Volume mapping from target to source
     pub volumes: HashMap<VolumeTarget, VolumeSource>,
     // The port bindings
-    pub ports: HashSet<ContainerPort>,
+    pub ports: HashSet<PortBinding>,
 }
 
 impl ContainerConfig {
@@ -153,7 +198,7 @@ impl ContainerConfig {
         }
 
         // Add ports
-        for ContainerPort {
+        for PortBinding {
             container_port,
             protocol,
             host_port,

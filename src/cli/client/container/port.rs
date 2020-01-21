@@ -4,6 +4,7 @@ use clap::{App, Arg, ArgMatches};
 use std::io::Write;
 
 use crate::cli::*;
+use crate::docker::PortBinding;
 use crate::rpc::{VarlinkClient, VarlinkClientInterface};
 
 pub(super) struct PortSubcommand;
@@ -48,14 +49,12 @@ impl<'a> CliCommand<'a> for AddSubcommand {
         self.get_base_app()
             .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
             .about("Add a port binding")
-            .arg(Arg::with_name("host_port")
-                .help("The port to bind on the host"))
-            .arg(Arg::with_name("container_port")
-                .help("The port to bind to in the container"))
-            .arg(Arg::with_name("protocol")
-                .help("The protocol to bind")
-                .possible_values(&["tcp", "udp"])
-                .default_value("tcp"))
+            .arg(Arg::with_name("port_binding")
+                .help("The port binding to add in the format: `host_port:container_port/proto`.")
+                .long_help(concat!(
+                    "The port binding to add in the format: `host_port:container_port/proto`. ",
+                    "the `/proto` suffix is optional and defaults to `/tcp`."
+                )))
             .arg(super::container_arg())
     }
 
@@ -68,15 +67,6 @@ impl<'a> CliCommand<'a> for AddSubcommand {
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        let host_port = args
-            .value_of("host_port")
-            .expect("Missing required arg: host-port");
-        let container_port = args
-            .value_of("container_port")
-            .expect("Missing required arg: container-port");
-        let protocol = args
-            .value_of("protocol")
-            .expect("Missing required arg: protocol");
         let container = args.value_of("container");
 
         // Get client connection
@@ -86,13 +76,18 @@ impl<'a> CliCommand<'a> for AddSubcommand {
             .downcast()
             .expect("Invalid type");
 
+        let port_binding = args
+            .value_of("port_binding")
+            .expect("Missing required argument: port");
+        let port_binding = port_binding
+            .parse::<PortBinding>()
+            .context("Could not parse port binding")?;
+
         client
             .container_port_add(
-                host_port.parse().context("Could not parse host-port")?,
-                container_port
-                    .parse()
-                    .context("Could not parse container-port")?,
-                protocol.into(),
+                port_binding.host_port.into(),
+                port_binding.container_port.into(),
+                port_binding.protocol.into(),
                 container.map(Into::into),
             )
             .call()?;
@@ -112,16 +107,12 @@ impl<'a> CliCommand<'a> for RemoveSubcommand {
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Remove a port binding")
-            .arg(Arg::with_name("host_port")
-                .help("The port to bind on the host")
-                .required_unless("all"))
-            .arg(Arg::with_name("container_port")
-                .help("The port to bind to in the container")
-                .required_unless("all"))
-            .arg(Arg::with_name("protocol")
-                .help("The protocol to bind")
-                .possible_values(&["tcp", "udp"])
-                .default_value("tcp")
+            .arg(Arg::with_name("port_binding")
+                .help("The port binding to remove in the format: `host_port:container_port/proto`.")
+                .long_help(concat!(
+                    "The port binding to remove in the format: `host_port:container_port/proto`. ",
+                    "the `/proto` suffix is optional and defaults to `/tcp`."
+                ))
                 .required_unless("all"))
             .arg(Arg::with_name("all")
                 .help("Remove all port bindings from the container")
@@ -154,23 +145,18 @@ impl<'a> CliCommand<'a> for RemoveSubcommand {
                 .container_port_remove_all(container.map(Into::into))
                 .call()?;
         } else {
-            let host_port = args
-                .value_of("host_port")
-                .expect("Missing required arg: host-port");
-            let container_port = args
-                .value_of("container_port")
-                .expect("Missing required arg: container-port");
-            let protocol = args
-                .value_of("protocol")
-                .expect("Missing required arg: protocol");
+            let port_binding = args
+                .value_of("port_binding")
+                .expect("Missing required argument: port");
+            let port_binding = port_binding
+                .parse::<PortBinding>()
+                .context("Could not parse port binding")?;
 
             client
                 .container_port_remove(
-                    host_port.parse().context("Could not parse host-port")?,
-                    container_port
-                        .parse()
-                        .context("Could not parse container-port")?,
-                    protocol.into(),
+                    port_binding.host_port.into(),
+                    port_binding.container_port.into(),
+                    port_binding.protocol.into(),
                     container.map(Into::into),
                 )
                 .call()?;
