@@ -5,6 +5,7 @@ use serde_json::Value as JsonValue;
 use shiplift::Docker;
 
 use std::collections::HashMap;
+use std::convert::TryInto;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
@@ -13,7 +14,7 @@ use std::sync::{
     Arc, Mutex, RwLock,
 };
 
-use crate::docker::{ContainerInfo, VolumeSource, VolumeTarget};
+use crate::docker::{ContainerInfo, ContainerPort, VolumeSource, VolumeTarget};
 use crate::juju;
 use crate::rpc;
 use crate::types::{HookScript, LuckyMetadata, ScriptStatus};
@@ -793,6 +794,130 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                             target: (**target).clone(),
                         },
                     )
+                    .collect(),
+            )?;
+        } else {
+            // Reply empty
+            call.reply(vec![])?;
+        }
+
+        Ok(())
+    }
+
+    fn container_port_add(
+        &self,
+        call: &mut dyn rpc::Call_ContainerPortAdd,
+        host_port: i64,
+        container_port: i64,
+        protocol: String,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Get the config for the requested container
+        let mut container_log_name = None;
+        let mut container = match &container_name {
+            Some(container_name) => {
+                container_log_name = Some(container_name.clone());
+                state.named_containers.get_mut(container_name)
+            }
+            None => state.default_container.as_mut(),
+        };
+
+        if let Some(container) = &mut container {
+            log::debug!(
+                "Adding port to container{}: {}:{}/{}",
+                container_log_name.map_or("".into(), |x| format!("[{}]", x)),
+                host_port,
+                container_port,
+                protocol
+            );
+
+            container.config.ports.insert(ContainerPort {
+                host_port: handle_err!(host_port.try_into().context("Invalid port number"), call),
+                container_port: handle_err!(
+                    container_port.try_into().context("Invalid port number"),
+                    call
+                ),
+                protocol,
+            });
+        }
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
+    fn container_port_remove(
+        &self,
+        call: &mut dyn rpc::Call_ContainerPortRemove,
+        host_port: i64,
+        container_port: i64,
+        protocol: String,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Get the config for the requested container
+        let mut container_log_name = None;
+        let mut container = match &container_name {
+            Some(container_name) => {
+                container_log_name = Some(container_name.clone());
+                state.named_containers.get_mut(container_name)
+            }
+            None => state.default_container.as_mut(),
+        };
+
+        if let Some(container) = &mut container {
+            log::debug!(
+                "Removing port from container{}: {}:{}/{}",
+                container_log_name.map_or("".into(), |x| format!("[{}]", x)),
+                host_port,
+                container_port,
+                protocol
+            );
+
+            container.config.ports.remove(&ContainerPort {
+                host_port: handle_err!(host_port.try_into().context("Invalid port number"), call),
+                container_port: handle_err!(
+                    container_port.try_into().context("Invalid port number"),
+                    call
+                ),
+                protocol,
+            });
+        }
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
+    fn container_port_get_all(
+        &self,
+        call: &mut dyn rpc::Call_ContainerPortGetAll,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let state = self.state.read().unwrap();
+
+        // Get the config for the requested container
+        let mut container = match &container_name {
+            Some(container_name) => state.named_containers.get(container_name),
+            None => state.default_container.as_ref(),
+        };
+
+        if let Some(container) = &mut container {
+            call.reply(
+                container
+                    .config
+                    .ports
+                    .iter()
+                    .map(|port| rpc::ContainerPortGetAll_Reply_ports {
+                        container_port: port.container_port.into(),
+                        host_port: port.host_port.into(),
+                        protocol: port.protocol.clone(),
+                    })
                     .collect(),
             )?;
         } else {

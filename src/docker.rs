@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use shiplift::builder::ContainerOptions;
 use shrinkwraprs::Shrinkwrap;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -47,6 +47,13 @@ pub struct VolumeSource(pub String);
 /// A volume target path wrapper type to make it more difficult to mix-up sources and targets
 pub struct VolumeTarget(pub String);
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Hash, Default, Clone, Debug)]
+pub struct ContainerPort {
+    pub container_port: u32,
+    pub host_port: u32,
+    pub protocol: String,
+}
+
 /// The container configuration options such as image, volumes, ports, etc.
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub(crate) struct ContainerConfig {
@@ -56,6 +63,8 @@ pub(crate) struct ContainerConfig {
     pub command: Option<Vec<String>>,
     /// Volume mapping from target to source
     pub volumes: HashMap<VolumeTarget, VolumeSource>,
+    // The port bindings
+    pub ports: HashSet<ContainerPort>,
 }
 
 impl ContainerConfig {
@@ -141,6 +150,16 @@ impl ContainerConfig {
 
             // Add volume to container
             volumes.push(format!("{}:{}", host_path.to_string_lossy(), &**target));
+        }
+
+        // Add ports
+        for ContainerPort {
+            container_port,
+            protocol,
+            host_port,
+        } in &self.ports
+        {
+            options.expose(*container_port, protocol, *host_port);
         }
 
         // Add volumes

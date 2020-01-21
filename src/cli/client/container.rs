@@ -6,6 +6,7 @@ mod apply_updates;
 mod delete;
 mod env;
 mod image;
+mod port;
 mod set_command;
 mod set_entrypoint;
 mod volume;
@@ -33,6 +34,7 @@ impl<'a> CliCommand<'a> for ContainerSubcommand {
             Box::new(set_command::SetCommandSubcommand),
             Box::new(volume::VolumeSubcommand),
             Box::new(delete::DeleteSubcommand),
+            Box::new(port::PortSubcommand),
         ]
     }
 

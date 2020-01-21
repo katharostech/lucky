@@ -108,3 +108,14 @@ method ContainerVolumeAdd(source: string, target: string, container_name: ?strin
 method ContainerVolumeRemove(container_path: string, delete_data: bool, container_name: ?string) -> (data_deleted: bool)
 # Get the list of volumes in the format of `source:target`
 method ContainerVolumeGetAll(container_name: ?string) -> (volumes: [](source: string, target: string))
+
+#
+# Container ports
+#
+
+# Add a port binding to a container
+method ContainerPortAdd(host_port: int, container_port: int, protocol: string, container_name: ?string) -> ()
+# Remove a port binding from a container
+method ContainerPortRemove(host_port: int, container_port: int, protocol: string, container_name: ?string) -> ()
+# Get a list of the ports that have been bound for the container
+method ContainerPortGetAll(container_name: ?string) -> (ports: [](host_port: int, container_port: int, protocol: string))
