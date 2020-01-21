@@ -184,7 +184,7 @@ impl<'a> CliCommand<'a> for StartSubcommand {
             }
 
             // Spawn process and stream output
-            let mut output: Box<dyn Read> = cmd
+            let mut output = cmd
                 .stream_stdout()
                 .context("Could not start lucky daemon")?;
 
