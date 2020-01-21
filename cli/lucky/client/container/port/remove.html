@@ -151,7 +151,7 @@
                     <main>
                         <h1><a class="header" href="#remove" id="remove">remove</a></h1>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
-<p><code>remove [FLAGS] [OPTIONS] [ARGS]</code></p>
+<p><code>remove [FLAGS] [OPTIONS] [port_binding]</code></p>
 <h3><a class="header" href="#flags" id="flags">Flags</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
@@ -170,9 +170,7 @@
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>&lt;host_port&gt;</code></td><td></td><td>The port to bind on the host</td></tr>
-<tr><td><code>&lt;container_port&gt;</code></td><td></td><td>The port to bind to in the container</td></tr>
-<tr><td><code>&lt;protocol&gt;</code></td><td></td><td>The protocol to bind<br /><strong>default:</strong> <code>tcp</code><br /><strong>possible values:</strong> <code>tcp</code>, <code>udp</code></td></tr>
+<tr><td><code>&lt;port_binding&gt;</code></td><td></td><td>The port binding to remove in the format: <code>host_port:container_port/proto</code>. the <code>/proto</code> suffix is optional and defaults to <code>/tcp</code>.</td></tr>
 </tbody>
 </table>
 
