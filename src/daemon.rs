@@ -362,6 +362,21 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    fn port_close_all(&self, call: &mut dyn rpc::Call_PortCloseAll) -> varlink::Result<()> {
+        // For each opened port
+        for port in handle_err!(juju::opened_ports(), call) {
+            log::debug!("Closing port: {}", port);
+
+            // Close the port
+            handle_err!(juju::close_port(&port), call);
+        }
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
     fn port_get_opened(&self, call: &mut dyn rpc::Call_PortGetOpened) -> varlink::Result<()> {
         // Reply with port list
         call.reply(handle_err!(juju::opened_ports(), call))?;
@@ -915,6 +930,49 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
                 Ok(())
             })?;
+        }
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
+    fn container_port_remove_all(
+        &self,
+        call: &mut dyn rpc::Call_ContainerPortRemoveAll,
+        container_name: Option<String>,
+    ) -> varlink::Result<()> {
+        let mut state = self.state.write().unwrap();
+
+        // Get the config for the requested container
+        let mut container_log_name = None;
+        let container = match &container_name {
+            Some(container_name) => {
+                container_log_name = Some(container_name.clone());
+                state.named_containers.get_mut(container_name)
+            }
+            None => state.default_container.as_mut(),
+        };
+
+        if let Some(container) = container {
+            // For each port
+            for port_binding in &container.config.ports.clone() {
+                log::debug!(
+                    "Removing port from container{}: {}:{}/{}",
+                    container_log_name
+                        .as_ref()
+                        .map_or("".into(), |x| format!("[{}]", x)),
+                    port_binding.host_port,
+                    port_binding.container_port,
+                    port_binding.protocol
+                );
+
+                // Remove the port
+                container.update(|c| {
+                    c.config.ports.remove(&port_binding);
+                });
+            }
         }
 
         // Reply empty

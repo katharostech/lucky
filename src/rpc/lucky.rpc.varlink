@@ -42,6 +42,8 @@ method GetConfig() -> (config: [](key: string, value: string))
 method PortOpen(port: string) -> ()
 # Opens up the provided port or port range in the firewall ( assuming the charm is exposed )
 method PortClose(port: string) -> ()
+# Closes all opened ports
+method PortCloseAll() -> ()
 # Gets the list of ports opened *by this running charm*
 method PortGetOpened() -> (ports: []string)
 
@@ -117,5 +119,7 @@ method ContainerVolumeGetAll(container_name: ?string) -> (volumes: [](source: st
 method ContainerPortAdd(host_port: int, container_port: int, protocol: string, container_name: ?string) -> ()
 # Remove a port binding from a container
 method ContainerPortRemove(host_port: int, container_port: int, protocol: string, container_name: ?string) -> ()
+# Remove all of the containers port bindings
+method ContainerPortRemoveAll(container_name: ?string) -> ()
 # Get a list of the ports that have been bound for the container
 method ContainerPortGetAll(container_name: ?string) -> (ports: [](host_port: int, container_port: int, protocol: string))

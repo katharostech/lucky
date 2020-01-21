@@ -113,13 +113,20 @@ impl<'a> CliCommand<'a> for RemoveSubcommand {
         self.get_base_app()
             .about("Remove a port binding")
             .arg(Arg::with_name("host_port")
-                .help("The port to bind on the host"))
+                .help("The port to bind on the host")
+                .required_unless("all"))
             .arg(Arg::with_name("container_port")
-                .help("The port to bind to in the container"))
+                .help("The port to bind to in the container")
+                .required_unless("all"))
             .arg(Arg::with_name("protocol")
                 .help("The protocol to bind")
                 .possible_values(&["tcp", "udp"])
-                .default_value("tcp"))
+                .default_value("tcp")
+                .required_unless("all"))
+            .arg(Arg::with_name("all")
+                .help("Remove all port bindings from the container")
+                .long("all")
+                .short('A'))
             .arg(super::container_arg())
     }
 
@@ -132,15 +139,7 @@ impl<'a> CliCommand<'a> for RemoveSubcommand {
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        let host_port = args
-            .value_of("host_port")
-            .expect("Missing required arg: host-port");
-        let container_port = args
-            .value_of("container_port")
-            .expect("Missing required arg: container-port");
-        let protocol = args
-            .value_of("protocol")
-            .expect("Missing required arg: protocol");
+        let remove_all = args.is_present("all");
         let container = args.value_of("container");
 
         // Get client connection
@@ -150,16 +149,32 @@ impl<'a> CliCommand<'a> for RemoveSubcommand {
             .downcast()
             .expect("Invalid type");
 
-        client
-            .container_port_remove(
-                host_port.parse().context("Could not parse host-port")?,
-                container_port
-                    .parse()
-                    .context("Could not parse container-port")?,
-                protocol.into(),
-                container.map(Into::into),
-            )
-            .call()?;
+        if remove_all {
+            client
+                .container_port_remove_all(container.map(Into::into))
+                .call()?;
+        } else {
+            let host_port = args
+                .value_of("host_port")
+                .expect("Missing required arg: host-port");
+            let container_port = args
+                .value_of("container_port")
+                .expect("Missing required arg: container-port");
+            let protocol = args
+                .value_of("protocol")
+                .expect("Missing required arg: protocol");
+
+            client
+                .container_port_remove(
+                    host_port.parse().context("Could not parse host-port")?,
+                    container_port
+                        .parse()
+                        .context("Could not parse container-port")?,
+                    protocol.into(),
+                    container.map(Into::into),
+                )
+                .call()?;
+        }
 
         Ok(data)
     }

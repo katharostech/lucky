@@ -104,7 +104,11 @@ impl<'a> CliCommand<'a> for CloseSubcommand {
             ))
             .arg(Arg::with_name("port")
                 .help("The port to close")
-                .required(true))
+                .required_unless("all"))
+            .arg(Arg::with_name("all")
+                .help("Remove all port bindings from the container")
+                .long("all")
+                .short('A'))
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -116,9 +120,7 @@ impl<'a> CliCommand<'a> for CloseSubcommand {
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        let port = args
-            .value_of("port")
-            .expect("Missing required argument: port");
+        let close_all = args.is_present("all");
 
         // Get client connection
         let mut client: Box<VarlinkClient> = data
@@ -127,8 +129,17 @@ impl<'a> CliCommand<'a> for CloseSubcommand {
             .downcast()
             .expect("Invalid type");
 
-        // Close the port
-        client.port_close(port.into()).call()?;
+        if close_all {
+            // Close all ports
+            client.port_close_all().call()?;
+        } else {
+            let port = args
+                .value_of("port")
+                .expect("Missing required argument: port");
+
+            // Close the port
+            client.port_close(port.into()).call()?;
+        }
 
         Ok(data)
     }
