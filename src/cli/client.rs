@@ -6,9 +6,11 @@ use std::collections::HashMap;
 mod container;
 mod get_config;
 mod kv;
+mod leader;
 mod port;
 mod private_address;
 mod public_address;
+mod relation;
 mod set_status;
 
 #[cfg(feature = "daemon")]
@@ -45,6 +47,8 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
             Box::new(private_address::PrivateAddressSubcommand),
             Box::new(get_config::GetConfigSubcommand),
             Box::new(port::PortSubcommand),
+            Box::new(relation::RelationSubcommand),
+            Box::new(leader::LeaderSubcommand),
         ]
     }
 

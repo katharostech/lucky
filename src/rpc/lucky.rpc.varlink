@@ -59,6 +59,23 @@ method UnitKvGetAll() -> (pairs: [](key: string, value: string))
 method UnitKvSet(key: string, value: ?string) -> ()
 
 #
+# Juju Relations
+#
+
+method RelationSet(data: [string]string, relation_id: ?string) -> ()
+method RelationGet(relation: ?(relation_id: string, remote_unit: string)) -> (data: [string]string)
+method RelationList(relation_id: ?string) -> (units: []string)
+method RelationIds(relation_name: string) -> (ids: []string)
+
+#
+# Leadership
+#
+
+method LeaderIsLeader() -> (is_leader: bool)
+method LeaderSet(data: [string]string) -> ()
+method LeaderGet() -> (data: [string]string)
+
+#
 # Container
 #
 

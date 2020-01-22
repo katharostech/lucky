@@ -319,6 +319,83 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    fn relation_set(
+        &self,
+        call: &mut dyn rpc::Call_RelationSet,
+        data: HashMap<String, String>,
+        relation_id: Option<String>,
+    ) -> varlink::Result<()> {
+        handle_err!(juju::relation_set(data, relation_id), call);
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
+    fn relation_get(
+        &self,
+        call: &mut dyn rpc::Call_RelationGet,
+        relation: Option<rpc::RelationGet_Args_relation>,
+    ) -> varlink::Result<()> {
+        call.reply(handle_err!(
+            juju::relation_get(relation.map(|r| {
+                juju::SpecificRelation {
+                    relation_id: r.relation_id,
+                    remote_unit: r.remote_unit,
+                }
+            })),
+            call
+        ))?;
+
+        Ok(())
+    }
+
+    fn relation_list(
+        &self,
+        call: &mut dyn rpc::Call_RelationList,
+        relation_id: Option<String>,
+    ) -> varlink::Result<()> {
+        call.reply(handle_err!(juju::relation_list(relation_id), call))?;
+
+        Ok(())
+    }
+
+    fn relation_ids(
+        &self,
+        call: &mut dyn rpc::Call_RelationIds,
+        relation_name: String,
+    ) -> varlink::Result<()> {
+        call.reply(handle_err!(juju::relation_ids(&relation_name), call))?;
+
+        Ok(())
+    }
+
+    fn leader_is_leader(&self, call: &mut dyn rpc::Call_LeaderIsLeader) -> varlink::Result<()> {
+        call.reply(handle_err!(juju::is_leader(), call))?;
+
+        Ok(())
+    }
+
+    fn leader_set(
+        &self,
+        call: &mut dyn rpc::Call_LeaderSet,
+        data: HashMap<String, String>,
+    ) -> varlink::Result<()> {
+        handle_err!(juju::leader_set(data), call);
+
+        // Reply empty
+        call.reply()?;
+
+        Ok(())
+    }
+
+    fn leader_get(&self, call: &mut dyn rpc::Call_LeaderGet) -> varlink::Result<()> {
+        call.reply(handle_err!(juju::leader_get(), call))?;
+
+        Ok(())
+    }
+
     fn get_config(&self, call: &mut dyn rpc::Call_GetConfig) -> varlink::Result<()> {
         let state = self.state.read().unwrap();
 
