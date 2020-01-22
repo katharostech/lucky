@@ -12,6 +12,8 @@
 // TODO: This is simply because of the `function_name` macro and we might want to fix it there
 // instead of ignoring the warning here.
 #![allow(clippy::empty_enum)]
+// Ignore dead code warnings when building without the daemon
+#![cfg_attr(not(feature = "daemon"), allow(unused))]
 
 #[macro_use]
 pub(crate) mod macros;
