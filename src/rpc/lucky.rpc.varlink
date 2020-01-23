@@ -62,8 +62,8 @@ method UnitKvSet(key: string, value: ?string) -> ()
 # Juju Relations
 #
 
-method RelationSet(data: [string]string, relation_id: ?string) -> ()
-method RelationGet(relation: ?(relation_id: string, remote_unit: string)) -> (data: [string]string)
+method RelationSet(data: [string]string, relation_id: ?string, app: bool) -> ()
+method RelationGet(relation: ?(relation_id: string, remote_unit: string), app: bool) -> (data: [string]string)
 method RelationList(relation_id: ?string) -> (units: []string)
 method RelationIds(relation_name: string) -> (ids: []string)
 

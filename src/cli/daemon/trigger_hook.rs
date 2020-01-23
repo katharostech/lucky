@@ -54,6 +54,7 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
             "JUJU_RELATION_ID",
             "JUJU_REMOTE_UNIT",
             "JUJU_CONTEXT_ID",
+            "JUJU_REMOTE_APP",
         ] {
             if let Ok(value) = std::env::var(var) {
                 environment.insert(var.into(), value);

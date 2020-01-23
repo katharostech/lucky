@@ -64,6 +64,10 @@ impl<'a> CliCommand<'a> for GetSubcommand {
                 .short('u')
                 .takes_value(true)
                 .requires("relation_id"))
+            .arg(Arg::with_name("app")
+                .help("Get application relation data instead of unit relation data")
+                .long("app")
+                .short('A'))
             .arg(Arg::with_name("key")
                 .help("Optional key to get from the data")
                 .required(false))
@@ -87,6 +91,8 @@ impl<'a> CliCommand<'a> for GetSubcommand {
             .downcast()
             .expect("Invalid type");
 
+        let app = args.is_present("app");
+
         let relation_data;
         if let Some(relation_id) = relation_id {
             let remote_unit_name = args
@@ -94,14 +100,17 @@ impl<'a> CliCommand<'a> for GetSubcommand {
                 .expect("Missing required argument: unit-name");
 
             relation_data = client
-                .relation_get(Some(RelationGet_Args_relation {
-                    relation_id: relation_id.into(),
-                    remote_unit: remote_unit_name.into(),
-                }))
+                .relation_get(
+                    Some(RelationGet_Args_relation {
+                        relation_id: relation_id.into(),
+                        remote_unit: remote_unit_name.into(),
+                    }),
+                    app,
+                )
                 .call()?
                 .data;
         } else {
-            relation_data = client.relation_get(None).call()?.data;
+            relation_data = client.relation_get(None, app).call()?.data;
         }
 
         // If a specific key was requested
@@ -138,6 +147,14 @@ impl<'a> CliCommand<'a> for SetSubcommand {
                 .long("relation-id")
                 .short('r')
                 .takes_value(true))
+            .arg(Arg::with_name("app")
+                .help("Set application relation data instead of unit relation data")
+                .long_help(concat!(
+                    "Set application relation data instead of unit relation data. the unit must ",
+                    "be the leader unit to set application relation data",
+                ))
+                .long("app")
+                .short('A'))
             .arg(Arg::with_name("data")
                 .help("The data to set on the relation as `key=value` pairs separated by spaces")
                 .required(true)
@@ -186,7 +203,11 @@ impl<'a> CliCommand<'a> for SetSubcommand {
 
         // Set relation data
         client
-            .relation_set(relation_data, relation_id.map(Into::into))
+            .relation_set(
+                relation_data,
+                relation_id.map(Into::into),
+                args.is_present("app"),
+            )
             .call()?;
 
         Ok(data)

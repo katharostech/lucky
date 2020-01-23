@@ -58,8 +58,13 @@ pub(crate) fn opened_ports() -> anyhow::Result<Vec<String>> {
 pub(crate) fn relation_set(
     data: HashMap<String, String>,
     relation_id: Option<String>,
+    app: bool,
 ) -> anyhow::Result<()> {
     let mut args: Vec<String> = vec![];
+
+    if app {
+        args.push("--app".into());
+    }
 
     // Add relation option if specified
     if let Some(relation_id) = relation_id {
@@ -90,8 +95,13 @@ pub(crate) struct SpecificRelation {
 
 pub(crate) fn relation_get(
     relation: Option<SpecificRelation>,
+    app: bool,
 ) -> anyhow::Result<HashMap<String, String>> {
     let mut args: Vec<String> = vec!["--format".into(), "json".into()];
+
+    if app {
+        args.push("--app".into());
+    }
 
     // Add relation id
     if let Some(relation) = relation {

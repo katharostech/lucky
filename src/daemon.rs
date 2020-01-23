@@ -323,8 +323,9 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         call: &mut dyn rpc::Call_RelationSet,
         data: HashMap<String, String>,
         relation_id: Option<String>,
+        app: bool,
     ) -> varlink::Result<()> {
-        handle_err!(juju::relation_set(data, relation_id), call);
+        handle_err!(juju::relation_set(data, relation_id, app), call);
 
         // Reply empty
         call.reply()?;
@@ -336,14 +337,18 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         &self,
         call: &mut dyn rpc::Call_RelationGet,
         relation: Option<rpc::RelationGet_Args_relation>,
+        app: bool,
     ) -> varlink::Result<()> {
         call.reply(handle_err!(
-            juju::relation_get(relation.map(|r| {
-                juju::SpecificRelation {
-                    relation_id: r.relation_id,
-                    remote_unit: r.remote_unit,
-                }
-            })),
+            juju::relation_get(
+                relation.map(|r| {
+                    juju::SpecificRelation {
+                        relation_id: r.relation_id,
+                        remote_unit: r.remote_unit,
+                    }
+                }),
+                app
+            ),
             call
         ))?;
 
