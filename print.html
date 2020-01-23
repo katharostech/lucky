@@ -527,7 +527,7 @@ $ charm push build/charm_name
 </table>
 <h1><a class="header" href="#set-command" id="set-command">set-command</a></h1>
 <h2><a class="header" href="#usage-20" id="usage-20">Usage</a></h2>
-<p><code>set-command [FLAGS] [OPTIONS]</code></p>
+<p><code>set-command [FLAGS] [OPTIONS] [command]...</code></p>
 <h3><a class="header" href="#flags-3" id="flags-3">Flags</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
@@ -539,8 +539,14 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-C</code>, <code>--command</code><code>&lt;command&gt;</code></td><td></td><td>The command for the container</td></tr>
 <tr><td><code>-c</code>, <code>--container</code><code>&lt;name&gt;</code></td><td></td><td>The name of the container to update. If not specified the default container will be used</td></tr>
+</tbody>
+</table>
+<h3><a class="header" href="#positionals-11" id="positionals-11">Positionals</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>&lt;command&gt;</code></td><td></td><td>The command for the container</td></tr>
 </tbody>
 </table>
 <h1><a class="header" href="#volume" id="volume">volume</a></h1>
@@ -572,7 +578,7 @@ $ charm push build/charm_name
 <tr><td><code>-c</code>, <code>--container</code><code>&lt;name&gt;</code></td><td></td><td>The name of the container to update. If not specified the default container will be used</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-11" id="positionals-11">Positionals</a></h3>
+<h3><a class="header" href="#positionals-12" id="positionals-12">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -589,7 +595,7 @@ $ charm push build/charm_name
 <tr><td><code>-c</code>, <code>--container</code><code>&lt;name&gt;</code></td><td></td><td>The name of the container to update. If not specified the default container will be used</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-12" id="positionals-12">Positionals</a></h3>
+<h3><a class="header" href="#positionals-13" id="positionals-13">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -607,7 +613,7 @@ $ charm push build/charm_name
 <tr><td><code>-c</code>, <code>--container</code><code>&lt;container&gt;</code></td><td></td><td>The name of the container to delete the environment variable for</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-13" id="positionals-13">Positionals</a></h3>
+<h3><a class="header" href="#positionals-14" id="positionals-14">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -643,7 +649,7 @@ $ charm push build/charm_name
 <tr><td><code>-c</code>, <code>--container</code><code>&lt;name&gt;</code></td><td></td><td>The name of the container to update. If not specified the default container will be used</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-14" id="positionals-14">Positionals</a></h3>
+<h3><a class="header" href="#positionals-15" id="positionals-15">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -667,7 +673,7 @@ $ charm push build/charm_name
 <tr><td><code>-c</code>, <code>--container</code><code>&lt;name&gt;</code></td><td></td><td>The name of the container to update. If not specified the default container will be used</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-15" id="positionals-15">Positionals</a></h3>
+<h3><a class="header" href="#positionals-16" id="positionals-16">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -693,7 +699,7 @@ $ charm push build/charm_name
 <h1><a class="header" href="#get-config" id="get-config">get-config</a></h1>
 <h2><a class="header" href="#usage-32" id="usage-32">Usage</a></h2>
 <p><code>get-config [FLAGS] [key]</code></p>
-<h3><a class="header" href="#positionals-16" id="positionals-16">Positionals</a></h3>
+<h3><a class="header" href="#positionals-17" id="positionals-17">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -714,7 +720,7 @@ $ charm push build/charm_name
 <h1><a class="header" href="#open" id="open">open</a></h1>
 <h2><a class="header" href="#usage-34" id="usage-34">Usage</a></h2>
 <p><code>open [FLAGS] &lt;port&gt;</code></p>
-<h3><a class="header" href="#positionals-17" id="positionals-17">Positionals</a></h3>
+<h3><a class="header" href="#positionals-18" id="positionals-18">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -731,7 +737,7 @@ $ charm push build/charm_name
 <tr><td><code>-A</code>, <code>--all</code></td><td></td><td>Remove all port bindings from the container</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-18" id="positionals-18">Positionals</a></h3>
+<h3><a class="header" href="#positionals-19" id="positionals-19">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -762,7 +768,7 @@ $ charm push build/charm_name
 <tr><td><code>-u</code>, <code>--remote-unit</code><code>&lt;remote_unit_name&gt;</code></td><td></td><td>The name of the remote unit to get data from</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-19" id="positionals-19">Positionals</a></h3>
+<h3><a class="header" href="#positionals-20" id="positionals-20">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -779,7 +785,7 @@ $ charm push build/charm_name
 <tr><td><code>-r</code>, <code>--relation-id</code><code>&lt;relation_id&gt;</code></td><td></td><td>The relation id to get the data from</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-20" id="positionals-20">Positionals</a></h3>
+<h3><a class="header" href="#positionals-21" id="positionals-21">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -818,7 +824,7 @@ $ charm push build/charm_name
 <h1><a class="header" href="#get-6" id="get-6">get</a></h1>
 <h2><a class="header" href="#usage-43" id="usage-43">Usage</a></h2>
 <p><code>get [FLAGS] [key]</code></p>
-<h3><a class="header" href="#positionals-21" id="positionals-21">Positionals</a></h3>
+<h3><a class="header" href="#positionals-22" id="positionals-22">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -828,7 +834,7 @@ $ charm push build/charm_name
 <h1><a class="header" href="#set-4" id="set-4">set</a></h1>
 <h2><a class="header" href="#usage-44" id="usage-44">Usage</a></h2>
 <p><code>set [FLAGS] &lt;data&gt;...</code></p>
-<h3><a class="header" href="#positionals-22" id="positionals-22">Positionals</a></h3>
+<h3><a class="header" href="#positionals-23" id="positionals-23">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
