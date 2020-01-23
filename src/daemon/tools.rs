@@ -270,7 +270,8 @@ fn apply_updates(
         // Remove the container
         let container = containers.get(&id);
 
-        log::debug!("Stopping container: {}", id);
+        // TODO: handle NOT MODIFIED error response
+        log::debug!("Stopping container: {}", id); 
         block_on(container.stop(Some(Duration::from_secs(10))))?;
         log::debug!("Removing container: {}", id);
         block_on(container.delete())?;
