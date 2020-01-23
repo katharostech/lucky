@@ -21,7 +21,7 @@ The documentation is hosted at [katharostech.github.io/lucky].
 
 ## Installation
 
-Currently there isn't much to try yet, but you can test the latest builds of Lucky by downloading the build for your platform from the [releases] page.
+Currently there isn't much to try yet, but you can test the latest pre-release of Lucky by downloading the build for your platform from the [releases] page.
 
 We also support the following package managers.
 
@@ -49,6 +49,8 @@ We have a [snap] which can be installed on supported linux distros from the comm
     sudo snap install --edge --devmode lucky
 
 [snap]: https://snapcraft.io/lucky
+
+> **Note:** Unlike the Windows and mac packages, this will install Lucky from the latest commit on master instead of the latest pre-release.
 
 ### Homebrew ( MacOS )
 
