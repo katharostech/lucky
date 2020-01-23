@@ -563,7 +563,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     name,
                     command.as_ref().map_or("unset".into(), |x| x.join(" "))
                 );
-                // Set entrypoint
+                // Set command
                 container.update(|c| c.config.command = command);
             }
 
@@ -575,7 +575,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     "Set Docker command: {}",
                     command.as_ref().map_or("unset".into(), |x| x.join(" "))
                 );
-                // Set entrypoint
+                // Set command
                 container.update(|c| c.config.command = command);
             }
         }

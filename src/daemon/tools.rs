@@ -271,7 +271,7 @@ fn apply_updates(
         let container = containers.get(&id);
 
         // TODO: handle NOT MODIFIED error response
-        log::debug!("Stopping container: {}", id); 
+        log::debug!("Stopping container: {}", id);
         block_on(container.stop(Some(Duration::from_secs(10))))?;
         log::debug!("Removing container: {}", id);
         block_on(container.delete())?;
@@ -298,7 +298,7 @@ fn apply_updates(
             &daemon.lucky_data_dir,
             &daemon.socket_path,
         )?;
-        log::trace!("Creating container: docker {:#?}", docker_options);
+        log::trace!("Creating container with options: {:#?}", docker_options);
         let create_info = block_on(containers.create(&docker_options))?;
 
         // Start the container

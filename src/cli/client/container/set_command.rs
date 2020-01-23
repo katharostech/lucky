@@ -14,15 +14,7 @@ impl<'a> CliCommand<'a> for SetCommandSubcommand {
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Set the docker command")
-            .arg(Arg::with_name("command")
-                // TODO: This for now must be an option, but we would prefer positional:
-                // https://github.com/clap-rs/clap/issues/1437
-                .long("command")
-                .short('C')
-                .help("The command for the container")
-                .allow_hyphen_values(true)
-                .multiple(true)
-                .required_unless("unset"))
+            .setting(AppSettings::TrailingVarArg)
             .arg(Arg::with_name("unset")
                 .help("Unset the command instead of setting it")
                 .long_help(concat!(
@@ -32,6 +24,10 @@ impl<'a> CliCommand<'a> for SetCommandSubcommand {
                 .long("unset")
                 .short('u')
                 .required_unless("command"))
+            .arg(Arg::with_name("command")
+                .help("The command for the container")
+                .multiple(true)
+                .required_unless("unset"))
             .arg(super::container_arg())
     }
 
@@ -63,9 +59,8 @@ impl<'a> CliCommand<'a> for SetCommandSubcommand {
             client
                 .container_set_command(
                     Some(
-                        args.value_of("command")
-                            .expect("Missing required argument command")
-                            .split(" ")
+                        args.values_of("command")
+                            .expect("Missing required argument: command")
                             .map(ToOwned::to_owned)
                             .collect(),
                     ),
