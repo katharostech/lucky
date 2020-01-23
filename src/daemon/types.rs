@@ -99,9 +99,13 @@ impl<T: Clone + PartialEq> Cd<T> {
 impl<T: Clone + PartialEq> Deref for Cd<T> {
     type Target = T;
 
-    /// Dereference to the inner type    
+    /// Dereference to the inner type or the new inner type if it exists    
     fn deref(&self) -> &Self::Target {
-        &self.inner
+        if let Some(new_inner) = &self.new_inner {
+            new_inner
+        } else {
+            &self.inner
+        }
     }
 }
 
