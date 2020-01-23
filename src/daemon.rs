@@ -75,6 +75,7 @@ pub(crate) struct LuckyDaemonOptions {
     pub stop_listening: Arc<AtomicBool>,
 }
 
+// TODO: set juju status upon errors
 // Utility macro for handling anyhow results with `handle_err!(function_that_returns_anyhow_err())`
 macro_rules! handle_err {
     ($expr:expr, $call:ident) => {
@@ -174,26 +175,24 @@ impl LuckyDaemon {
                     }
                 }
 
-                hook_handlers::handle_post_hook(&self, &hook_name).context(format!(
-                    r#"Error running internal hook handler for hook "{}""#,
-                    hook_name
-                ))?;
-
                 // If docker is enabled, update container configuration
                 if self.lucky_metadata.use_docker {
                     tools::apply_container_updates(self)?;
                 }
             }
 
-            // Finish reply
+            // Set next reply as the last
             call.set_continues(false);
-            call.reply(None)?;
-
-        // If the hook is not handled by the charm
-        } else {
-            // Just reply without doing anything ( setting exit code to 0 )
-            call.reply(None)?;
         }
+
+        // Run post-script hook handlers
+        hook_handlers::handle_post_hook(&self, &hook_name).context(format!(
+            r#"Error running internal hook handler for hook "{}""#,
+            hook_name
+        ))?;
+
+        // Reply empty
+        call.reply(None)?;
 
         Ok(())
     }
