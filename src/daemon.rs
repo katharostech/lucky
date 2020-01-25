@@ -296,24 +296,19 @@ impl rpc::VarlinkInterface for LuckyDaemon {
     }
 
     fn unit_kv_get_all(&self, call: &mut dyn rpc::Call_UnitKvGetAll) -> varlink::Result<()> {
-        // This call must be called with more
-        if !call.wants_more() {
-            call.reply_requires_more()?;
-            return Ok(());
-        }
-
-        // Loop through key-value pairs and return result to client
         let state = self.state.read().unwrap();
-        let pairs: Vec<rpc::UnitKvGetAll_Reply_pairs> = state
+
+        // Reply with pairs
+        call.reply(
+            state
             .kv
             .iter()
             .map(|(k, v)| rpc::UnitKvGetAll_Reply_pairs {
                 key: k.clone(),
                 value: v.clone().into_inner(),
             })
-            .collect();
-        // Reply with pairs
-        call.reply(pairs)?;
+                .collect(),
+        )?;
 
         Ok(())
     }
