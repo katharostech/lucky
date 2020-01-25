@@ -1,10 +1,11 @@
 use anyhow::{format_err, Context};
+use log::log_enabled;
 use subprocess::{Exec, ExitStatus, PopenError, Redirection};
 
 use std::collections::HashMap;
 use std::io::ErrorKind as IoErrorKind;
 use std::thread::sleep;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 /// Data on how many times and with what delay to try running a command
 pub(crate) struct Retries {
@@ -67,7 +68,26 @@ fn _run_cmd(
     let command_string = cmd.to_cmdline_lossy();
     let err_message = format!("Error running {}", command_string);
 
-    match cmd.capture() {
+    log::trace!("Running command: `{}`", command_string);
+    let mut start_time = None;
+    if log_enabled!(log::Level::Trace) {
+        start_time = Some(Instant::now());
+    }
+
+    // Run command and capture output
+    let capture = cmd.capture();
+
+    if log_enabled!(log::Level::Trace) {
+        if let Some(start_time) = start_time {
+            log::trace!(
+                "Command `{}` took: {:?}",
+                command_string,
+                start_time.elapsed()
+            );
+        }
+    }
+
+    match capture {
         Err(PopenError::IoError(e)) => Err(e).context(err_message),
         Err(PopenError::Utf8Error(e)) => Err(e).context(err_message),
         Err(PopenError::LogicError(e)) => panic!(
@@ -89,7 +109,7 @@ fn _run_cmd(
                     exit_code_str,
                     capture.stdout_str()
                 )
-                .context(format!("Error running command {}", command_string)))
+                .context(format!("Error running command `{}`", command_string)))
             }
         }
     }
