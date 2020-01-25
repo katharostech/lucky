@@ -160,10 +160,13 @@ pub(crate) fn is_leader() -> anyhow::Result<bool> {
     let output = run_cmd("is-leader", &[])?;
 
     // Parse output
-    match output.as_ref() {
+    match output.trim() {
         "True" => Ok(true),
         "False" => Ok(false),
-        other => Err(format_err!("Unexpected response: {}", other)),
+        other => {
+            Err(format_err!("Unexpected response: {}", other)
+                .context("Error running `is-leader` tool"))
+        }
     }
 }
 
