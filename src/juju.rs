@@ -149,7 +149,7 @@ pub(crate) fn relation_list(relation_id: Option<String>) -> anyhow::Result<Vec<S
 
 pub(crate) fn relation_ids(relation_name: &str) -> anyhow::Result<Vec<String>> {
     // Run command
-    let output = run_cmd("relation-list", &["--format", "json", relation_name])?;
+    let output = run_cmd("relation-ids", &["--format", "json", relation_name])?;
 
     // Parse output
     Ok(serde_json::from_str(&output).context("Could not parse JSON")?)
