@@ -27,7 +27,7 @@ impl<'a> CliCommand<'a> for RelationSubcommand {
             Box::new(GetSubcommand),
             Box::new(SetSubcommand),
             Box::new(ListUnitsSubcommand),
-            Box::new(ListRelationsSubcommand),
+            Box::new(ListIdsSubcommand),
         ]
     }
 
@@ -62,8 +62,7 @@ impl<'a> CliCommand<'a> for GetSubcommand {
                 .help("The name of the remote unit to get data from")
                 .long("remote-unit")
                 .short('u')
-                .takes_value(true)
-                .requires("relation_id"))
+                .takes_value(true))
             .arg(Arg::with_name("app")
                 .help("Get application relation data instead of unit relation data")
                 .long("app")
@@ -95,9 +94,9 @@ impl<'a> CliCommand<'a> for GetSubcommand {
 
         let relation_data;
         if let Some(relation_id) = relation_id {
-            let remote_unit_name = args
-                .value_of("remote_unit_name")
-                .expect("Missing required argument: unit-name");
+            let remote_unit_name = args.value_of("remote_unit_name").ok_or(format_err!(
+                "--remote-unit option is required if specifying relation id"
+            ))?;
 
             relation_data = client
                 .relation_get(
@@ -262,11 +261,11 @@ impl<'a> CliCommand<'a> for ListUnitsSubcommand {
     }
 }
 
-struct ListRelationsSubcommand;
+struct ListIdsSubcommand;
 
-impl<'a> CliCommand<'a> for ListRelationsSubcommand {
+impl<'a> CliCommand<'a> for ListIdsSubcommand {
     fn get_name(&self) -> &'static str {
-        "list-relations"
+        "list-ids"
     }
 
     #[rustfmt::skip]
