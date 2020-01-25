@@ -111,9 +111,11 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         self.get_base_app()
             .about("Set a value")
             .arg(Arg::with_name("key")
-                .help("The key to set in the store"))
+                .help("The key to set in the store")
+                .required(true))
             .arg(Arg::with_name("value")
-                .help(r#"The value to set "key" to"#))
+                .help(r#"The value to set "key" to"#)
+                .required(true))
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
