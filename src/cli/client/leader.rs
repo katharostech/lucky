@@ -167,6 +167,10 @@ impl<'a> CliCommand<'a> for IsLeaderSubcommand {
         self.get_base_app()
             .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
             .about("Get whether or not this unit is the leader unit")
+            .long_about(concat!(
+                "Get whether or not this unit is the leader unit. Returns \"true\" if unit is ",
+                "leader and \"false\" if it is not."
+            ))
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
