@@ -168,10 +168,28 @@ impl LuckyDaemon {
                         // TODO: Find out whether or not it makes sense that, upon removal, if a remove charm
                         // script fails, all other scripts will be skipped including the built-in one that cleans
                         // up the docker containers.
-                        tools::run_host_script(self, call, script_name, &environment)?;
+                        tools::run_host_script(
+                            self,
+                            call,
+                            &tools::ScriptType::Named(script_name.into()),
+                            hook_name,
+                            &environment,
+                        )?;
+                    }
+                    HookScript::InlineHostScript(script_contents) => {
+                        tools::run_host_script(
+                            self,
+                            call,
+                            &tools::ScriptType::Inline(script_contents.into()),
+                            hook_name,
+                            &environment,
+                        )?;
                     }
                     HookScript::ContainerScript(_script_name) => {
                         log::warn!("Container scripts not yet implemented");
+                    }
+                    HookScript::InlineContainerScript(_script_contents) => {
+                        log::warn!("Inline container scripts not yet implemented");
                     }
                 }
 
@@ -301,12 +319,12 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // Reply with pairs
         call.reply(
             state
-            .kv
-            .iter()
-            .map(|(k, v)| rpc::UnitKvGetAll_Reply_pairs {
-                key: k.clone(),
-                value: v.clone().into_inner(),
-            })
+                .kv
+                .iter()
+                .map(|(k, v)| rpc::UnitKvGetAll_Reply_pairs {
+                    key: k.clone(),
+                    value: v.clone().into_inner(),
+                })
                 .collect(),
         )?;
 

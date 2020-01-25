@@ -124,10 +124,10 @@ pub(crate) struct LuckyMetadata {
 #[serde(rename_all = "kebab-case")]
 /// A hook script in the `lucky.yaml` definition
 pub(crate) enum HookScript {
-    #[serde(rename = "host-script")]
     HostScript(String),
-    #[serde(rename = "container-script")]
+    InlineHostScript(String),
     ContainerScript(String),
+    InlineContainerScript(String),
 }
 
 //

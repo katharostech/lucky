@@ -126,13 +126,28 @@ pub(super) fn get_juju_status(state: &DaemonState) -> ScriptStatus {
     }
 }
 
+/// A type of script, either `Inline` or `Named`
+pub(super) enum ScriptType {
+    /// An inline host script where the string is the whole contents of the script
+    Inline(String),
+    /// A named host script that will run from the script dir
+    Named(String),
+}
+
 // Run one of the charm's host scripts
 pub(super) fn run_host_script(
     daemon: &LuckyDaemon,
     call: &mut dyn rpc::Call_TriggerHook,
-    script_name: &str,
+    script_type: &ScriptType,
+    hook_name: &str,
     environment: &HashMap<String, String>,
 ) -> anyhow::Result<()> {
+    // Create script name based on script type
+    let script_name = match script_type {
+        ScriptType::Inline(_) => format!("{}_inline", hook_name),
+        ScriptType::Named(script_name) => script_name.into(),
+    };
+
     log::info!("Running host script: {}", script_name);
 
     // Add bin dirs to the PATH
@@ -152,13 +167,24 @@ pub(super) fn run_host_script(
     };
 
     // Build command
-    let command_path = daemon.charm_dir.join("host_scripts").join(script_name);
+    let mut args: Vec<String> = vec![];
+    let command_path = match script_type {
+        // Run bash -c "inline script"
+        ScriptType::Inline(script_contents) => {
+            args.push("-c".into());
+            args.push(script_contents.into());
+            PathBuf::from("/bin/bash")
+        }
+        // Run the script directly
+        ScriptType::Named(script_name) => daemon.charm_dir.join("host_scripts").join(script_name),
+    };
     let mut command = Exec::cmd(&command_path)
         .stdout(Redirection::Pipe)
         .stderr(Redirection::Merge)
+        .args(args.as_slice())
         .env("PATH", path_env)
         .env("LUCKY_CONTEXT", "client")
-        .env("LUCKY_SCRIPT_ID", script_name);
+        .env("LUCKY_SCRIPT_ID", &script_name);
 
     // Set environment for hook exececution
     for (k, v) in environment.iter() {
