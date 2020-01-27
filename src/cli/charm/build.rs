@@ -8,8 +8,11 @@ use std::path::Path;
 
 use crate::cli::*;
 use crate::config::load_yaml;
-use crate::types::juju::{
-    CharmMetadata, RelationDef, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS,
+use crate::types::{
+    juju::{
+        CharmMetadata, RelationDef, JUJU_NORMAL_HOOKS, JUJU_RELATION_HOOKS, JUJU_STORAGE_HOOKS,
+    },
+    LuckyMetadata,
 };
 
 pub(super) struct BuildSubcommand;
@@ -93,6 +96,8 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
 
         // Load charm metadata
         let mut charm_metadata: CharmMetadata = load_yaml(&charm_path, "metadata")?;
+        // Load lucky metadata simply to validate the lucky.yaml file
+        load_yaml::<LuckyMetadata>(&charm_path, "lucky")?;
         // Get charm name
         let charm_name = &charm_metadata.name;
         // Get build target dir
