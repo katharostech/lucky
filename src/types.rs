@@ -117,13 +117,22 @@ pub(crate) struct LuckyMetadata {
     #[serde(default = "default_true")]
     /// Specifies whether or not to install Docker on the host and enable Docker-based features
     pub use_docker: bool,
-    pub hooks: HashMap<String, Vec<HookScript>>,
+    pub hooks: HashMap<String, Vec<ScriptDefinition>>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "kebab-case")]
+pub(crate) struct ScriptDefinition {
+    #[serde(flatten)]
+    pub script_type: ScriptType,
+    #[serde(default = "Vec::new")]
+    pub args: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "kebab-case")]
 /// A hook script in the `lucky.yaml` definition
-pub(crate) enum HookScript {
+pub(crate) enum ScriptType {
     HostScript(String),
     InlineHostScript(String),
     ContainerScript(String),

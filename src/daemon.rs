@@ -17,7 +17,7 @@ use std::sync::{
 use crate::docker::{ContainerInfo, PortBinding, VolumeSource, VolumeTarget};
 use crate::juju;
 use crate::rpc;
-use crate::types::{HookScript, LuckyMetadata, ScriptStatus};
+use crate::types::{LuckyMetadata, ScriptStatus, ScriptType};
 
 use crate::VOLUME_DIR;
 
@@ -159,12 +159,18 @@ impl LuckyDaemon {
             hook_name
         ))?;
 
+        // Create a mutable clone of the recieved environment
+        let mut environment = environment.clone();
+
+        // Add LUCKY_HOOK environment variable
+        environment.insert("LUCKY_HOOK".into(), hook_name.into());
+
         // Run hook scripts
         if let Some(hook_scripts) = self.lucky_metadata.hooks.get(hook_name) {
             // Execute all scripts registered for this hook
             for hook_script in hook_scripts {
-                match hook_script {
-                    HookScript::HostScript(script_name) => {
+                match &hook_script.script_type {
+                    ScriptType::HostScript(script_name) => {
                         // TODO: Find out whether or not it makes sense that, upon removal, if a remove charm
                         // script fails, all other scripts will be skipped including the built-in one that cleans
                         // up the docker containers.
@@ -173,22 +179,24 @@ impl LuckyDaemon {
                             call,
                             &tools::ScriptType::Named(script_name.into()),
                             hook_name,
+                            hook_script.args.as_slice(),
                             &environment,
                         )?;
                     }
-                    HookScript::InlineHostScript(script_contents) => {
+                    ScriptType::InlineHostScript(script_contents) => {
                         tools::run_host_script(
                             self,
                             call,
                             &tools::ScriptType::Inline(script_contents.into()),
                             hook_name,
+                            hook_script.args.as_slice(),
                             &environment,
                         )?;
                     }
-                    HookScript::ContainerScript(_script_name) => {
+                    ScriptType::ContainerScript(_script_name) => {
                         log::warn!("Container scripts not yet implemented");
                     }
-                    HookScript::InlineContainerScript(_script_contents) => {
+                    ScriptType::InlineContainerScript(_script_contents) => {
                         log::warn!("Inline container scripts not yet implemented");
                     }
                 }

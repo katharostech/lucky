@@ -140,6 +140,7 @@ pub(super) fn run_host_script(
     call: &mut dyn rpc::Call_TriggerHook,
     script_type: &ScriptType,
     hook_name: &str,
+    script_args: &[String],
     environment: &HashMap<String, String>,
 ) -> anyhow::Result<()> {
     // Create script name based on script type
@@ -171,12 +172,17 @@ pub(super) fn run_host_script(
     let command_path = match script_type {
         // Run bash -c "inline script"
         ScriptType::Inline(script_contents) => {
+            // NOTE: args are ignored for inline scripts
             args.push("-c".into());
             args.push(script_contents.into());
             PathBuf::from("/bin/bash")
         }
         // Run the script directly
-        ScriptType::Named(script_name) => daemon.charm_dir.join("host_scripts").join(script_name),
+        ScriptType::Named(script_name) => {
+            // Add script arguments to run command
+            args.extend(script_args.iter().map(ToOwned::to_owned));
+            daemon.charm_dir.join("host_scripts").join(script_name)
+        }
     };
     let mut command = Exec::cmd(&command_path)
         .stdout(Redirection::Pipe)
