@@ -128,7 +128,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         let raw_kv_pairs = args.values_of("data").expect("Missing required arg: data");
 
         // Create regex for matching key-value pairs
-        let re = Regex::new(r"(?ms)^(?P<key>[a-zA-Z][a-zA-Z0-9]*)=(?P<value>.*)")
+        let re = Regex::new(r"(?ms)^(?P<key>[a-zA-Z][a-zA-Z0-9_]*)=(?P<value>.*)")
             .expect("Could not compile regex");
 
         // Parse key-value pairs
