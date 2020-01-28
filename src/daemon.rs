@@ -440,6 +440,17 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    fn get_resource(
+        &self,
+        call: &mut dyn rpc::Call_GetResource,
+        resource_name: String,
+    ) -> varlink::Result<()> {
+        // Reply with path to resource
+        call.reply(handle_err!(juju::resource_get(&resource_name), call))?;
+
+        Ok(())
+    }
+
     fn port_open(&self, call: &mut dyn rpc::Call_PortOpen, port: String) -> varlink::Result<()> {
         log::debug!("Opening port: {}", port);
 

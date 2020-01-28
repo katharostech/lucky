@@ -197,6 +197,10 @@ pub(crate) fn leader_get() -> anyhow::Result<HashMap<String, String>> {
     Ok(serde_json::from_str(&output).context("Could not parse JSON response")?)
 }
 
+pub(crate) fn resource_get(resource_name: &str) -> anyhow::Result<String> {
+    Ok(run_cmd("resource-get", &[resource_name])?.trim().into())
+}
+
 /// Write out a message to the Juju Log. Setting `debug` to `true` will tell Juju the log is a
 /// debug log.
 ///

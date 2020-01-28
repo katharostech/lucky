@@ -5,6 +5,7 @@ use std::collections::HashMap;
 // Subcommands
 mod container;
 mod get_config;
+mod get_resource;
 mod kv;
 mod leader;
 mod port;
@@ -51,6 +52,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
             Box::new(relation::RelationSubcommand),
             Box::new(leader::LeaderSubcommand),
             Box::new(random::RandomSubcommand),
+            Box::new(get_resource::GetResourceSubcommand),
         ]
     }
 

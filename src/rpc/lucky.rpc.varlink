@@ -38,6 +38,9 @@ method GetPublicAddress() -> (address: string)
 # Get juju config. Value will be the JSON-encoded value.
 method GetConfig() -> (config: [](key: string, value: string))
 
+# Gets the path, on the host, to a Juju resource
+method GetResource(resource_name: string) -> (path: string) 
+
 # Opens up the provided port or port range in the firewall ( assuming the charm is exposed )
 method PortOpen(port: string) -> ()
 # Opens up the provided port or port range in the firewall ( assuming the charm is exposed )
