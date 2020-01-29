@@ -169,34 +169,39 @@ impl LuckyDaemon {
         if let Some(hook_scripts) = self.lucky_metadata.hooks.get(hook_name) {
             // Execute all scripts registered for this hook
             for hook_script in hook_scripts {
-                match &hook_script.script_type {
-                    ScriptType::HostScript(script_name) => {
+                match &hook_script {
+                    ScriptType::HostScript { host_script, args } => {
                         // TODO: Find out whether or not it makes sense that, upon removal, if a remove charm
                         // script fails, all other scripts will be skipped including the built-in one that cleans
                         // up the docker containers.
                         tools::run_host_script(
                             self,
                             call,
-                            &tools::ScriptType::Named(script_name.into()),
+                            &tools::ScriptType::Named(host_script.into()),
                             hook_name,
-                            hook_script.args.as_slice(),
+                            args.as_slice(),
                             &environment,
                         )?;
                     }
-                    ScriptType::InlineHostScript(script_contents) => {
+                    ScriptType::InlineHostScript { inline_host_script } => {
                         tools::run_host_script(
                             self,
                             call,
-                            &tools::ScriptType::Inline(script_contents.into()),
+                            &tools::ScriptType::Inline(inline_host_script.into()),
                             hook_name,
-                            hook_script.args.as_slice(),
+                            Vec::new().as_slice(),
                             &environment,
                         )?;
                     }
-                    ScriptType::ContainerScript(_script_name) => {
+                    ScriptType::ContainerScript {
+                        container_script: _,
+                        args: _,
+                    } => {
                         log::warn!("Container scripts not yet implemented");
                     }
-                    ScriptType::InlineContainerScript(_script_contents) => {
+                    ScriptType::InlineContainerScript {
+                        inline_container_script: _,
+                    } => {
                         log::warn!("Inline container scripts not yet implemented");
                     }
                 }

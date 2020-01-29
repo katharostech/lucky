@@ -117,26 +117,35 @@ pub(crate) struct LuckyMetadata {
     #[serde(default = "default_true")]
     /// Specifies whether or not to install Docker on the host and enable Docker-based features
     pub use_docker: bool,
-    pub hooks: HashMap<String, Vec<ScriptDefinition>>,
+    pub hooks: HashMap<String, Vec<ScriptType>>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "kebab-case")]
-pub(crate) struct ScriptDefinition {
-    #[serde(flatten)]
-    pub script_type: ScriptType,
-    #[serde(default = "Vec::new")]
-    pub args: Vec<String>,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-#[serde(rename_all = "kebab-case")]
+#[serde(untagged)]
+#[serde(deny_unknown_fields)]
 /// A hook script in the `lucky.yaml` definition
 pub(crate) enum ScriptType {
-    HostScript(String),
-    InlineHostScript(String),
-    ContainerScript(String),
-    InlineContainerScript(String),
+    /// A script that runs on the host from the `host_scripts` dir
+    #[serde(rename_all = "kebab-case")]
+    HostScript {
+        host_script: String,
+        #[serde(default = "Vec::new")]
+        args: Vec<String>,
+    },
+    /// A script that runs on the host as inline bash
+    #[serde(rename_all = "kebab-case")]
+    InlineHostScript { inline_host_script: String },
+    /// A script that runs in the container from the `container_scripts` dir
+    #[serde(rename_all = "kebab-case")]
+    ContainerScript {
+        container_script: String,
+        #[serde(default = "Vec::new")]
+        args: Vec<String>,
+    },
+    /// A script that runs in the container as inline bash
+    #[serde(rename_all = "kebab-case")]
+    InlineContainerScript { inline_container_script: String },
 }
 
 //
