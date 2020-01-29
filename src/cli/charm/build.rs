@@ -121,9 +121,7 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
                 return false;
             };
             // Skip paths in the build dir
-            entry_path != build_dir_canonical &&
-            // Skip the metadata.yml file because we will be adding it with modifications
-            !e.path().ends_with("metadata.yaml")
+            entry_path != build_dir_canonical
         }) {
             let entry = entry?;
             let relative_path = entry
@@ -170,10 +168,10 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
         //     peers.insert("lucky-data".into(), lucky_data_relation);
         //     charm_metadata.peers = Some(peers);
         // }
-        write_file(
-            &target_dir.join("metadata.yaml"),
-            &serde_yaml::to_string(&charm_metadata)?,
-        )?;
+        // write_file(
+        //     &target_dir.join("metadata.yaml"),
+        //     &serde_yaml::to_string(&charm_metadata)?,
+        // )?;
 
         // Create bin dir
         let bin_dir = target_dir.join("bin");
