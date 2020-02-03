@@ -69,7 +69,7 @@ pub(crate) fn relation_set(
     // Add relation option if specified
     if let Some(relation_id) = relation_id {
         args.push("-r".into());
-        args.push(relation_id.into());
+        args.push(relation_id);
     }
 
     // Add data
@@ -131,7 +131,7 @@ pub(crate) fn relation_list(relation_id: Option<String>) -> anyhow::Result<Vec<S
 
     // Add relation id
     if let Some(relation_id) = relation_id {
-        args.append(&mut vec!["-r".into(), relation_id.into()]);
+        args.append(&mut vec!["-r".into(), relation_id]);
     }
 
     // Run command

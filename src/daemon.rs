@@ -170,7 +170,7 @@ impl LuckyDaemon {
             // Execute all scripts registered for this hook
             for hook_script in hook_scripts {
                 match &hook_script {
-                    ScriptType::HostScript { host_script, args } => {
+                    ScriptType::Host { host_script, args } => {
                         // TODO: Find out whether or not it makes sense that, upon removal, if a remove charm
                         // script fails, all other scripts will be skipped including the built-in one that cleans
                         // up the docker containers.
@@ -183,7 +183,7 @@ impl LuckyDaemon {
                             &environment,
                         )?;
                     }
-                    ScriptType::InlineHostScript { inline_host_script } => {
+                    ScriptType::InlineHost { inline_host_script } => {
                         tools::run_host_script(
                             self,
                             call,
@@ -193,15 +193,10 @@ impl LuckyDaemon {
                             &environment,
                         )?;
                     }
-                    ScriptType::ContainerScript {
-                        container_script: _,
-                        args: _,
-                    } => {
+                    ScriptType::Container { .. } => {
                         log::warn!("Container scripts not yet implemented");
                     }
-                    ScriptType::InlineContainerScript {
-                        inline_container_script: _,
-                    } => {
+                    ScriptType::InlineContainer { .. } => {
                         log::warn!("Inline container scripts not yet implemented");
                     }
                 }
@@ -893,17 +888,17 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     // If we should delete the source data
                     if delete_data {
                         // If there are no other volumes with the same source
-                        if let None = volumes.values().find(|&x| *x == source) {
+                        if volumes.values().find(|&x| *x == source).is_none() {
                             log::debug!("Deleting volume data source: {}", &*source);
 
                             // Delete data
-                            if source.starts_with("/") {
+                            if source.starts_with('/') {
                                 handle_err!(std::fs::remove_dir_all(&*source), call);
                             } else {
                                 handle_err!(
-                                    std::fs::remove_dir_all(PathBuf::from(
-                                        self.lucky_data_dir.join(VOLUME_DIR).join(&*source),
-                                    )),
+                                    std::fs::remove_dir_all(
+                                        self.lucky_data_dir.join(VOLUME_DIR).join(&*source)
+                                    ),
                                     call
                                 );
                             }
@@ -1005,22 +1000,16 @@ impl rpc::VarlinkInterface for LuckyDaemon {
 
             // If there are other port bindings with the same protocol and host or container port
             // but isn't the exact same port binding
-            if let Some(offending_binding) = container
-                .config
-                .ports
-                .iter()
-                .filter(|&b| {
-                    // With the same host port
-                    (b.host_port == port_binding.host_port
+            if let Some(offending_binding) = container.config.ports.iter().find(|&b| {
+                // With the same host port
+                (b.host_port == port_binding.host_port
                         // or with the same container port
                         || b.container_port == port_binding.container_port)
                         // and with the same protocol
                         && b.protocol == port_binding.protocol
                         // and not the same exact port binding
                         && b != &port_binding
-                })
-                .next()
-            {
+            }) {
                 // Throw an error because we can't add port binding that has the same port as
                 // another.
                 call.reply_error(format!(

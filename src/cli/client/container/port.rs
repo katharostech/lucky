@@ -94,7 +94,7 @@ impl<'a> CliCommand<'a> for AddSubcommand {
             .container_port_add(
                 port_binding.host_port.into(),
                 port_binding.container_port.into(),
-                port_binding.protocol.into(),
+                port_binding.protocol,
                 container.map(Into::into),
             )
             .call()?;
@@ -169,7 +169,7 @@ impl<'a> CliCommand<'a> for RemoveSubcommand {
                 .container_port_remove(
                     port_binding.host_port.into(),
                     port_binding.container_port.into(),
-                    port_binding.protocol.into(),
+                    port_binding.protocol,
                     container.map(Into::into),
                 )
                 .call()?;

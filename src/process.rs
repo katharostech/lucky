@@ -69,10 +69,11 @@ fn _run_cmd(
     let err_message = format!("Error running {}", command_string);
 
     log::trace!("Running command: `{}`", command_string);
-    let mut start_time = None;
-    if log_enabled!(log::Level::Trace) {
-        start_time = Some(Instant::now());
-    }
+    let start_time = if log_enabled!(log::Level::Trace) {
+        Some(Instant::now())
+    } else {
+        None
+    };
 
     // Run command and capture output
     let capture = cmd.capture();

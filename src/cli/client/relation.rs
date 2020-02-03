@@ -94,9 +94,9 @@ impl<'a> CliCommand<'a> for GetSubcommand {
 
         let relation_data;
         if let Some(relation_id) = relation_id {
-            let remote_unit_name = args.value_of("remote_unit_name").ok_or(format_err!(
-                "--remote-unit option is required if specifying relation id"
-            ))?;
+            let remote_unit_name = args.value_of("remote_unit_name").ok_or_else(|| {
+                format_err!("--remote-unit option is required if specifying relation id")
+            })?;
 
             relation_data = client
                 .relation_get(

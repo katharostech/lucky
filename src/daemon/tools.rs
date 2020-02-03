@@ -317,7 +317,7 @@ fn apply_updates(
         let mut image_name = container_info.config.image.clone();
 
         // Add `:latest` if the image name doesn't specify a tag
-        if !image_name.contains(":") {
+        if !image_name.contains(':') {
             image_name = format!("{}:latest", image_name);
         }
 

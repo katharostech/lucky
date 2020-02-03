@@ -183,7 +183,7 @@ impl ContainerConfig {
 
         // Add other specified volumes
         for (target, source) in &self.volumes {
-            let host_path = if source.starts_with("/") {
+            let host_path = if source.starts_with('/') {
                 PathBuf::from(&**source)
             } else {
                 lucky_data_dir.join(VOLUME_DIR).join(&**source)

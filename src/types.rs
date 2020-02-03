@@ -128,24 +128,24 @@ pub(crate) struct LuckyMetadata {
 pub(crate) enum ScriptType {
     /// A script that runs on the host from the `host_scripts` dir
     #[serde(rename_all = "kebab-case")]
-    HostScript {
+    Host {
         host_script: String,
         #[serde(default = "Vec::new")]
         args: Vec<String>,
     },
     /// A script that runs on the host as inline bash
     #[serde(rename_all = "kebab-case")]
-    InlineHostScript { inline_host_script: String },
+    InlineHost { inline_host_script: String },
     /// A script that runs in the container from the `container_scripts` dir
     #[serde(rename_all = "kebab-case")]
-    ContainerScript {
+    Container {
         container_script: String,
         #[serde(default = "Vec::new")]
         args: Vec<String>,
     },
     /// A script that runs in the container as inline bash
     #[serde(rename_all = "kebab-case")]
-    InlineContainerScript { inline_container_script: String },
+    InlineContainer { inline_container_script: String },
 }
 
 //

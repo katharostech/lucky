@@ -69,7 +69,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
         // Skip creation of client data if the matched subcommand was "random", which doesn't need
         // the client connection.
-        if let Some(_) = args.subcommand_matches("random") {
+        if args.subcommand_matches("random").is_some() {
             return Ok(data);
         }
 

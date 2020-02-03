@@ -83,7 +83,7 @@ impl<'a> CliCommand<'a> for GetConfigSubcommand {
 fn json_value_to_string(v: JsonValue) -> String {
     match v {
         JsonValue::Null => "".into(),
-        JsonValue::String(s) => s.into(),
+        JsonValue::String(s) => s,
         other_json => other_json.to_string(),
     }
 }

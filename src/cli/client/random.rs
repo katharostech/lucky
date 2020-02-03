@@ -6,7 +6,7 @@ use std::io::Write;
 
 use crate::cli::*;
 
-const PASSWORD_CHARS: &'static str =
+const PASSWORD_CHARS: &str =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 pub(super) struct RandomSubcommand;
