@@ -242,7 +242,7 @@
 <p><code>charm [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands-1" id="subcommands-1">Subcommands</a></h3>
 <ul>
-<li><a href="cli/lucky/./charm/build.html">build</a>: Build a Lucky charm and make it ready for deployment to the Juju server or charm store</li>
+<li><a href="cli/lucky/./charm/build.html">build</a>: Build a Lucky charm and make it ready for deployment</li>
 <li><a href="cli/lucky/./charm/create.html">create</a>: Create a new lucky charm</li>
 </ul>
 <h2><a class="header" href="#getting-started-1" id="getting-started-1">Getting Started</a></h2>
@@ -258,6 +258,7 @@ $ charm push build/charm_name
 </code></pre>
 <p>See the Juju <a href="https://jaas.ai/docs/charm-writing/store">documentation</a> for more information about publishing charms.</p>
 <h1><a class="header" href="#build" id="build">build</a></h1>
+<p>Build a Lucky charm and make it ready for deployment to the Juju server or charm store</p>
 <h2><a class="header" href="#usage-2" id="usage-2">Usage</a></h2>
 <p><code>build [FLAGS] [OPTIONS] [charm_dir]</code></p>
 <h3><a class="header" href="#flags" id="flags">Flags</a></h3>
@@ -284,6 +285,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#create" id="create">create</a></h1>
+<p>Create a new lucky charm</p>
 <h2><a class="header" href="#usage-3" id="usage-3">Usage</a></h2>
 <p><code>create [FLAGS] [OPTIONS] [target_dir]</code></p>
 <h3><a class="header" href="#flags-1" id="flags-1">Flags</a></h3>
@@ -311,6 +313,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#client" id="client">client</a></h1>
+<p>Communicate with the Lucky daemon in charm scripts</p>
 <h2><a class="header" href="#usage-4" id="usage-4">Usage</a></h2>
 <p><code>client [FLAGS] [OPTIONS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#options-2" id="options-2">Options</a></h3>
@@ -326,16 +329,17 @@ $ charm push build/charm_name
 <li><a href="cli/lucky/./client/set-status.html">set-status</a>: Set the status of the current script</li>
 <li><a href="cli/lucky/./client/kv.html">kv</a>: Get and set values in the unit key-value store</li>
 <li><a href="cli/lucky/./client/container.html">container</a>: Manipulate the charm's container(s)</li>
-<li><a href="cli/lucky/./client/public-address.html">public-address</a>: Get the public address of the unit, which may be a DNS name</li>
+<li><a href="cli/lucky/./client/public-address.html">public-address</a>: Get the public address of the unit</li>
 <li><a href="cli/lucky/./client/private-address.html">private-address</a>: Get the private IP address of the unit</li>
 <li><a href="cli/lucky/./client/get-config.html">get-config</a>: Get the charm configuration</li>
-<li><a href="cli/lucky/./client/port.html">port</a>: Open and close ports on the firewall. These only take effect when the charm is &quot;exposed&quot; through the Juju GUI or CLI.</li>
+<li><a href="cli/lucky/./client/port.html">port</a>: Open and close ports on the firewall</li>
 <li><a href="cli/lucky/./client/relation.html">relation</a>: Communicate over Juju relations</li>
 <li><a href="cli/lucky/./client/leader.html">leader</a>: Communicate as/with unit leader</li>
-<li><a href="cli/lucky/./client/random.html">random</a>: Generate random numbers and strings. Without any arguments it generates a random sequence of 24 letters and numbers.</li>
-<li><a href="cli/lucky/./client/get-resource.html">get-resource</a>: Get the path to a Juju resource. NOTE: This path is the path to the resource on the host and will not be accessible if called from a container. This may be fixed later.</li>
+<li><a href="cli/lucky/./client/random.html">random</a>: Generate random numbers and strings</li>
+<li><a href="cli/lucky/./client/get-resource.html">get-resource</a>: Get the path to a Juju resource</li>
 </ul>
 <h1><a class="header" href="#set-status" id="set-status">set-status</a></h1>
+<p>Set the status of the current script</p>
 <h2><a class="header" href="#usage-5" id="usage-5">Usage</a></h2>
 <p><code>set-status [FLAGS] [OPTIONS] [ARGS]</code></p>
 <h3><a class="header" href="#options-3" id="options-3">Options</a></h3>
@@ -354,15 +358,17 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#kv" id="kv">kv</a></h1>
+<p>Get and set values in the unit key-value store</p>
 <h2><a class="header" href="#usage-6" id="usage-6">Usage</a></h2>
 <p><code>kv [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands-3" id="subcommands-3">Subcommands</a></h3>
 <ul>
-<li><a href="cli/lucky/client/./kv/get.html">get</a>: Get a value from the key-value store. If you leave <code>key</code> unspecified, all key-value pairs will be printed out, one per line, in the format <code>key=value</code>.</li>
+<li><a href="cli/lucky/client/./kv/get.html">get</a>: Get a value</li>
 <li><a href="cli/lucky/client/./kv/set.html">set</a>: Set a value</li>
 <li><a href="cli/lucky/client/./kv/delete.html">delete</a>: Delete a value</li>
 </ul>
 <h1><a class="header" href="#get" id="get">get</a></h1>
+<p>Get a value from the key-value store. If you leave <code>key</code> unspecified, all key-value pairs will be printed out, one per line, in the format <code>key=value</code>.</p>
 <h2><a class="header" href="#usage-7" id="usage-7">Usage</a></h2>
 <p><code>get [FLAGS] [key]</code></p>
 <h3><a class="header" href="#positionals-3" id="positionals-3">Positionals</a></h3>
@@ -373,6 +379,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set" id="set">set</a></h1>
+<p>Set a value</p>
 <h2><a class="header" href="#usage-8" id="usage-8">Usage</a></h2>
 <p><code>set [FLAGS] &lt;key&gt; &lt;value&gt;</code></p>
 <h3><a class="header" href="#positionals-4" id="positionals-4">Positionals</a></h3>
@@ -384,6 +391,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#delete" id="delete">delete</a></h1>
+<p>Delete a value</p>
 <h2><a class="header" href="#usage-9" id="usage-9">Usage</a></h2>
 <p><code>delete [FLAGS] [key]</code></p>
 <h3><a class="header" href="#positionals-5" id="positionals-5">Positionals</a></h3>
@@ -394,6 +402,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#container" id="container">container</a></h1>
+<p>Manipulate the charm's container(s)</p>
 <h2><a class="header" href="#usage-10" id="usage-10">Usage</a></h2>
 <p><code>container [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands-4" id="subcommands-4">Subcommands</a></h3>
@@ -409,6 +418,7 @@ $ charm push build/charm_name
 <li><a href="cli/lucky/client/./container/set-network.html">set-network</a>: Set the docker network</li>
 </ul>
 <h1><a class="header" href="#image" id="image">image</a></h1>
+<p>Get and set the Docker image</p>
 <h2><a class="header" href="#usage-11" id="usage-11">Usage</a></h2>
 <p><code>image [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands-5" id="subcommands-5">Subcommands</a></h3>
@@ -417,6 +427,7 @@ $ charm push build/charm_name
 <li><a href="cli/lucky/client/container/./image/set.html">set</a>: Set the container image</li>
 </ul>
 <h1><a class="header" href="#get-1" id="get-1">get</a></h1>
+<p>Get the container image</p>
 <h2><a class="header" href="#usage-12" id="usage-12">Usage</a></h2>
 <p><code>get [FLAGS] [OPTIONS]</code></p>
 <h3><a class="header" href="#options-4" id="options-4">Options</a></h3>
@@ -427,6 +438,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set-1" id="set-1">set</a></h1>
+<p>Set the container image</p>
 <h2><a class="header" href="#usage-13" id="usage-13">Usage</a></h2>
 <p><code>set [FLAGS] [OPTIONS] &lt;image&gt;</code></p>
 <h3><a class="header" href="#flags-2" id="flags-2">Flags</a></h3>
@@ -451,18 +463,21 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#apply-updates" id="apply-updates">apply-updates</a></h1>
+<p>Apply pending container configuration updates</p>
 <h2><a class="header" href="#usage-14" id="usage-14">Usage</a></h2>
 <p><code>apply-updates [FLAGS]</code></p>
 <h1><a class="header" href="#env" id="env">env</a></h1>
+<p>Get and set container environment variables</p>
 <h2><a class="header" href="#usage-15" id="usage-15">Usage</a></h2>
 <p><code>env [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands-6" id="subcommands-6">Subcommands</a></h3>
 <ul>
-<li><a href="cli/lucky/client/container/./env/get.html">get</a>: Get an environment variable from the container. If you leave <code>key</code> unspecified, all environment variables will be printed out, one per line, in the format <code>key=value</code>.</li>
+<li><a href="cli/lucky/client/container/./env/get.html">get</a>: Get an environment variable</li>
 <li><a href="cli/lucky/client/container/./env/set.html">set</a>: Set a value</li>
 <li><a href="cli/lucky/client/container/./env/delete.html">delete</a>: Delete a value</li>
 </ul>
 <h1><a class="header" href="#get-2" id="get-2">get</a></h1>
+<p>Get an environment variable from the container. If you leave <code>key</code> unspecified, all environment variables will be printed out, one per line, in the format <code>key=value</code>.</p>
 <h2><a class="header" href="#usage-16" id="usage-16">Usage</a></h2>
 <p><code>get [FLAGS] [OPTIONS] [key]</code></p>
 <h3><a class="header" href="#options-6" id="options-6">Options</a></h3>
@@ -480,6 +495,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set-2" id="set-2">set</a></h1>
+<p>Set a value</p>
 <h2><a class="header" href="#usage-17" id="usage-17">Usage</a></h2>
 <p><code>set [FLAGS] [OPTIONS] [ARGS]</code></p>
 <h3><a class="header" href="#options-7" id="options-7">Options</a></h3>
@@ -498,6 +514,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#delete-1" id="delete-1">delete</a></h1>
+<p>Delete a value</p>
 <h2><a class="header" href="#usage-18" id="usage-18">Usage</a></h2>
 <p><code>delete [FLAGS] [OPTIONS] [key]</code></p>
 <h3><a class="header" href="#options-8" id="options-8">Options</a></h3>
@@ -515,6 +532,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set-entrypoint" id="set-entrypoint">set-entrypoint</a></h1>
+<p>Set the docker entrypoint</p>
 <h2><a class="header" href="#usage-19" id="usage-19">Usage</a></h2>
 <p><code>set-entrypoint [FLAGS] [OPTIONS] [entrypoint]</code></p>
 <h3><a class="header" href="#flags-3" id="flags-3">Flags</a></h3>
@@ -539,6 +557,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set-command" id="set-command">set-command</a></h1>
+<p>Set the docker command</p>
 <h2><a class="header" href="#usage-20" id="usage-20">Usage</a></h2>
 <p><code>set-command [FLAGS] [OPTIONS] [command]...</code></p>
 <h3><a class="header" href="#flags-4" id="flags-4">Flags</a></h3>
@@ -563,18 +582,17 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#volume" id="volume">volume</a></h1>
+<p>Configure container volumes</p>
 <h2><a class="header" href="#usage-21" id="usage-21">Usage</a></h2>
 <p><code>volume [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands-7" id="subcommands-7">Subcommands</a></h3>
 <ul>
 <li><a href="cli/lucky/client/container/./volume/remove.html">remove</a>: Remove a volume from the container</li>
-<li><a href="cli/lucky/client/container/./volume/add.html">add</a>: Add a volume to the container.</li>
-</ul>
-<p>Note: This command does not exhibit the same behaviour docker does when mounting an empty volume to an non-empty directory in the container. If you use this command to mount an empty volume to a non-empty path in the container the path in the container will be replaced by the empty volume. Please tell us if this is an issue for you by opening a forum topic: https://discourse.jujucharms.com/c/related-software/lucky</p>
-<ul>
-<li><a href="cli/lucky/client/container/./volume/get.html">get</a>: If <code>target</code> is provided and the volume exists, the source of the volume will be printed. If target is not provided, a list of volumes in the format source:target will be printed.</li>
+<li><a href="cli/lucky/client/container/./volume/add.html">add</a>: Add a volume to the container</li>
+<li><a href="cli/lucky/client/container/./volume/get.html">get</a>: Get the list of volumes or the source for specific volume</li>
 </ul>
 <h1><a class="header" href="#remove" id="remove">remove</a></h1>
+<p>Remove a volume from the container</p>
 <h2><a class="header" href="#usage-22" id="usage-22">Usage</a></h2>
 <p><code>remove [FLAGS] [OPTIONS] [container_path]</code></p>
 <h3><a class="header" href="#flags-5" id="flags-5">Flags</a></h3>
@@ -599,6 +617,8 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#add" id="add">add</a></h1>
+<p>Add a volume to the container.</p>
+<p>Note: This command does not exhibit the same behaviour docker does when mounting an empty volume to an non-empty directory in the container. If you use this command to mount an empty volume to a non-empty path in the container the path in the container will be replaced by the empty volume. Please tell us if this is an issue for you by opening a forum topic: https://discourse.jujucharms.com/c/related-software/lucky</p>
 <h2><a class="header" href="#usage-23" id="usage-23">Usage</a></h2>
 <p><code>add [FLAGS] [OPTIONS] [ARGS]</code></p>
 <h3><a class="header" href="#options-12" id="options-12">Options</a></h3>
@@ -617,6 +637,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#get-3" id="get-3">get</a></h1>
+<p>If <code>target</code> is provided and the volume exists, the source of the volume will be printed. If target is not provided, a list of volumes in the format source:target will be printed.</p>
 <h2><a class="header" href="#usage-24" id="usage-24">Usage</a></h2>
 <p><code>get [FLAGS] [OPTIONS] [container_path]</code></p>
 <h3><a class="header" href="#options-13" id="options-13">Options</a></h3>
@@ -634,6 +655,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#delete-2" id="delete-2">delete</a></h1>
+<p>Delete the docker container</p>
 <h2><a class="header" href="#usage-25" id="usage-25">Usage</a></h2>
 <p><code>delete [FLAGS] [OPTIONS]</code></p>
 <h3><a class="header" href="#options-14" id="options-14">Options</a></h3>
@@ -644,6 +666,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#port" id="port">port</a></h1>
+<p>Add and remove container port bindings</p>
 <h2><a class="header" href="#usage-26" id="usage-26">Usage</a></h2>
 <p><code>port [FLAGS] [SUBCOMMAND]</code></p>
 <h3><a class="header" href="#subcommands-8" id="subcommands-8">Subcommands</a></h3>
@@ -653,6 +676,7 @@ $ charm push build/charm_name
 <li><a href="cli/lucky/client/container/./port/get.html">get</a>: Get a list of the containers port bindings</li>
 </ul>
 <h1><a class="header" href="#add-1" id="add-1">add</a></h1>
+<p>Add a port binding</p>
 <h2><a class="header" href="#usage-27" id="usage-27">Usage</a></h2>
 <p><code>add [FLAGS] [OPTIONS] [port_binding]</code></p>
 <h3><a class="header" href="#options-15" id="options-15">Options</a></h3>
@@ -670,6 +694,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#remove-1" id="remove-1">remove</a></h1>
+<p>Remove a port binding</p>
 <h2><a class="header" href="#usage-28" id="usage-28">Usage</a></h2>
 <p><code>remove [FLAGS] [OPTIONS] [port_binding]</code></p>
 <h3><a class="header" href="#flags-6" id="flags-6">Flags</a></h3>
@@ -694,6 +719,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#get-4" id="get-4">get</a></h1>
+<p>Get a list of the containers port bindings</p>
 <h2><a class="header" href="#usage-29" id="usage-29">Usage</a></h2>
 <p><code>get [FLAGS] [OPTIONS]</code></p>
 <h3><a class="header" href="#options-17" id="options-17">Options</a></h3>
@@ -704,6 +730,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set-network" id="set-network">set-network</a></h1>
+<p>Set the docker network</p>
 <h2><a class="header" href="#usage-30" id="usage-30">Usage</a></h2>
 <p><code>set-network [FLAGS] [OPTIONS] [network]</code></p>
 <h3><a class="header" href="#flags-7" id="flags-7">Flags</a></h3>
@@ -728,12 +755,15 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#public-address" id="public-address">public-address</a></h1>
+<p>Get the public address of the unit, which may be a DNS name</p>
 <h2><a class="header" href="#usage-31" id="usage-31">Usage</a></h2>
 <p><code>public-address [FLAGS]</code></p>
 <h1><a class="header" href="#private-address" id="private-address">private-address</a></h1>
+<p>Get the private IP address of the unit</p>
 <h2><a class="header" href="#usage-32" id="usage-32">Usage</a></h2>
 <p><code>private-address [FLAGS]</code></p>
 <h1><a class="header" href="#get-config" id="get-config">get-config</a></h1>
+<p>Get the charm configuration</p>
 <h2><a class="header" href="#usage-33" id="usage-33">Usage</a></h2>
 <p><code>get-config [FLAGS] [key]</code></p>
 <h3><a class="header" href="#positionals-18" id="positionals-18">Positionals</a></h3>
@@ -744,17 +774,17 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#port-1" id="port-1">port</a></h1>
+<p>Open and close ports on the firewall. These only take effect when the charm is &quot;exposed&quot; through the Juju GUI or CLI.</p>
 <h2><a class="header" href="#usage-34" id="usage-34">Usage</a></h2>
 <p><code>port [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands-9" id="subcommands-9">Subcommands</a></h3>
 <ul>
-<li><a href="cli/lucky/client/./port/open.html">open</a>: Open a port on the firewall. A port range may be specified with an optional protocol as well ( TCP is default ). Example values: <code>8000-9000/udp</code>, <code>9000</code>.</li>
-<li><a href="cli/lucky/client/./port/close.html">close</a>: Close a port on the firewall. A port range may be specified with an optional protocol as well ( TCP is default ). Example values: <code>8000-9000/udp</code>, <code>9000</code>.</li>
-<li><a href="cli/lucky/client/./port/get-opened.html">get-opened</a>: Get the ports opened by this charm. This will return a line for each port or port range that has been opened in the format: <code>port-or-range/protocol</code>. For exmaple:</li>
+<li><a href="cli/lucky/client/./port/open.html">open</a>: Open a port on the firewall</li>
+<li><a href="cli/lucky/client/./port/close.html">close</a>: Close a port on the firewall</li>
+<li><a href="cli/lucky/client/./port/get-opened.html">get-opened</a>: Get the ports opened by this charm</li>
 </ul>
-<p>8000/tcp
-10000-11000/udp</p>
 <h1><a class="header" href="#open" id="open">open</a></h1>
+<p>Open a port on the firewall. A port range may be specified with an optional protocol as well ( TCP is default ). Example values: <code>8000-9000/udp</code>, <code>9000</code>.</p>
 <h2><a class="header" href="#usage-35" id="usage-35">Usage</a></h2>
 <p><code>open [FLAGS] &lt;port&gt;</code></p>
 <h3><a class="header" href="#positionals-19" id="positionals-19">Positionals</a></h3>
@@ -765,6 +795,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#close" id="close">close</a></h1>
+<p>Close a port on the firewall. A port range may be specified with an optional protocol as well ( TCP is default ). Example values: <code>8000-9000/udp</code>, <code>9000</code>.</p>
 <h2><a class="header" href="#usage-36" id="usage-36">Usage</a></h2>
 <p><code>close [FLAGS] [port]</code></p>
 <h3><a class="header" href="#flags-8" id="flags-8">Flags</a></h3>
@@ -782,9 +813,13 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#get-opened" id="get-opened">get-opened</a></h1>
+<p>Get the ports opened by this charm. This will return a line for each port or port range that has been opened in the format: <code>port-or-range/protocol</code>. For exmaple:</p>
+<p>8000/tcp
+10000-11000/udp</p>
 <h2><a class="header" href="#usage-37" id="usage-37">Usage</a></h2>
 <p><code>get-opened [FLAGS]</code></p>
 <h1><a class="header" href="#relation" id="relation">relation</a></h1>
+<p>Communicate over Juju relations</p>
 <h2><a class="header" href="#usage-38" id="usage-38">Usage</a></h2>
 <p><code>relation [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands-10" id="subcommands-10">Subcommands</a></h3>
@@ -795,6 +830,7 @@ $ charm push build/charm_name
 <li><a href="cli/lucky/client/./relation/list-ids.html">list-ids</a>: List relation ids connected to this unit</li>
 </ul>
 <h1><a class="header" href="#get-5" id="get-5">get</a></h1>
+<p>Get data from a relation</p>
 <h2><a class="header" href="#usage-39" id="usage-39">Usage</a></h2>
 <p><code>get [FLAGS] [OPTIONS] [key]</code></p>
 <h3><a class="header" href="#flags-9" id="flags-9">Flags</a></h3>
@@ -820,6 +856,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set-3" id="set-3">set</a></h1>
+<p>Set local values on a relation</p>
 <h2><a class="header" href="#usage-40" id="usage-40">Usage</a></h2>
 <p><code>set [FLAGS] [OPTIONS] &lt;data&gt;...</code></p>
 <h3><a class="header" href="#flags-10" id="flags-10">Flags</a></h3>
@@ -844,6 +881,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#list-units" id="list-units">list-units</a></h1>
+<p>List the units collected to a relation</p>
 <h2><a class="header" href="#usage-41" id="usage-41">Usage</a></h2>
 <p><code>list-units [FLAGS] [OPTIONS]</code></p>
 <h3><a class="header" href="#options-21" id="options-21">Options</a></h3>
@@ -854,6 +892,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#list-ids" id="list-ids">list-ids</a></h1>
+<p>List relation ids connected to this unit</p>
 <h2><a class="header" href="#usage-42" id="usage-42">Usage</a></h2>
 <p><code>list-ids [FLAGS] [OPTIONS]</code></p>
 <h3><a class="header" href="#options-22" id="options-22">Options</a></h3>
@@ -864,15 +903,17 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#leader" id="leader">leader</a></h1>
+<p>Communicate as/with unit leader</p>
 <h2><a class="header" href="#usage-43" id="usage-43">Usage</a></h2>
 <p><code>leader [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands-11" id="subcommands-11">Subcommands</a></h3>
 <ul>
 <li><a href="cli/lucky/client/./leader/get.html">get</a>: Get data from the leader unit</li>
 <li><a href="cli/lucky/client/./leader/set.html">set</a>: Set values as the leader charm</li>
-<li><a href="cli/lucky/client/./leader/is-leader.html">is-leader</a>: Get whether or not this unit is the leader unit. Returns &quot;true&quot; if unit is leader and &quot;false&quot; if it is not.</li>
+<li><a href="cli/lucky/client/./leader/is-leader.html">is-leader</a>: Get whether or not this unit is the leader unit</li>
 </ul>
 <h1><a class="header" href="#get-6" id="get-6">get</a></h1>
+<p>Get data from the leader unit</p>
 <h2><a class="header" href="#usage-44" id="usage-44">Usage</a></h2>
 <p><code>get [FLAGS] [key]</code></p>
 <h3><a class="header" href="#positionals-23" id="positionals-23">Positionals</a></h3>
@@ -883,6 +924,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set-4" id="set-4">set</a></h1>
+<p>Set values as the leader charm</p>
 <h2><a class="header" href="#usage-45" id="usage-45">Usage</a></h2>
 <p><code>set [FLAGS] &lt;data&gt;...</code></p>
 <h3><a class="header" href="#positionals-24" id="positionals-24">Positionals</a></h3>
@@ -893,9 +935,11 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#is-leader" id="is-leader">is-leader</a></h1>
+<p>Get whether or not this unit is the leader unit. Returns &quot;true&quot; if unit is leader and &quot;false&quot; if it is not.</p>
 <h2><a class="header" href="#usage-46" id="usage-46">Usage</a></h2>
 <p><code>is-leader [FLAGS]</code></p>
 <h1><a class="header" href="#random" id="random">random</a></h1>
+<p>Generate random numbers and strings. Without any arguments it generates a random sequence of 24 letters and numbers.</p>
 <h2><a class="header" href="#usage-47" id="usage-47">Usage</a></h2>
 <p><code>random [FLAGS] [OPTIONS]</code></p>
 <h3><a class="header" href="#flags-11" id="flags-11">Flags</a></h3>
@@ -914,6 +958,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#get-resource" id="get-resource">get-resource</a></h1>
+<p>Get the path to a Juju resource. NOTE: This path is the path to the resource on the host and will not be accessible if called from a container. This may be fixed later.</p>
 <h2><a class="header" href="#usage-48" id="usage-48">Usage</a></h2>
 <p><code>get-resource [FLAGS] [resource_name]</code></p>
 <h3><a class="header" href="#positionals-25" id="positionals-25">Positionals</a></h3>

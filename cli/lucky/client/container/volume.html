@@ -153,16 +153,14 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#volume" id="volume">volume</a></h1>
+<p>Configure container volumes</p>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
 <p><code>volume [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands" id="subcommands">Subcommands</a></h3>
 <ul>
 <li><a href="./volume/remove.html">remove</a>: Remove a volume from the container</li>
-<li><a href="./volume/add.html">add</a>: Add a volume to the container.</li>
-</ul>
-<p>Note: This command does not exhibit the same behaviour docker does when mounting an empty volume to an non-empty directory in the container. If you use this command to mount an empty volume to a non-empty path in the container the path in the container will be replaced by the empty volume. Please tell us if this is an issue for you by opening a forum topic: https://discourse.jujucharms.com/c/related-software/lucky</p>
-<ul>
-<li><a href="./volume/get.html">get</a>: If <code>target</code> is provided and the volume exists, the source of the volume will be printed. If target is not provided, a list of volumes in the format source:target will be printed.</li>
+<li><a href="./volume/add.html">add</a>: Add a volume to the container</li>
+<li><a href="./volume/get.html">get</a>: Get the list of volumes or the source for specific volume</li>
 </ul>
 
                     </main>
