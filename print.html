@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js">
+<html lang="en" class="sidebar-visible no-js rust">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -34,11 +34,11 @@
 
         
     </head>
-    <body class="rust">
+    <body>
         <!-- Provide site root to javascript -->
         <script type="text/javascript">
             var path_to_root = "";
-            var default_theme = "rust";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "rust" : "rust";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -62,8 +62,11 @@
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
-            document.body.className = theme;
-            document.querySelector('html').className = theme + ' js';
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add('js');
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
@@ -79,8 +82,8 @@
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-            <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="affix"><a href="overview.html">Overview</a></li><li class="spacer"></li><li><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><a href="development.html"><strong aria-hidden="true">2.</strong> Development</a></li><li class="spacer"></li><li><a href="cli/lucky.html"><strong aria-hidden="true">3.</strong> Lucky CLI</a></li><li><ol class="section"><li><a href="cli/lucky/charm.html"><strong aria-hidden="true">3.1.</strong> charm</a></li><li><ol class="section"><li><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">3.1.1.</strong> build</a></li><li><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">3.1.2.</strong> create</a></li></ol></li><li><a href="cli/lucky/client.html"><strong aria-hidden="true">3.2.</strong> client</a></li><li><ol class="section"><li><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">3.2.1.</strong> set-status</a></li><li><a href="cli/lucky/client/kv.html"><strong aria-hidden="true">3.2.2.</strong> kv</a></li><li><ol class="section"><li><a href="cli/lucky/client/kv/get.html"><strong aria-hidden="true">3.2.2.1.</strong> get</a></li><li><a href="cli/lucky/client/kv/set.html"><strong aria-hidden="true">3.2.2.2.</strong> set</a></li><li><a href="cli/lucky/client/kv/delete.html"><strong aria-hidden="true">3.2.2.3.</strong> delete</a></li></ol></li><li><a href="cli/lucky/client/container.html"><strong aria-hidden="true">3.2.3.</strong> container</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/image.html"><strong aria-hidden="true">3.2.3.1.</strong> image</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/image/get.html"><strong aria-hidden="true">3.2.3.1.1.</strong> get</a></li><li><a href="cli/lucky/client/container/image/set.html"><strong aria-hidden="true">3.2.3.1.2.</strong> set</a></li></ol></li><li><a href="cli/lucky/client/container/apply-updates.html"><strong aria-hidden="true">3.2.3.2.</strong> apply-updates</a></li><li><a href="cli/lucky/client/container/env.html"><strong aria-hidden="true">3.2.3.3.</strong> env</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/env/get.html"><strong aria-hidden="true">3.2.3.3.1.</strong> get</a></li><li><a href="cli/lucky/client/container/env/set.html"><strong aria-hidden="true">3.2.3.3.2.</strong> set</a></li><li><a href="cli/lucky/client/container/env/delete.html"><strong aria-hidden="true">3.2.3.3.3.</strong> delete</a></li></ol></li><li><a href="cli/lucky/client/container/set-entrypoint.html"><strong aria-hidden="true">3.2.3.4.</strong> set-entrypoint</a></li><li><a href="cli/lucky/client/container/set-command.html"><strong aria-hidden="true">3.2.3.5.</strong> set-command</a></li><li><a href="cli/lucky/client/container/volume.html"><strong aria-hidden="true">3.2.3.6.</strong> volume</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/volume/remove.html"><strong aria-hidden="true">3.2.3.6.1.</strong> remove</a></li><li><a href="cli/lucky/client/container/volume/add.html"><strong aria-hidden="true">3.2.3.6.2.</strong> add</a></li><li><a href="cli/lucky/client/container/volume/get.html"><strong aria-hidden="true">3.2.3.6.3.</strong> get</a></li></ol></li><li><a href="cli/lucky/client/container/delete.html"><strong aria-hidden="true">3.2.3.7.</strong> delete</a></li><li><a href="cli/lucky/client/container/port.html"><strong aria-hidden="true">3.2.3.8.</strong> port</a></li><li><ol class="section"><li><a href="cli/lucky/client/container/port/add.html"><strong aria-hidden="true">3.2.3.8.1.</strong> add</a></li><li><a href="cli/lucky/client/container/port/remove.html"><strong aria-hidden="true">3.2.3.8.2.</strong> remove</a></li><li><a href="cli/lucky/client/container/port/get.html"><strong aria-hidden="true">3.2.3.8.3.</strong> get</a></li></ol></li></ol></li><li><a href="cli/lucky/client/public-address.html"><strong aria-hidden="true">3.2.4.</strong> public-address</a></li><li><a href="cli/lucky/client/private-address.html"><strong aria-hidden="true">3.2.5.</strong> private-address</a></li><li><a href="cli/lucky/client/get-config.html"><strong aria-hidden="true">3.2.6.</strong> get-config</a></li><li><a href="cli/lucky/client/port.html"><strong aria-hidden="true">3.2.7.</strong> port</a></li><li><ol class="section"><li><a href="cli/lucky/client/port/open.html"><strong aria-hidden="true">3.2.7.1.</strong> open</a></li><li><a href="cli/lucky/client/port/close.html"><strong aria-hidden="true">3.2.7.2.</strong> close</a></li><li><a href="cli/lucky/client/port/get-opened.html"><strong aria-hidden="true">3.2.7.3.</strong> get-opened</a></li></ol></li><li><a href="cli/lucky/client/relation.html"><strong aria-hidden="true">3.2.8.</strong> relation</a></li><li><ol class="section"><li><a href="cli/lucky/client/relation/get.html"><strong aria-hidden="true">3.2.8.1.</strong> get</a></li><li><a href="cli/lucky/client/relation/set.html"><strong aria-hidden="true">3.2.8.2.</strong> set</a></li><li><a href="cli/lucky/client/relation/list-units.html"><strong aria-hidden="true">3.2.8.3.</strong> list-units</a></li><li><a href="cli/lucky/client/relation/list-ids.html"><strong aria-hidden="true">3.2.8.4.</strong> list-ids</a></li></ol></li><li><a href="cli/lucky/client/leader.html"><strong aria-hidden="true">3.2.9.</strong> leader</a></li><li><ol class="section"><li><a href="cli/lucky/client/leader/get.html"><strong aria-hidden="true">3.2.9.1.</strong> get</a></li><li><a href="cli/lucky/client/leader/set.html"><strong aria-hidden="true">3.2.9.2.</strong> set</a></li><li><a href="cli/lucky/client/leader/is-leader.html"><strong aria-hidden="true">3.2.9.3.</strong> is-leader</a></li></ol></li><li><a href="cli/lucky/client/random.html"><strong aria-hidden="true">3.2.10.</strong> random</a></li><li><a href="cli/lucky/client/get-resource.html"><strong aria-hidden="true">3.2.11.</strong> get-resource</a></li></ol></li></ol></li></ol>
+            <div id="sidebar-scrollbox" class="sidebar-scrollbox">
+                <ol class="chapter"><li class="expanded affix "><a href="overview.html">Overview</a></li><li class="spacer"></li><li class="expanded "><a href="design.html"><strong aria-hidden="true">1.</strong> Design</a></li><li class="expanded "><a href="development.html"><strong aria-hidden="true">2.</strong> Development</a></li><li class="spacer"></li><li class="expanded "><a href="cli/lucky.html"><strong aria-hidden="true">3.</strong> Lucky CLI</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/charm.html"><strong aria-hidden="true">3.1.</strong> charm</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/charm/build.html"><strong aria-hidden="true">3.1.1.</strong> build</a></li><li class="expanded "><a href="cli/lucky/charm/create.html"><strong aria-hidden="true">3.1.2.</strong> create</a></li></ol></li><li class="expanded "><a href="cli/lucky/client.html"><strong aria-hidden="true">3.2.</strong> client</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/set-status.html"><strong aria-hidden="true">3.2.1.</strong> set-status</a></li><li class="expanded "><a href="cli/lucky/client/kv.html"><strong aria-hidden="true">3.2.2.</strong> kv</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/kv/get.html"><strong aria-hidden="true">3.2.2.1.</strong> get</a></li><li class="expanded "><a href="cli/lucky/client/kv/set.html"><strong aria-hidden="true">3.2.2.2.</strong> set</a></li><li class="expanded "><a href="cli/lucky/client/kv/delete.html"><strong aria-hidden="true">3.2.2.3.</strong> delete</a></li></ol></li><li class="expanded "><a href="cli/lucky/client/container.html"><strong aria-hidden="true">3.2.3.</strong> container</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/container/image.html"><strong aria-hidden="true">3.2.3.1.</strong> image</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/container/image/get.html"><strong aria-hidden="true">3.2.3.1.1.</strong> get</a></li><li class="expanded "><a href="cli/lucky/client/container/image/set.html"><strong aria-hidden="true">3.2.3.1.2.</strong> set</a></li></ol></li><li class="expanded "><a href="cli/lucky/client/container/apply-updates.html"><strong aria-hidden="true">3.2.3.2.</strong> apply-updates</a></li><li class="expanded "><a href="cli/lucky/client/container/env.html"><strong aria-hidden="true">3.2.3.3.</strong> env</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/container/env/get.html"><strong aria-hidden="true">3.2.3.3.1.</strong> get</a></li><li class="expanded "><a href="cli/lucky/client/container/env/set.html"><strong aria-hidden="true">3.2.3.3.2.</strong> set</a></li><li class="expanded "><a href="cli/lucky/client/container/env/delete.html"><strong aria-hidden="true">3.2.3.3.3.</strong> delete</a></li></ol></li><li class="expanded "><a href="cli/lucky/client/container/set-entrypoint.html"><strong aria-hidden="true">3.2.3.4.</strong> set-entrypoint</a></li><li class="expanded "><a href="cli/lucky/client/container/set-command.html"><strong aria-hidden="true">3.2.3.5.</strong> set-command</a></li><li class="expanded "><a href="cli/lucky/client/container/volume.html"><strong aria-hidden="true">3.2.3.6.</strong> volume</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/container/volume/remove.html"><strong aria-hidden="true">3.2.3.6.1.</strong> remove</a></li><li class="expanded "><a href="cli/lucky/client/container/volume/add.html"><strong aria-hidden="true">3.2.3.6.2.</strong> add</a></li><li class="expanded "><a href="cli/lucky/client/container/volume/get.html"><strong aria-hidden="true">3.2.3.6.3.</strong> get</a></li></ol></li><li class="expanded "><a href="cli/lucky/client/container/delete.html"><strong aria-hidden="true">3.2.3.7.</strong> delete</a></li><li class="expanded "><a href="cli/lucky/client/container/port.html"><strong aria-hidden="true">3.2.3.8.</strong> port</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/container/port/add.html"><strong aria-hidden="true">3.2.3.8.1.</strong> add</a></li><li class="expanded "><a href="cli/lucky/client/container/port/remove.html"><strong aria-hidden="true">3.2.3.8.2.</strong> remove</a></li><li class="expanded "><a href="cli/lucky/client/container/port/get.html"><strong aria-hidden="true">3.2.3.8.3.</strong> get</a></li></ol></li><li class="expanded "><a href="cli/lucky/client/container/set-network.html"><strong aria-hidden="true">3.2.3.9.</strong> set-network</a></li></ol></li><li class="expanded "><a href="cli/lucky/client/public-address.html"><strong aria-hidden="true">3.2.4.</strong> public-address</a></li><li class="expanded "><a href="cli/lucky/client/private-address.html"><strong aria-hidden="true">3.2.5.</strong> private-address</a></li><li class="expanded "><a href="cli/lucky/client/get-config.html"><strong aria-hidden="true">3.2.6.</strong> get-config</a></li><li class="expanded "><a href="cli/lucky/client/port.html"><strong aria-hidden="true">3.2.7.</strong> port</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/port/open.html"><strong aria-hidden="true">3.2.7.1.</strong> open</a></li><li class="expanded "><a href="cli/lucky/client/port/close.html"><strong aria-hidden="true">3.2.7.2.</strong> close</a></li><li class="expanded "><a href="cli/lucky/client/port/get-opened.html"><strong aria-hidden="true">3.2.7.3.</strong> get-opened</a></li></ol></li><li class="expanded "><a href="cli/lucky/client/relation.html"><strong aria-hidden="true">3.2.8.</strong> relation</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/relation/get.html"><strong aria-hidden="true">3.2.8.1.</strong> get</a></li><li class="expanded "><a href="cli/lucky/client/relation/set.html"><strong aria-hidden="true">3.2.8.2.</strong> set</a></li><li class="expanded "><a href="cli/lucky/client/relation/list-units.html"><strong aria-hidden="true">3.2.8.3.</strong> list-units</a></li><li class="expanded "><a href="cli/lucky/client/relation/list-ids.html"><strong aria-hidden="true">3.2.8.4.</strong> list-ids</a></li></ol></li><li class="expanded "><a href="cli/lucky/client/leader.html"><strong aria-hidden="true">3.2.9.</strong> leader</a></li><li><ol class="section"><li class="expanded "><a href="cli/lucky/client/leader/get.html"><strong aria-hidden="true">3.2.9.1.</strong> get</a></li><li class="expanded "><a href="cli/lucky/client/leader/set.html"><strong aria-hidden="true">3.2.9.2.</strong> set</a></li><li class="expanded "><a href="cli/lucky/client/leader/is-leader.html"><strong aria-hidden="true">3.2.9.3.</strong> is-leader</a></li></ol></li><li class="expanded "><a href="cli/lucky/client/random.html"><strong aria-hidden="true">3.2.10.</strong> random</a></li><li class="expanded "><a href="cli/lucky/client/get-resource.html"><strong aria-hidden="true">3.2.11.</strong> get-resource</a></li></ol></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -157,7 +160,7 @@
 <h2><a class="header" href="#developer-experience" id="developer-experience">Developer Experience</a></h2>
 <p>The Lucky framework will provide a CLI that will be installed on the developers workstation that will be used to create and build Lucky charms. We will be focusing on making it easy to write charms in bash or any other shell language, but, through the Lucky commandline interface, any programming language could be used.</p>
 <h2><a class="header" href="#development" id="development">Development</a></h2>
-<p>We are very early in development. We have just started work on the proof of concept. We have a <a href="./design.html">design</a> document outlining our current plan for the framework. This may change as we get into development. If you have any questions or thoughts don't hesitate to <a href="#bugs-features-and-questions">contact us</a>.</p>
+<p>We are very early in development. We have just started work on the proof of concept. We have a <a href="./design.html">design</a> document outlining our current plan for the framework. This may change as we get into development. If you have any questions or thoughts don't hesitate to <a href="overview.html#bugs-features-and-questions">contact us</a>.</p>
 <h2><a class="header" href="#bugs-features-and-questions" id="bugs-features-and-questions">Bugs, Features, and Questions</a></h2>
 <p>If you have any bug reports or feature requests you can create a <a href="https://tree.taiga.io/project/zicklag-lucky/issues">Taiga issue</a> and we'll see what we can do to help.</p>
 <p>For questions or general discussion there is also a <a href="https://discourse.jujucharms.com/c/related-software/lucky">Lucky category</a> on the <a href="https://discourse.jujucharms.com">Juju forum</a>.</p>
@@ -403,6 +406,7 @@ $ charm push build/charm_name
 <li><a href="cli/lucky/client/./container/volume.html">volume</a>: Configure container volumes</li>
 <li><a href="cli/lucky/client/./container/delete.html">delete</a>: Delete the docker container</li>
 <li><a href="cli/lucky/client/./container/port.html">port</a>: Add and remove container port bindings</li>
+<li><a href="cli/lucky/client/./container/set-network.html">set-network</a>: Set the docker network</li>
 </ul>
 <h1><a class="header" href="#image" id="image">image</a></h1>
 <h2><a class="header" href="#usage-11" id="usage-11">Usage</a></h2>
@@ -699,16 +703,40 @@ $ charm push build/charm_name
 <tr><td><code>-c</code>, <code>--container</code><code>&lt;name&gt;</code></td><td></td><td>The name of the container to update. If not specified the default container will be used</td></tr>
 </tbody>
 </table>
-<h1><a class="header" href="#public-address" id="public-address">public-address</a></h1>
+<h1><a class="header" href="#set-network" id="set-network">set-network</a></h1>
 <h2><a class="header" href="#usage-30" id="usage-30">Usage</a></h2>
+<p><code>set-network [FLAGS] [OPTIONS] [network]</code></p>
+<h3><a class="header" href="#flags-7" id="flags-7">Flags</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>-u</code>, <code>--unset</code></td><td></td><td>Unset the network instead of setting it. The container will use the default bridge network.</td></tr>
+</tbody>
+</table>
+<h3><a class="header" href="#options-18" id="options-18">Options</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>-c</code>, <code>--container</code><code>&lt;name&gt;</code></td><td></td><td>The name of the container to update. If not specified the default container will be used</td></tr>
+</tbody>
+</table>
+<h3><a class="header" href="#positionals-17" id="positionals-17">Positionals</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>&lt;network&gt;</code></td><td></td><td>The network for the container to use</td></tr>
+</tbody>
+</table>
+<h1><a class="header" href="#public-address" id="public-address">public-address</a></h1>
+<h2><a class="header" href="#usage-31" id="usage-31">Usage</a></h2>
 <p><code>public-address [FLAGS]</code></p>
 <h1><a class="header" href="#private-address" id="private-address">private-address</a></h1>
-<h2><a class="header" href="#usage-31" id="usage-31">Usage</a></h2>
+<h2><a class="header" href="#usage-32" id="usage-32">Usage</a></h2>
 <p><code>private-address [FLAGS]</code></p>
 <h1><a class="header" href="#get-config" id="get-config">get-config</a></h1>
-<h2><a class="header" href="#usage-32" id="usage-32">Usage</a></h2>
+<h2><a class="header" href="#usage-33" id="usage-33">Usage</a></h2>
 <p><code>get-config [FLAGS] [key]</code></p>
-<h3><a class="header" href="#positionals-17" id="positionals-17">Positionals</a></h3>
+<h3><a class="header" href="#positionals-18" id="positionals-18">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -716,7 +744,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#port-1" id="port-1">port</a></h1>
-<h2><a class="header" href="#usage-33" id="usage-33">Usage</a></h2>
+<h2><a class="header" href="#usage-34" id="usage-34">Usage</a></h2>
 <p><code>port [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands-9" id="subcommands-9">Subcommands</a></h3>
 <ul>
@@ -727,9 +755,9 @@ $ charm push build/charm_name
 <p>8000/tcp
 10000-11000/udp</p>
 <h1><a class="header" href="#open" id="open">open</a></h1>
-<h2><a class="header" href="#usage-34" id="usage-34">Usage</a></h2>
+<h2><a class="header" href="#usage-35" id="usage-35">Usage</a></h2>
 <p><code>open [FLAGS] &lt;port&gt;</code></p>
-<h3><a class="header" href="#positionals-18" id="positionals-18">Positionals</a></h3>
+<h3><a class="header" href="#positionals-19" id="positionals-19">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -737,16 +765,16 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#close" id="close">close</a></h1>
-<h2><a class="header" href="#usage-35" id="usage-35">Usage</a></h2>
+<h2><a class="header" href="#usage-36" id="usage-36">Usage</a></h2>
 <p><code>close [FLAGS] [port]</code></p>
-<h3><a class="header" href="#flags-7" id="flags-7">Flags</a></h3>
+<h3><a class="header" href="#flags-8" id="flags-8">Flags</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
 <tr><td><code>-A</code>, <code>--all</code></td><td></td><td>Remove all port bindings from the container</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#positionals-19" id="positionals-19">Positionals</a></h3>
+<h3><a class="header" href="#positionals-20" id="positionals-20">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -754,10 +782,10 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#get-opened" id="get-opened">get-opened</a></h1>
-<h2><a class="header" href="#usage-36" id="usage-36">Usage</a></h2>
+<h2><a class="header" href="#usage-37" id="usage-37">Usage</a></h2>
 <p><code>get-opened [FLAGS]</code></p>
 <h1><a class="header" href="#relation" id="relation">relation</a></h1>
-<h2><a class="header" href="#usage-37" id="usage-37">Usage</a></h2>
+<h2><a class="header" href="#usage-38" id="usage-38">Usage</a></h2>
 <p><code>relation [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands-10" id="subcommands-10">Subcommands</a></h3>
 <ul>
@@ -767,38 +795,13 @@ $ charm push build/charm_name
 <li><a href="cli/lucky/client/./relation/list-ids.html">list-ids</a>: List relation ids connected to this unit</li>
 </ul>
 <h1><a class="header" href="#get-5" id="get-5">get</a></h1>
-<h2><a class="header" href="#usage-38" id="usage-38">Usage</a></h2>
-<p><code>get [FLAGS] [OPTIONS] [key]</code></p>
-<h3><a class="header" href="#flags-8" id="flags-8">Flags</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-A</code>, <code>--app</code></td><td></td><td>Get application relation data instead of unit relation data</td></tr>
-</tbody>
-</table>
-<h3><a class="header" href="#options-18" id="options-18">Options</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>-r</code>, <code>--relation-id</code><code>&lt;relation_id&gt;</code></td><td></td><td>The relation id to get the data from</td></tr>
-<tr><td><code>-u</code>, <code>--remote-unit</code><code>&lt;remote_unit_name&gt;</code></td><td></td><td>The name of the remote unit to get data from</td></tr>
-</tbody>
-</table>
-<h3><a class="header" href="#positionals-20" id="positionals-20">Positionals</a></h3>
-<table>
-<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
-<tbody>
-<tr><td><code>&lt;key&gt;</code></td><td></td><td>Optional key to get from the data</td></tr>
-</tbody>
-</table>
-<h1><a class="header" href="#set-3" id="set-3">set</a></h1>
 <h2><a class="header" href="#usage-39" id="usage-39">Usage</a></h2>
-<p><code>set [FLAGS] [OPTIONS] &lt;data&gt;...</code></p>
+<p><code>get [FLAGS] [OPTIONS] [key]</code></p>
 <h3><a class="header" href="#flags-9" id="flags-9">Flags</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-A</code>, <code>--app</code></td><td></td><td>Set application relation data instead of unit relation data. the unit must be the leader unit to set application relation data</td></tr>
+<tr><td><code>-A</code>, <code>--app</code></td><td></td><td>Get application relation data instead of unit relation data</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#options-19" id="options-19">Options</a></h3>
@@ -806,9 +809,34 @@ $ charm push build/charm_name
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
 <tr><td><code>-r</code>, <code>--relation-id</code><code>&lt;relation_id&gt;</code></td><td></td><td>The relation id to get the data from</td></tr>
+<tr><td><code>-u</code>, <code>--remote-unit</code><code>&lt;remote_unit_name&gt;</code></td><td></td><td>The name of the remote unit to get data from</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#positionals-21" id="positionals-21">Positionals</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>&lt;key&gt;</code></td><td></td><td>Optional key to get from the data</td></tr>
+</tbody>
+</table>
+<h1><a class="header" href="#set-3" id="set-3">set</a></h1>
+<h2><a class="header" href="#usage-40" id="usage-40">Usage</a></h2>
+<p><code>set [FLAGS] [OPTIONS] &lt;data&gt;...</code></p>
+<h3><a class="header" href="#flags-10" id="flags-10">Flags</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>-A</code>, <code>--app</code></td><td></td><td>Set application relation data instead of unit relation data. the unit must be the leader unit to set application relation data</td></tr>
+</tbody>
+</table>
+<h3><a class="header" href="#options-20" id="options-20">Options</a></h3>
+<table>
+<thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
+<tbody>
+<tr><td><code>-r</code>, <code>--relation-id</code><code>&lt;relation_id&gt;</code></td><td></td><td>The relation id to get the data from</td></tr>
+</tbody>
+</table>
+<h3><a class="header" href="#positionals-22" id="positionals-22">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -816,9 +844,9 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#list-units" id="list-units">list-units</a></h1>
-<h2><a class="header" href="#usage-40" id="usage-40">Usage</a></h2>
+<h2><a class="header" href="#usage-41" id="usage-41">Usage</a></h2>
 <p><code>list-units [FLAGS] [OPTIONS]</code></p>
-<h3><a class="header" href="#options-20" id="options-20">Options</a></h3>
+<h3><a class="header" href="#options-21" id="options-21">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -826,9 +854,9 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#list-ids" id="list-ids">list-ids</a></h1>
-<h2><a class="header" href="#usage-41" id="usage-41">Usage</a></h2>
+<h2><a class="header" href="#usage-42" id="usage-42">Usage</a></h2>
 <p><code>list-ids [FLAGS] [OPTIONS]</code></p>
-<h3><a class="header" href="#options-21" id="options-21">Options</a></h3>
+<h3><a class="header" href="#options-22" id="options-22">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -836,7 +864,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#leader" id="leader">leader</a></h1>
-<h2><a class="header" href="#usage-42" id="usage-42">Usage</a></h2>
+<h2><a class="header" href="#usage-43" id="usage-43">Usage</a></h2>
 <p><code>leader [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#subcommands-11" id="subcommands-11">Subcommands</a></h3>
 <ul>
@@ -845,9 +873,9 @@ $ charm push build/charm_name
 <li><a href="cli/lucky/client/./leader/is-leader.html">is-leader</a>: Get whether or not this unit is the leader unit. Returns &quot;true&quot; if unit is leader and &quot;false&quot; if it is not.</li>
 </ul>
 <h1><a class="header" href="#get-6" id="get-6">get</a></h1>
-<h2><a class="header" href="#usage-43" id="usage-43">Usage</a></h2>
+<h2><a class="header" href="#usage-44" id="usage-44">Usage</a></h2>
 <p><code>get [FLAGS] [key]</code></p>
-<h3><a class="header" href="#positionals-22" id="positionals-22">Positionals</a></h3>
+<h3><a class="header" href="#positionals-23" id="positionals-23">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -855,9 +883,9 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set-4" id="set-4">set</a></h1>
-<h2><a class="header" href="#usage-44" id="usage-44">Usage</a></h2>
+<h2><a class="header" href="#usage-45" id="usage-45">Usage</a></h2>
 <p><code>set [FLAGS] &lt;data&gt;...</code></p>
-<h3><a class="header" href="#positionals-23" id="positionals-23">Positionals</a></h3>
+<h3><a class="header" href="#positionals-24" id="positionals-24">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -865,19 +893,19 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#is-leader" id="is-leader">is-leader</a></h1>
-<h2><a class="header" href="#usage-45" id="usage-45">Usage</a></h2>
+<h2><a class="header" href="#usage-46" id="usage-46">Usage</a></h2>
 <p><code>is-leader [FLAGS]</code></p>
 <h1><a class="header" href="#random" id="random">random</a></h1>
-<h2><a class="header" href="#usage-46" id="usage-46">Usage</a></h2>
+<h2><a class="header" href="#usage-47" id="usage-47">Usage</a></h2>
 <p><code>random [FLAGS] [OPTIONS]</code></p>
-<h3><a class="header" href="#flags-10" id="flags-10">Flags</a></h3>
+<h3><a class="header" href="#flags-11" id="flags-11">Flags</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
 <tr><td><code>-f</code>, <code>--float</code></td><td></td><td>Generate a floating point range instead of an integer range</td></tr>
 </tbody>
 </table>
-<h3><a class="header" href="#options-22" id="options-22">Options</a></h3>
+<h3><a class="header" href="#options-23" id="options-23">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -886,9 +914,9 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#get-resource" id="get-resource">get-resource</a></h1>
-<h2><a class="header" href="#usage-47" id="usage-47">Usage</a></h2>
+<h2><a class="header" href="#usage-48" id="usage-48">Usage</a></h2>
 <p><code>get-resource [FLAGS] [resource_name]</code></p>
-<h3><a class="header" href="#positionals-24" id="positionals-24">Positionals</a></h3>
+<h3><a class="header" href="#positionals-25" id="positionals-25">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
@@ -919,6 +947,14 @@ $ charm push build/charm_name
 
         
 
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
         
 
         
