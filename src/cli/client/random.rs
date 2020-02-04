@@ -22,8 +22,8 @@ impl<'a> CliCommand<'a> for RandomSubcommand {
         self.get_base_app()
             .about("Generate random numbers and strings")
             .long_about(concat!(
-                "Generate random numbers and strings. Without any arguments it generates a ",
-                "random sequence of 24 letters and numbers."
+                "Generate random passwords, numbers, and ports. Without any arguments it ",
+                "generates a random sequence of 24 letters and numbers."
             ))
             .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
             .arg(Arg::with_name("range")
