@@ -16,13 +16,16 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Set the status of the current script")
-            .arg(Arg::with_name("script_id")
-                .long("script-id")
-                .short('I')
-                .help("The ID of the script that is being run")
+            .arg(Arg::with_name("status_name")
+                .long("status-name")
+                .short('n')
+                .help("The name of the status to set: defaults to the script's name.")
                 .long_help(concat!(
-                    "The ID of the script that is being run. Allows each script to have a status ",
-                    "independent of the other scripts in the charm."
+                    "The name of the status to set: defaults to the script's name. By default, ",
+                    "setting the status will set the status only for the current script, ",
+                    "leaving other statuses untouched. If you specify a name for the status ",
+                    "other scripts can change that status by specifying the same name when ",
+                    "calling `set-status`."
                 ))
                 .env("LUCKY_SCRIPT_ID"))
             .arg(Arg::with_name("state")
@@ -51,9 +54,9 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
             state: state.parse()?,
             message: args.value_of("message").map(ToOwned::to_owned),
         };
-        let script_id = args
-            .value_of("script_id")
-            .expect("Missing required argument: script_id");
+        let status_name = args
+            .value_of("status_name")
+            .expect("Missing required argument: status-name");
 
         // Get client connection
         let mut client: Box<VarlinkClient> = data
@@ -63,7 +66,9 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
             .expect("Invalid type");
 
         // Set script status
-        client.set_status(script_id.into(), status.into()).call()?;
+        client
+            .set_status(status_name.into(), status.into())
+            .call()?;
 
         Ok(data)
     }

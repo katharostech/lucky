@@ -9,7 +9,7 @@ use std::time::Duration;
 
 use crate::docker::ContainerInfo;
 use crate::rt::block_on;
-use crate::types::{ScriptState, ScriptStatus};
+use crate::types::{CharmScript, ScriptState, ScriptStatus};
 
 use super::*;
 
@@ -128,32 +128,83 @@ pub(super) fn get_juju_status(state: &DaemonState) -> ScriptStatus {
 
 /// A type of script, either `Inline` or `Named`
 pub(super) enum ScriptType {
-    /// An inline host script where the string is the whole contents of the script
-    Inline(String),
-    /// A named host script that will run from the script dir
-    Named(String),
+    /// An inline script
+    Inline {
+        /// The script contents
+        content: String,
+        /// The shell to use to run the script
+        shell: Vec<String>,
+    },
+    /// A named script taken from the scripts directly
+    Named {
+        /// The script name
+        name: String,
+        /// The script args
+        args: Vec<String>,
+    },
+}
+
+pub(super) fn run_charm_script(
+    daemon: &LuckyDaemon,
+    hook_name: &str,
+    script: &CharmScript,
+    environment: &HashMap<String, String>,
+) -> anyhow::Result<()> {
+    match script {
+        // Run named host script
+        CharmScript::Host { host_script, args } => run_host_script(
+            daemon,
+            ScriptType::Named {
+                name: host_script.into(),
+                args: args.clone(),
+            },
+            hook_name,
+            &environment,
+        ),
+        // Run inline host script
+        CharmScript::InlineHost {
+            inline_host_script,
+            shell_command,
+        } => run_host_script(
+            daemon,
+            ScriptType::Inline {
+                content: inline_host_script.into(),
+                shell: shell_command.clone(),
+            },
+            hook_name,
+            &environment,
+        ),
+        _ => {
+            log::warn!("Container scripts are not yet implemented");
+            Ok(())
+        }
+    }
 }
 
 // Run one of the charm's host scripts
 pub(super) fn run_host_script(
     daemon: &LuckyDaemon,
-    call: &mut dyn rpc::Call_TriggerHook,
-    script_type: &ScriptType,
+    script_type: ScriptType,
     hook_name: &str,
-    script_args: &[String],
     environment: &HashMap<String, String>,
 ) -> anyhow::Result<()> {
     // Create script name based on script type
-    let script_name = match script_type {
-        ScriptType::Inline(_) => format!("{}_inline", hook_name),
-        ScriptType::Named(script_name) => script_name.into(),
+    let script_name = match &script_type {
+        ScriptType::Inline { .. } => format!("{}_inline", hook_name),
+        ScriptType::Named { name, .. } => name.clone().into(),
     };
 
     log::info!("Running host script: {}", script_name);
 
     // Add bin dirs to the PATH
-    let path_env = if let Some(path) = std::env::var_os("PATH") {
-        let mut paths = env::split_paths(&path).collect::<Vec<_>>();
+    let path_env = {
+        // Get initial PATH if set
+        let mut paths = if let Some(path) = std::env::var_os("PATH") {
+            env::split_paths(&path).collect::<Vec<_>>()
+        } else {
+            vec![]
+        };
+
         // Add the charm's bin dir
         paths.push(daemon.charm_dir.join("bin"));
 
@@ -163,27 +214,46 @@ pub(super) fn run_host_script(
         };
 
         env::join_paths(paths).context("Path contains invalid character")?
-    } else {
-        daemon.charm_dir.join("bin").as_os_str().to_owned()
     };
 
-    // Build command
+    // Build the command to run
     let mut args: Vec<String> = vec![];
     let command_path = match script_type {
-        // Run bash -c "inline script"
-        ScriptType::Inline(script_contents) => {
+        // Run an inline script with the specified shell
+        ScriptType::Inline { shell, content } => {
             // NOTE: args are ignored for inline scripts
-            args.push("-c".into());
-            args.push(script_contents.into());
-            PathBuf::from("/bin/bash")
+            let mut shell_iter = shell.iter();
+
+            // Get program path from the inline scripts specified shell
+            let shell_path = PathBuf::from(shell_iter.next().ok_or_else(|| {
+                format_err!("Inline script's shell must have a shell command specified")
+            })?);
+
+            // Add remaining args to the shell
+            for arg in shell_iter {
+                args.push(arg.into());
+            }
+
+            // Add inline script to command
+            args.push(content.into());
+
+            // Return program path
+            shell_path
         }
-        // Run the script directly
-        ScriptType::Named(script_name) => {
-            // Add script arguments to run command
+        // Run the named script
+        ScriptType::Named {
+            name,
+            args: script_args,
+        } => {
+            // Add scripts arguments to run command
             args.extend(script_args.iter().map(ToOwned::to_owned));
-            daemon.charm_dir.join("host_scripts").join(script_name)
+
+            // Return the path to the script
+            daemon.charm_dir.join("host_scripts").join(name)
         }
     };
+
+    // Creat the command
     let mut command = Exec::cmd(&command_path)
         .stdout(Redirection::Pipe)
         .stderr(Redirection::Merge)
@@ -205,21 +275,11 @@ pub(super) fn run_host_script(
     // Get script output buffer
     let output_buffer = BufReader::new(process.stdout.as_ref().expect("Stdout not opened"));
 
-    // If the caller wants to get the streamed output
-    if call.wants_more() {
-        // Set the continues flag on the call to true
-        call.set_continues(true);
-    }
-
     // Loop through lines of output
     for line in output_buffer.lines() {
         let line = line?;
+        // Print output to debug log
         log::debug!("output: {}", line);
-
-        // Send caller output if they asked for it
-        if call.wants_more() {
-            call.reply(Some(line))?;
-        }
     }
 
     // Wait for script to exit

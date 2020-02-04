@@ -17,17 +17,7 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
         self.get_base_app()
             .about("Run a hook through the Lucky daemon")
             .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
-            .arg(Arg::with_name("get_logs")
-                .long("get-logs")
-                .short('L')
-                .help("Print the logs of the hook as it is running")
-                .long_help(concat!(
-                    "Print the logs of the hook as it is running. Even if the logs are not printed ",
-                    "here, the standard out and error of the hook will be logged to Juju and can be ",
-                    "viewed with `juju debug-log`."
-                )))
-            .arg(Arg::with_name("hook_name")
-                .help("The name of the hook to trigger"))
+            .arg(Arg::with_name("hook_name").help("The name of the hook to trigger"))
             .args(&get_daemon_connection_args())
     }
 
@@ -66,23 +56,8 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
 
         log::info!(r#"Triggering hook "{}""#, &hook_name);
 
-        // If the caller wants the hook logs
-        if args.is_present("get_logs") {
-            // Trigger the hook and stream the logs
-            for response in client.trigger_hook(hook_name.clone(), environment).more()? {
-                let response = response?;
-
-                // Log output
-                if let Some(output) = response.output {
-                    log::info!("output: {}", output);
-                }
-            }
-
-        // If we don't care about the logs
-        } else {
-            // Just trigger the hook and exit
-            client.trigger_hook(hook_name.clone(), environment).call()?;
-        }
+        // Just trigger the hook and exit
+        client.trigger_hook(hook_name.clone(), environment).call()?;
 
         log::info!(r#"Done running hook "{}""#, &hook_name);
 

@@ -17,7 +17,7 @@ use std::sync::{
 use crate::docker::{ContainerInfo, PortBinding, VolumeSource, VolumeTarget};
 use crate::juju;
 use crate::rpc;
-use crate::types::{LuckyMetadata, ScriptStatus, ScriptType};
+use crate::types::{LuckyMetadata, ScriptStatus};
 
 use crate::VOLUME_DIR;
 
@@ -169,46 +169,13 @@ impl LuckyDaemon {
         if let Some(hook_scripts) = self.lucky_metadata.hooks.get(hook_name) {
             // Execute all scripts registered for this hook
             for hook_script in hook_scripts {
-                match &hook_script {
-                    ScriptType::Host { host_script, args } => {
-                        // TODO: Find out whether or not it makes sense that, upon removal, if a remove charm
-                        // script fails, all other scripts will be skipped including the built-in one that cleans
-                        // up the docker containers.
-                        tools::run_host_script(
-                            self,
-                            call,
-                            &tools::ScriptType::Named(host_script.into()),
-                            hook_name,
-                            args.as_slice(),
-                            &environment,
-                        )?;
-                    }
-                    ScriptType::InlineHost { inline_host_script } => {
-                        tools::run_host_script(
-                            self,
-                            call,
-                            &tools::ScriptType::Inline(inline_host_script.into()),
-                            hook_name,
-                            Vec::new().as_slice(),
-                            &environment,
-                        )?;
-                    }
-                    ScriptType::Container { .. } => {
-                        log::warn!("Container scripts not yet implemented");
-                    }
-                    ScriptType::InlineContainer { .. } => {
-                        log::warn!("Inline container scripts not yet implemented");
-                    }
-                }
+                tools::run_charm_script(&self, hook_name, hook_script, &environment)?;
 
                 // If docker is enabled, update container configuration
                 if self.lucky_metadata.use_docker {
                     tools::apply_container_updates(self)?;
                 }
             }
-
-            // Set next reply as the last
-            call.set_continues(false);
         }
 
         // Run post-script hook handlers
@@ -218,7 +185,7 @@ impl LuckyDaemon {
         ))?;
 
         // Reply empty
-        call.reply(None)?;
+        call.reply()?;
 
         Ok(())
     }

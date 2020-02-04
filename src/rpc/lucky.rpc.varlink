@@ -14,8 +14,7 @@ error RequiresMore()
 # If this hook is called with --more it will return once for each line of output from the hook.
 #
 # If hook execution failed this will throw a `HookFailed` error
-method TriggerHook(hook_name: String, environment: [string]string)
-    -> (output: ?string)
+method TriggerHook(hook_name: String, environment: [string]string) -> ()
 
 # Stops the deamon service
 method StopDaemon() -> ()

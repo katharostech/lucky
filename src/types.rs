@@ -117,7 +117,7 @@ pub(crate) struct LuckyMetadata {
     #[serde(default = "default_true")]
     /// Specifies whether or not to install Docker on the host and enable Docker-based features
     pub use_docker: bool,
-    pub hooks: HashMap<String, Vec<ScriptType>>,
+    pub hooks: HashMap<String, Vec<CharmScript>>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -125,7 +125,7 @@ pub(crate) struct LuckyMetadata {
 #[serde(untagged)]
 #[serde(deny_unknown_fields)]
 /// A hook script in the `lucky.yaml` definition
-pub(crate) enum ScriptType {
+pub(crate) enum CharmScript {
     /// A script that runs on the host from the `host_scripts` dir
     #[serde(rename_all = "kebab-case")]
     Host {
@@ -135,17 +135,27 @@ pub(crate) enum ScriptType {
     },
     /// A script that runs on the host as inline bash
     #[serde(rename_all = "kebab-case")]
-    InlineHost { inline_host_script: String },
+    InlineHost {
+        inline_host_script: String,
+        #[serde(default = "default_shell")]
+        shell_command: Vec<String>,
+    },
     /// A script that runs in the container from the `container_scripts` dir
     #[serde(rename_all = "kebab-case")]
     Container {
         container_script: String,
+        container_name: Option<String>,
         #[serde(default = "Vec::new")]
         args: Vec<String>,
     },
     /// A script that runs in the container as inline bash
     #[serde(rename_all = "kebab-case")]
-    InlineContainer { inline_container_script: String },
+    InlineContainer {
+        inline_container_script: String,
+        container_name: Option<String>,
+        #[serde(default = "default_shell")]
+        shell_command: Vec<String>,
+    },
 }
 
 //
@@ -154,4 +164,8 @@ pub(crate) enum ScriptType {
 
 fn default_true() -> bool {
     true
+}
+
+fn default_shell() -> Vec<String> {
+    vec!["/bin/bash".into(), "-c".into()]
 }
