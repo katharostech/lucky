@@ -51,6 +51,8 @@ futures = { version = "0.1.29", optional = true }
 function_name = "0.2.0"
 shrinkwraprs = "0.3.0"
 rand = { version = "0.7.3", default-features = false }
+# Super small dependency for getting available port
+get-port = "1.3.1"
 
 [features]
 default = ["color-backtrace", "daemon"]
