@@ -94,7 +94,7 @@ fn update_config_cache(state: &mut DaemonState) -> anyhow::Result<()> {
         // If it already exists
         if let Some(value) = charm_config.get_mut(&k) {
             // Update the value
-            value.update(|value| std::mem::replace(value, v));
+            value.update(|value| *value = v);
         // If key does not already exist
         } else {
             // Insert the key
