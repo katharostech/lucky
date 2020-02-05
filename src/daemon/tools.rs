@@ -1,15 +1,16 @@
 use anyhow::format_err;
 use futures::prelude::*;
-use shiplift::PullOptions;
+use shiplift::{builder::ExecContainerOptions, PullOptions};
 use subprocess::{Exec, ExitStatus, Redirection};
 
 use std::env;
 use std::io::{BufRead, BufReader};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use crate::docker::ContainerInfo;
 use crate::rt::block_on;
-use crate::types::{CharmScript, ScriptState, ScriptStatus};
+use crate::types::{CharmScript, ScriptState, ScriptStatus, LUCKY_EXIT_CODE_HELPER_PREFIX};
 
 use super::*;
 
@@ -127,7 +128,7 @@ pub(super) fn get_juju_status(state: &DaemonState) -> ScriptStatus {
 }
 
 /// A type of script, either `Inline` or `Named`
-pub(super) enum ScriptType {
+enum ScriptType {
     /// An inline script
     Inline {
         /// The script contents
@@ -174,15 +175,45 @@ pub(super) fn run_charm_script(
             hook_name,
             &environment,
         ),
-        _ => {
-            log::warn!("Container scripts are not yet implemented");
-            Ok(())
-        }
+        // Run named container script
+        CharmScript::Container {
+            container_script,
+            args,
+            container_name,
+            ignore_missing_container,
+        } => run_container_script(
+            daemon,
+            ScriptType::Named {
+                name: container_script.into(),
+                args: args.clone(),
+            },
+            hook_name,
+            container_name,
+            *ignore_missing_container,
+            &environment,
+        ),
+        // Run inline host script
+        CharmScript::InlineContainer {
+            inline_container_script,
+            shell_command,
+            container_name,
+            ignore_missing_container,
+        } => run_container_script(
+            daemon,
+            ScriptType::Inline {
+                content: inline_container_script.into(),
+                shell: shell_command.clone(),
+            },
+            hook_name,
+            container_name,
+            *ignore_missing_container,
+            &environment,
+        ),
     }
 }
 
 // Run one of the charm's host scripts
-pub(super) fn run_host_script(
+fn run_host_script(
     daemon: &LuckyDaemon,
     script_type: ScriptType,
     hook_name: &str,
@@ -191,7 +222,7 @@ pub(super) fn run_host_script(
     // Create script name based on script type
     let script_name = match &script_type {
         ScriptType::Inline { .. } => format!("{}_inline", hook_name),
-        ScriptType::Named { name, .. } => name.clone().into(),
+        ScriptType::Named { name, .. } => name.clone(),
     };
 
     log::info!("Running host script: {}", script_name);
@@ -218,14 +249,14 @@ pub(super) fn run_host_script(
 
     // Build the command to run
     let mut args: Vec<String> = vec![];
-    let command_path = match script_type {
+    let command_path;
+    match script_type {
         // Run an inline script with the specified shell
         ScriptType::Inline { shell, content } => {
-            // NOTE: args are ignored for inline scripts
             let mut shell_iter = shell.iter();
 
             // Get program path from the inline scripts specified shell
-            let shell_path = PathBuf::from(shell_iter.next().ok_or_else(|| {
+            command_path = PathBuf::from(shell_iter.next().ok_or_else(|| {
                 format_err!("Inline script's shell must have a shell command specified")
             })?);
 
@@ -235,21 +266,18 @@ pub(super) fn run_host_script(
             }
 
             // Add inline script to command
-            args.push(content.into());
-
-            // Return program path
-            shell_path
+            args.push(content);
         }
         // Run the named script
         ScriptType::Named {
             name,
             args: script_args,
         } => {
+            // Return the path to the script
+            command_path = daemon.charm_dir.join("host_scripts").join(name);
+
             // Add scripts arguments to run command
             args.extend(script_args.iter().map(ToOwned::to_owned));
-
-            // Return the path to the script
-            daemon.charm_dir.join("host_scripts").join(name)
         }
     };
 
@@ -303,6 +331,213 @@ pub(super) fn run_host_script(
             r#"Host script "{}" failed: {:?}"#,
             script_name,
             status
+        )),
+    }
+}
+
+fn run_container_script(
+    daemon: &LuckyDaemon,
+    script_type: ScriptType,
+    hook_name: &str,
+    container_name: &Option<String>,
+    ignore_missing_container: bool,
+    environment: &HashMap<String, String>,
+) -> anyhow::Result<()> {
+    // Create script name based on script type
+    let script_name = match &script_type {
+        ScriptType::Inline { .. } => format!("{}_inline", hook_name),
+        ScriptType::Named { name, .. } => name.clone(),
+    };
+
+    log::info!("Running container script: {}", script_name);
+
+    // Get the container ID. This must be scoped to limit the time that we lock the daemon state
+    // otherwise any script attempting to access the daemon state will deadlock.
+    let container_id;
+    {
+        let state = daemon.state.read().unwrap();
+
+        // Get container info
+        let container_info = if let Some(container_name) = container_name {
+            state.named_containers.get(container_name)
+        } else {
+            state.default_container.as_ref()
+        };
+
+        // Get container info
+        let container_info = match container_info {
+            // If the container doesn't exist
+            None => {
+                // If we ignore missing containers
+                if ignore_missing_container {
+                    // Log it and exit OK
+                    log::debug!(
+                        r#"Container "{}" does not exist, skipping script "{}""#,
+                        container_name.as_ref().unwrap_or(&"default".into()),
+                        script_name
+                    );
+                    return Ok(());
+                // If we don't ignore missing containers
+                } else {
+                    // Exit with error
+                    return Err(format_err!(
+                        concat!(
+                            "Cannot run container script \"{}\" in container \"{}\" because ",
+                            "container does not exist."
+                        ),
+                        script_name,
+                        container_name.as_ref().unwrap_or(&"default".into())
+                    ));
+                }
+            }
+            Some(info) => info,
+        };
+
+        // Get the container id
+        container_id = match container_info.id.as_ref() {
+            // If the container hasn't been started
+            None => {
+                // If we ignore missing containers
+                if ignore_missing_container {
+                    // Log it and exit OK
+                    log::debug!(
+                        r#"Container "{}" has not been started, skipping script "{}""#,
+                        container_name.as_ref().unwrap_or(&"default".into()),
+                        script_name
+                    );
+                    return Ok(());
+                // If we don't ignore missing containers
+                } else {
+                    // Exit with error
+                    return Err(format_err!(
+                        concat!(
+                            "Cannot run container script \"{}\" in container \"{}\" because ",
+                            "container has not been started."
+                        ),
+                        script_name,
+                        container_name.as_ref().unwrap_or(&"default".into())
+                    ));
+                }
+            }
+            Some(info) => info.clone(),
+        };
+    }
+
+    // Get the docker connection
+    let docker_conn = daemon.get_docker_conn()?;
+    let docker_conn = docker_conn.lock().unwrap();
+    let containers = docker_conn.containers();
+    let container = containers.get(&container_id);
+
+    // The command environment
+    let mut env: Vec<String> = environment
+        .iter()
+        .map(|(k, v)| format!("{}={}", k, v))
+        .collect();
+
+    // Add Lucky environment variables
+    env.push(format!("LUCKY_SCRIPT_ID={}", &script_name));
+    // TODO: https://github.com/softprops/shiplift/issues/219
+    // We currently set the context to "daemon" so we can call `lucky exit-code-helper` to help
+    // us get the exit code of the container script.
+    env.push("LUCKY_CONTEXT=daemon".into());
+
+    // Build the command
+    let mut cmd: Vec<String>;
+    match script_type {
+        ScriptType::Inline { content, mut shell } => {
+            // Set command to the lucky exit code helper ( see comment above )
+            cmd = vec!["lucky".into(), "exit-code-helper".into()];
+
+            // Add shell command
+            cmd.extend(shell.drain(0..));
+
+            // Add inline script as last arg
+            cmd.push(content);
+        }
+        ScriptType::Named { name, mut args } => {
+            // Set command to the lucky exit code helper ( see comment above )
+            cmd = vec![
+                "lucky".into(),
+                "exit-code-helper".into(),
+                // Add container script
+                format!("/lucky/container_scripts/{}", name),
+            ];
+
+            // Add script args
+            cmd.extend(args.drain(0..));
+        }
+    };
+
+    log::trace!(
+        "Executing command in container \"{}\": {:?}",
+        container_name.as_ref().unwrap_or(&"default".into()),
+        cmd
+    );
+
+    // Build exec options
+    let exec_options = ExecContainerOptions::builder()
+        .attach_stderr(true)
+        .attach_stdout(true)
+        .env(env.iter().map(AsRef::as_ref).collect())
+        .cmd(cmd.iter().map(AsRef::as_ref).collect())
+        .build();
+
+    // Instantiate exit code
+    let exit_code: Arc<Mutex<Option<i32>>> = Arc::new(Mutex::new(None));
+    let exit_code_ = exit_code.clone();
+
+    // Exec script and log output
+    block_on(container.exec(&exec_options).for_each(move |chunk| {
+        let exit_code = &exit_code_;
+        let chunk_str = chunk.as_string_lossy();
+
+        // TODO: https://github.com/softprops/shiplift/issues/219
+        // This hack looks for a special prefix for a line of text that will tell us the exit
+        // code. This output provided by our `lucky daemon exit-code-helper` wrapper command.
+
+        // If the line starts with the exit code indication prefix
+        if chunk_str.starts_with(LUCKY_EXIT_CODE_HELPER_PREFIX) {
+            // Trim output string
+            let chunk_str = chunk_str.trim();
+
+            // Set the exit code
+            *exit_code.lock().unwrap() = Some(
+                chunk_str
+                    .trim_start_matches(LUCKY_EXIT_CODE_HELPER_PREFIX)
+                    .parse()
+                    .map_err(|e| {
+                        shiplift::Error::InvalidResponse(format!(
+                            "Could not parse container script exit code: {}",
+                            e
+                        ))
+                    })?,
+            );
+
+        // If line doesn't start with exit-code prefix
+        } else {
+            // Log the output
+            log::debug!("output: {}", chunk.as_string_lossy());
+        }
+        Ok(())
+    }))
+    .context(format!(
+        r#"failed to exec script "{}" for container "{}""#,
+        script_name,
+        container_name.as_ref().unwrap_or(&"default".into())
+    ))?;
+
+    // Match exit code and exit accordingly
+    let exit_code = exit_code.lock().unwrap();
+    match *exit_code {
+        Some(0) => Ok(()),
+        Some(code) => Err(format_err!(
+            r#"Container script "{}" exited non-zero: {}"#,
+            script_name,
+            code
+        )),
+        None => Err(format_err!(
+            "Error getting exit code from container script: assuming something went wrong."
         )),
     }
 }

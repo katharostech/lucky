@@ -8,6 +8,11 @@ use strum_macros::{AsRefStr, EnumString, EnumVariantNames};
 use crate::rpc::ScriptStatus as RpcScriptStatus;
 use crate::rpc::ScriptStatus_state as RpcScriptState;
 
+/// The prefix for the exit code in the exit code helper command
+/// 
+/// See `lucky::cli::daemon::exit_code_helper`.
+pub(crate) const LUCKY_EXIT_CODE_HELPER_PREFIX: &str = "__LUCKY_CMD_EXIT_CODE__:";
+
 /// Juju related types
 pub(crate) mod juju;
 
@@ -147,6 +152,9 @@ pub(crate) enum CharmScript {
         container_name: Option<String>,
         #[serde(default = "Vec::new")]
         args: Vec<String>,
+        /// This instructs Lucky to ignore the script if the container is not running yet
+        #[serde(default = "default_false")]
+        ignore_missing_container: bool
     },
     /// A script that runs in the container as inline bash
     #[serde(rename_all = "kebab-case")]
@@ -155,6 +163,9 @@ pub(crate) enum CharmScript {
         container_name: Option<String>,
         #[serde(default = "default_shell")]
         shell_command: Vec<String>,
+        /// This instructs Lucky to ignore the script if the container is not running yet
+        #[serde(default = "default_false")]
+        ignore_missing_container: bool
     },
 }
 
@@ -164,6 +175,10 @@ pub(crate) enum CharmScript {
 
 fn default_true() -> bool {
     true
+}
+
+fn default_false() -> bool {
+    false
 }
 
 fn default_shell() -> Vec<String> {

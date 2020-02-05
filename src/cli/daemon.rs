@@ -3,6 +3,7 @@ use clap::{App, Arg, ArgMatches};
 
 use std::sync::{Arc, RwLock};
 
+mod exit_code_helper;
 mod start;
 mod stop;
 mod trigger_hook;
@@ -26,6 +27,7 @@ impl<'a> CliCommand<'a> for DaemonSubcommand {
             Box::new(start::StartSubcommand),
             Box::new(stop::StopSubcommand),
             Box::new(trigger_hook::TriggerHookSubcommand),
+            Box::new(exit_code_helper::ExitCodeHelperSubcommand),
         ]
     }
 
