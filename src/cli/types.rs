@@ -154,7 +154,7 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
             // 1 char padding on each side.
             .max_term_width(
                 crossterm::terminal::size()
-                    .map(|size| size.0 - 3)
+                    .map(|size| if size.0 >= 3 { size.0 - 3 } else { 0 })
                     .unwrap_or(0) as usize,
             )
             .setting(AppSettings::ColoredHelp)
