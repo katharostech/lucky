@@ -27,7 +27,8 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
                     "other scripts can change that status by specifying the same name when ",
                     "calling `set-status`."
                 ))
-                .env("LUCKY_SCRIPT_ID"))
+                .env("LUCKY_SCRIPT_ID")
+                .required(true))
             .arg(Arg::with_name("state")
                 .help("The enumerated state of the service")
                 .possible_values(&ScriptState::variants())
