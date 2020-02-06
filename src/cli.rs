@@ -114,8 +114,8 @@ pub fn run_doc_gen() -> anyhow::Result<()> {
 /// Run the given function with error handling and logging initialized
 pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
     // Enable colored backtraces
-    #[cfg(feature = "color-backtrace")]
-    color_backtrace::install();
+    #[cfg(feature = "better-panic")]
+    better_panic::Settings::auto().lineno_suffix(true).install();
 
     // Initialize logger
     crate::log::init_logger();
