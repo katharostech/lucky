@@ -1,10 +1,9 @@
 use anyhow::Context;
 use clap::{App, Arg, ArgMatches};
-use subprocess::{Exec, Redirection};
 
 use std::fs::OpenOptions;
-use std::io::Read;
 use std::path::PathBuf;
+use std::process::{Command, Stdio};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     mpsc::sync_channel,
@@ -170,23 +169,21 @@ impl<'a> CliCommand<'a> for StartSubcommand {
             let data_dir = data_dir.to_string_lossy();
 
             // Create the daemon process to run in the background
-            let mut cmd = Exec::cmd(std::env::current_exe()?)
+            let exe = std::env::current_exe()?;
+            let mut cmd = Command::new(exe);
+            cmd.stdout(Stdio::null())
+                .stderr(Stdio::null())
                 .env("LUCKY_CONTEXT", "daemon")
                 .env("LUCKY_DATA_DIR", &*data_dir)
                 .env("JUJU_UNIT_NAME", &unit_name)
                 .env("LUCKY_DAEMON_SOCKET", &socket_path)
-                .args(&["start", "-F"])
-                .stdout(Redirection::Pipe)
-                .stderr(Redirection::Merge)
-                .detached();
+                .args(&["start", "-F"]);
             if let Some(log_file) = args.value_of("log_file") {
-                cmd = cmd.env("LUCKY_LOG_FILE", log_file);
+                cmd.env("LUCKY_LOG_FILE", log_file);
             }
 
             // Spawn process and stream output
-            let mut output = cmd
-                .stream_stdout()
-                .context("Could not start lucky daemon")?;
+            cmd.spawn().context("Could not start lucky daemon")?;
 
             // Make sure we can connect to the daemon
             try_connect_daemon(&socket_path)
@@ -196,14 +193,19 @@ impl<'a> CliCommand<'a> for StartSubcommand {
                 })
                 // If we can't connect to the daemon
                 .or_else(move |_| {
-                    let mut out = String::new();
-                    output.read_to_string(&mut out).unwrap_or_else(|_| {
-                        out = "Could not read daemon logs".into();
-                        0
-                    });
                     Err(anyhow::format_err!(format!(
-                        "Could not connect to daemon. Dameon logs:\n----\n{}",
-                        out
+                        "Could not connect to daemon. {}",
+                        {
+                            // If there was a log file specified, print out the log
+                            if let Some(log_file) = args.value_of("log_file") {
+                                std::fs::read_to_string(log_file)
+                                    .context(format!("Could not read log file: {}", log_file))?
+
+                            // Otherwise suggest running with a log file
+                            } else {
+                                "Specify a log file when starting to see the daemon output.".into()
+                            }
+                        }
                     )))
                 })?;
         }
