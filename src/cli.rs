@@ -91,7 +91,7 @@ pub fn doc_gen() {
 }
 
 /// Generate CLI documentation
-pub fn run_doc_gen() -> anyhow::Result<()> {
+fn run_doc_gen() -> anyhow::Result<()> {
     println!("Starting doc gen");
 
     let cli = LuckyCli;

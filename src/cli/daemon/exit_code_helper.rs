@@ -52,7 +52,7 @@ impl<'a> CliCommand<'a> for ExitCodeHelperSubcommand {
         let status = Command::new(
             command
                 .next()
-                .ok_or(format_err!("Missing command argument"))?,
+                .ok_or_else(|| format_err!("Missing command argument"))?,
         )
         .args(command.collect::<Vec<&str>>().as_slice())
         // Make sure to set the context to client so scripts work like normal
