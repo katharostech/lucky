@@ -303,8 +303,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         );
 
         // Reply
-        call.reply()?;
-        Ok(())
+        call.reply()
     }
 
     /// Get a value in the unit local key-value store
@@ -314,9 +313,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         let value = state.kv.get(&key);
 
         // Reply with value
-        call.reply(value.map(|x| x.clone().into_inner()))?;
-
-        Ok(())
+        call.reply(value.map(|x| x.clone().into_inner()))
     }
 
     /// Set a value in the unit local key-value store
@@ -340,9 +337,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn unit_kv_get_all(&self, call: &mut dyn rpc::Call_UnitKvGetAll) -> varlink::Result<()> {
@@ -358,9 +353,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     value: v.clone().into_inner(),
                 })
                 .collect(),
-        )?;
-
-        Ok(())
+        )
     }
 
     fn relation_set(
@@ -373,9 +366,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         handle_err!(juju::relation_set(data, relation_id, app), call);
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn relation_get(
@@ -395,9 +386,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 app
             ),
             call
-        ))?;
-
-        Ok(())
+        ))
     }
 
     fn relation_list(
@@ -405,9 +394,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         call: &mut dyn rpc::Call_RelationList,
         relation_id: Option<String>,
     ) -> varlink::Result<()> {
-        call.reply(handle_err!(juju::relation_list(relation_id), call))?;
-
-        Ok(())
+        call.reply(handle_err!(juju::relation_list(relation_id), call))
     }
 
     fn relation_ids(
@@ -415,15 +402,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         call: &mut dyn rpc::Call_RelationIds,
         relation_name: String,
     ) -> varlink::Result<()> {
-        call.reply(handle_err!(juju::relation_ids(&relation_name), call))?;
-
-        Ok(())
+        call.reply(handle_err!(juju::relation_ids(&relation_name), call))
     }
 
     fn leader_is_leader(&self, call: &mut dyn rpc::Call_LeaderIsLeader) -> varlink::Result<()> {
-        call.reply(handle_err!(juju::is_leader(), call))?;
-
-        Ok(())
+        call.reply(handle_err!(juju::is_leader(), call))
     }
 
     fn leader_set(
@@ -434,15 +417,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         handle_err!(juju::leader_set(data), call);
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn leader_get(&self, call: &mut dyn rpc::Call_LeaderGet) -> varlink::Result<()> {
-        call.reply(handle_err!(juju::leader_get(), call))?;
-
-        Ok(())
+        call.reply(handle_err!(juju::leader_get(), call))
     }
 
     fn get_config(&self, call: &mut dyn rpc::Call_GetConfig) -> varlink::Result<()> {
@@ -459,9 +438,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     value: v.clone().into_inner().to_string(),
                 })
                 .collect(),
-        )?;
-
-        Ok(())
+        )
     }
 
     fn get_resource(
@@ -470,9 +447,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         resource_name: String,
     ) -> varlink::Result<()> {
         // Reply with path to resource
-        call.reply(handle_err!(juju::resource_get(&resource_name), call))?;
-
-        Ok(())
+        call.reply(handle_err!(juju::resource_get(&resource_name), call))
     }
 
     fn port_open(&self, call: &mut dyn rpc::Call_PortOpen, port: String) -> varlink::Result<()> {
@@ -482,9 +457,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         handle_err!(juju::open_port(&port), call);
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn port_close(&self, call: &mut dyn rpc::Call_PortClose, port: String) -> varlink::Result<()> {
@@ -494,9 +467,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         handle_err!(juju::close_port(&port), call);
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn port_close_all(&self, call: &mut dyn rpc::Call_PortCloseAll) -> varlink::Result<()> {
@@ -509,31 +480,23 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn port_get_opened(&self, call: &mut dyn rpc::Call_PortGetOpened) -> varlink::Result<()> {
         // Reply with port list
-        call.reply(handle_err!(juju::opened_ports(), call))?;
-
-        Ok(())
+        call.reply(handle_err!(juju::opened_ports(), call))
     }
 
     fn get_private_address(
         &self,
         call: &mut dyn rpc::Call_GetPrivateAddress,
     ) -> varlink::Result<()> {
-        call.reply(handle_err!(juju::unit_get_private_address(), call))?;
-
-        Ok(())
+        call.reply(handle_err!(juju::unit_get_private_address(), call))
     }
 
     fn get_public_address(&self, call: &mut dyn rpc::Call_GetPublicAddress) -> varlink::Result<()> {
-        call.reply(handle_err!(juju::unit_get_public_address(), call))?;
-
-        Ok(())
+        call.reply(handle_err!(juju::unit_get_public_address(), call))
     }
 
     fn container_apply(&self, call: &mut dyn rpc::Call_ContainerApply) -> varlink::Result<()> {
@@ -541,8 +504,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             handle_err!(tools::apply_container_updates(self), call);
         }
 
-        call.reply()?;
-        Ok(())
+        call.reply()
     }
 
     fn container_delete(
@@ -564,9 +526,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn container_set_entrypoint(
@@ -603,8 +563,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             }
         }
 
-        call.reply()?;
-        Ok(())
+        call.reply()
     }
 
     fn container_set_command(
@@ -641,8 +600,8 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             }
         }
 
-        call.reply()?;
-        Ok(())
+        // Reply empty
+        call.reply()
     }
 
     // The uncollapsed if is easier to understand in this case
@@ -692,8 +651,8 @@ impl rpc::VarlinkInterface for LuckyDaemon {
             }
         }
 
-        call.reply()?;
-        Ok(())
+        // Reply empty
+        call.reply()
     }
 
     // The uncollapsed if is easier to understand in this case
@@ -708,20 +667,18 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // If this is for a named container
         if let Some(name) = container_name {
             if let Some(container) = state.named_containers.get(&name) {
-                call.reply(Some(container.config.image.clone()))?;
+                call.reply(Some(container.config.image.clone()))
             } else {
-                call.reply(None)?;
+                call.reply(None)
             }
         // If this is for the default container
         } else {
             if let Some(container) = &state.default_container {
-                call.reply(Some(container.config.image.clone()))?;
+                call.reply(Some(container.config.image.clone()))
             } else {
-                call.reply(None)?;
+                call.reply(None)
             }
         }
-
-        Ok(())
     }
 
     fn container_env_get(
@@ -741,13 +698,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // If the specified container exists
         if let Some(container) = container {
             // Reply with the environment variable's value
-            call.reply(container.config.env_vars.get(&key).map(ToOwned::to_owned))?;
+            call.reply(container.config.env_vars.get(&key).map(ToOwned::to_owned))
         } else {
             // Reply with None
-            call.reply(None)?;
+            call.reply(None)
         }
-
-        Ok(())
     }
 
     fn container_env_get_all(
@@ -783,15 +738,13 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 .collect();
 
             // Reply with pairs
-            call.reply(pairs)?;
+            call.reply(pairs)
 
         // If the container doesn't exist
         } else {
             // Reply with empty array
-            call.reply(vec![])?;
+            call.reply(vec![])
         }
-
-        Ok(())
     }
 
     /// Set a value in the unit local key-value store
@@ -828,9 +781,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn container_volume_add(
@@ -868,9 +819,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn container_volume_remove(
@@ -933,14 +882,12 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                     }
                 }
 
-                call.reply(false /* no data deleted */)?;
-                Ok(())
+                call.reply(false /* no data deleted */)
             })
 
         // If the specified container didn't exist
         } else {
-            call.reply(false /* no data deleted */)?;
-            Ok(())
+            call.reply(false /* no data deleted */)
         }
     }
 
@@ -972,13 +919,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                         },
                     )
                     .collect(),
-            )?;
+            )
         } else {
             // Reply empty
-            call.reply(vec![])?;
+            call.reply(vec![])
         }
-
-        Ok(())
     }
 
     fn container_port_add(
@@ -1052,9 +997,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn container_port_remove(
@@ -1104,9 +1047,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn container_port_remove_all(
@@ -1147,9 +1088,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 
     fn container_port_get_all(
@@ -1177,13 +1116,11 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                         protocol: port.protocol.clone(),
                     })
                     .collect(),
-            )?;
+            )
         } else {
             // Reply empty
-            call.reply(vec![])?;
+            call.reply(vec![])
         }
-
-        Ok(())
     }
 
     fn container_network_set(
@@ -1215,9 +1152,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         }
 
         // Reply empty
-        call.reply()?;
-
-        Ok(())
+        call.reply()
     }
 }
 
@@ -1247,7 +1182,7 @@ pub(crate) fn get_service(options: LuckyDaemonOptions) -> varlink::VarlinkServic
     )
 }
 
-/// Get the client
+/// Get the client given a connection
 pub(crate) fn get_client(connection: Arc<RwLock<varlink::Connection>>) -> rpc::VarlinkClient {
     // Return the varlink client
     rpc::VarlinkClient::new(connection)
