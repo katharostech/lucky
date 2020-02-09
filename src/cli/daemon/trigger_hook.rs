@@ -16,7 +16,6 @@ impl<'a> CliCommand<'a> for TriggerHookSubcommand {
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Run a hook through the Lucky daemon")
-            .unset_setting(clap::AppSettings::ArgRequiredElseHelp)
             .arg(Arg::with_name("hook_name").help("The name of the hook to trigger"))
             .args(&get_daemon_connection_args())
     }
