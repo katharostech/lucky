@@ -16,6 +16,10 @@ error RequiresMore()
 # If hook execution failed this will throw a `HookFailed` error
 method TriggerHook(hook_name: String, environment: [string]string) -> ()
 
+# Tick the cron scheduler to execute pending jobs. This requires the value from the JUJU_CONTEXT_ID
+# environment variable, meaning it has to be run from inside a Juju context by using `juju-run`.
+method CronTick(juju_context_id: string) -> ()
+
 # Stops the deamon service
 method StopDaemon() -> ()
 

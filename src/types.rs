@@ -122,7 +122,11 @@ pub(crate) struct LuckyMetadata {
     #[serde(default = "default_true")]
     /// Specifies whether or not to install Docker on the host and enable Docker-based features
     pub use_docker: bool,
+    /// The hooks for the charm
+    #[serde(default)]
     pub hooks: HashMap<String, Vec<CharmScript>>,
+    /// The cron jobs for the charm
+    pub cron_jobs: HashMap<String, Vec<CharmScript>>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

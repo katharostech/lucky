@@ -93,12 +93,18 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
 
         // Load charm metadata
         let charm_metadata: CharmMetadata = load_yaml(&charm_path, "metadata")?;
-        // Load lucky metadata simply to validate the lucky.yaml file
-        load_yaml::<LuckyMetadata>(&charm_path, "lucky")?;
         // Get charm name
         let charm_name = &charm_metadata.name;
         // Get build target dir
         let target_dir = build_dir.join(charm_name);
+        // Load lucky metadata and validate the lucky.yaml file
+        let lucky_metadata = load_yaml::<LuckyMetadata>(&charm_path, "lucky")?;
+        // Validate chron schedules
+        for (schedule, _) in lucky_metadata.cron_jobs {
+            schedule
+                .parse::<cron::Schedule>()
+                .map_err(|_| format_err!("Could not parse cron schedule: {}", schedule))?;
+        }
 
         // Clear the target directory
         if target_dir.exists() {

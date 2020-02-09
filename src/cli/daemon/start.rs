@@ -9,6 +9,8 @@ use std::sync::{
     mpsc::sync_channel,
     Arc,
 };
+use std::thread;
+use std::time::Duration;
 
 use crate::cli::daemon::{
     can_connect_daemon, get_daemon_connection_args, get_daemon_socket_path, try_connect_daemon,
@@ -128,7 +130,7 @@ impl<'a> CliCommand<'a> for StartSubcommand {
                 charm_dir,
                 data_dir,
                 stop_listening: stop_listening.clone(),
-                socket_path: PathBuf::from(socket_path),
+                socket_path: PathBuf::from(&socket_path),
             });
 
             // Set signal handler for SIGINT/SIGTERM
@@ -140,27 +142,91 @@ impl<'a> CliCommand<'a> for StartSubcommand {
             .context("Error setting signal handler for SIGINT/SIGTERM")?;
 
             // Start varlink server in its own thread
-            let (sender, reciever) = sync_channel(0);
-            let thread = std::thread::spawn(move || {
+            let stop_listening_ = stop_listening.clone();
+            let (server_sender, server_receiver) = sync_channel(0);
+            let server_thread = thread::spawn(move || {
                 let result = varlink::listen(
                     service,
                     &listen_address,
                     &varlink::ListenConfig {
-                        max_worker_threads: num_cpus::get(),
-                        stop_listening: Some(stop_listening.clone()),
+                        // We only need one thread because Juju only allows one charm context at a
+                        // time anyway.
+                        max_worker_threads: 1,
+                        stop_listening: Some(stop_listening_),
                         ..Default::default()
                     },
                 );
 
-                sender
+                server_sender
                     .send(result)
                     .expect("Could not send result over thread");
             });
-            // Get the server start resut and wait for the thread to exit
-            reciever
+
+            // Start the cron tick thread
+            let unit_name_ = unit_name.to_string();
+            let cron_thread = thread::Builder::new()
+                .name("cron-tick".into())
+                .spawn(move || {
+                    let stop = stop_listening;
+
+                    // Lucky exe path
+                    let lucky_exe = match std::env::current_exe() {
+                        Ok(exe) => exe,
+                        Err(e) => {
+                            // TODO: Maybe the whole program should bomb out if cron can't start?
+                            log::error!(
+                                "Could not get current executable path, cron jobs will not run: {}",
+                                e
+                            );
+                            return;
+                        }
+                    };
+
+                    // Run the cron tick with 1 second delay between runs
+                    loop {
+                        // Exit loop if we are done
+                        if stop.load(std::sync::atomic::Ordering::SeqCst) {
+                            break;
+                        }
+
+                        // Make sure don't already have a Juju context ( i.e. we are in the middle )
+                        // of running a hook. Wait if we already have a context
+                        if std::env::var("JUJU_CONTEXT_ID").is_ok() {
+                            thread::sleep(Duration::from_secs(1));
+                            continue;
+                        }
+
+                        // Use Juju run to create a Juju context and run the `lucky cron-tick`
+                        if let Err(e) = crate::process::run_cmd(
+                            "juju-run",
+                            &[
+                                &unit_name_,
+                                &format!(
+                                    "LUCKY_CONTEXT=daemon {} {}",
+                                    &lucky_exe.as_os_str().to_string_lossy(),
+                                    "cron-tick"
+                                ),
+                            ],
+                        ) {
+                            log::error!("Error running cron-tick process: {:?}", e);
+                        }
+
+                        // Sleep for 1 second
+                        thread::sleep(Duration::from_secs(1));
+                    }
+                })
+                .context("Could not spawn cron-tick thread")?;
+
+            // Get the server thread result
+            server_receiver
                 .recv()
                 .expect("Could not recieve result from thread")?;
-            thread.join().expect("Could not join to thread");
+
+            // Wait on the server thread and the cron tick thread
+            server_thread
+                .join()
+                .expect("Could not join to server thread");
+            cron_thread.join().expect("Could not join to cron thread");
 
         // If we should start in background
         } else {

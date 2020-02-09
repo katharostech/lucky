@@ -310,6 +310,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "cron"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab2c162d8a208293b4a4e126db1211571ee4990dbfa6f7fdacc267486849dab8"
+dependencies = [
+ "chrono",
+ "error-chain",
+ "nom",
+]
+
+[[package]]
 name = "crossbeam"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -460,6 +471,15 @@ name = "encode_unicode"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
+
+[[package]]
+name = "error-chain"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d9435d864e017c3c6afeac1654189b06cdb491cf2ff73dbf0d73b0f292f42ff8"
+dependencies = [
+ "backtrace",
+]
 
 [[package]]
 name = "fake-simd"
@@ -849,7 +869,9 @@ dependencies = [
  "anyhow",
  "atty",
  "better-panic",
+ "chrono",
  "clap",
+ "cron",
  "crossterm",
  "ctrlc",
  "dirs",
@@ -861,7 +883,6 @@ dependencies = [
  "lazy_static",
  "log",
  "minimad",
- "num_cpus",
  "rand 0.7.3",
  "regex",
  "rprompt",
@@ -1005,6 +1026,12 @@ dependencies = [
  "libc",
  "void",
 ]
+
+[[package]]
+name = "nom"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e5d4598834859fedb9a0a69d5b862a970e77982a92f544d547257a4d49469067"
 
 [[package]]
 name = "num-integer"

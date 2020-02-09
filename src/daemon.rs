@@ -1,5 +1,6 @@
 //! Contains the Lucky Daemon and RPC implementaiton used for client->daemon communication.
 use anyhow::Context;
+use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use shiplift::Docker;
@@ -63,6 +64,8 @@ struct LuckyDaemon {
     /// The daemon state. This will be serialized and written to disc for persistance when the
     /// daemon crashes or is shutdown.  
     state: Arc<RwLock<DaemonState>>,
+    /// The last time that the cron tick was run
+    last_cron_tick: Arc<Mutex<DateTime<Local>>>,
     /// The docker daemon connection if it has been loaded
     docker_conn: Arc<Mutex<Option<Arc<Mutex<Docker>>>>>,
 }
@@ -103,6 +106,7 @@ impl LuckyDaemon {
             socket_path: options.socket_path,
             stop_listening: options.stop_listening,
             state: Default::default(),
+            last_cron_tick: Arc::new(Mutex::new(Local::now())),
             docker_conn: Arc::new(Mutex::new(None)),
         };
 
@@ -201,6 +205,59 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // Reply and exit
         call.reply()?;
         Ok(())
+    }
+
+    fn cron_tick(
+        &self,
+        call: &mut dyn rpc::Call_CronTick,
+        juju_context_id: String,
+    ) -> varlink::Result<()> {
+        // Set the Juju context
+        std::env::set_var("JUJU_CONTEXT_ID", &juju_context_id);
+
+        log::trace!("Cron tick");
+
+        // Create environment map
+        let mut environment: HashMap<String, String> = HashMap::new();
+        environment.insert("JUJU_CONTEXT_ID".into(), juju_context_id);
+
+        // Get the last cron tick time and the current time
+        let mut last_cron_tick = self.last_cron_tick.lock().unwrap();
+        let now = Local::now();
+
+        // Loop through cron jobs and run them if necessary
+        for (schedule, scripts) in &self.lucky_metadata.cron_jobs {
+            let schedule: cron::Schedule = handle_err!(schedule.parse(), call);
+
+            // If this job should be run
+            if let Some(date) = schedule.after(&last_cron_tick).next() {
+                if date < now {
+                    // Run job scripts
+                    for script in scripts {
+                        // Run script
+                        let hook_name = "cron";
+                        handle_err!(
+                            tools::run_charm_script(&self, hook_name, script, &environment),
+                            call
+                        );
+
+                        // If docker is enabled, update container configuration
+                        if self.lucky_metadata.use_docker {
+                            handle_err!(tools::apply_container_updates(self), call);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Update the last cron tick
+        *last_cron_tick = Local::now();
+
+        // Unset the Juju context as it will be invalid when the cron tick command exits
+        std::env::remove_var("JUJU_CONTEXT_ID");
+
+        // Reply empty
+        call.reply()
     }
 
     /// Trigger a Juju hook
