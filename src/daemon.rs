@@ -173,19 +173,63 @@ impl LuckyDaemon {
 
         // Add LUCKY_HOOK environment variable
         environment.insert("LUCKY_HOOK".into(), hook_name.into());
+        // Make environment a reference so it can be used in threads
+        let environment = &environment;
 
-        // Run hook scripts
-        if let Some(hook_scripts) = self.lucky_metadata.hooks.get(hook_name) {
-            // Execute all scripts registered for this hook
-            for hook_script in hook_scripts {
-                tools::run_charm_script(&self, hook_name, hook_script, &environment, None)?;
+        // Create a thread scope so script threads will be able to use references
+        thread_scope(|s| -> anyhow::Result<()> {
+            // Run hook scripts
+            if let Some(hook_scripts) = self.lucky_metadata.hooks.get(hook_name) {
+                let mut async_handles = Vec::new();
 
-                // If docker is enabled, update container configuration
-                if self.lucky_metadata.use_docker {
-                    tools::apply_container_updates(self)?;
+                // Execute all scripts registered for this hook
+                for (i, hook_script) in hook_scripts.iter().enumerate() {
+                    // Helper to run script
+                    macro_rules! run_script {
+                        () => {
+                            tools::run_charm_script(
+                                &self,
+                                hook_name,
+                                hook_script,
+                                environment,
+                                // Add hook index as script_id override to make it unique
+                                // TODO: Fix clugy script id override
+                                Some(&format!("{}_{}", hook_name, i)),
+                            )?;
+
+                            // If docker is enabled, update container configuration
+                            if self.lucky_metadata.use_docker {
+                                tools::apply_container_updates(self)?;
+                            }
+                        };
+                    }
+
+                    // If the script is asynchronous
+                    if hook_script.is_async {
+                        log::trace!("Running async hook script: {:#?}", hook_script);
+                        // Spawn it in another thread
+                        async_handles.push(s.spawn(move |_| -> anyhow::Result<()> {
+                            run_script!();
+                            Ok(())
+                        }));
+
+                    // If the script is synchronous
+                    } else {
+                        log::trace!("Running hook script: {:#?}", hook_script);
+                        // Run it in place
+                        run_script!();
+                    }
+                }
+
+                // Join and handle any errors from async scripts
+                for async_handle in async_handles {
+                    async_handle.join().expect("Scoped thread paniced")?;
                 }
             }
-        }
+
+            Ok(())
+        })
+        .expect("Scoped thread paniced")?;
 
         // Run post-script hook handlers
         hook_handlers::handle_post_hook(&self, &hook_name).context(format!(
