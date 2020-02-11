@@ -255,7 +255,7 @@ fn cron_tick(unit_name: &str, cron_schedules: &[cron::Schedule], stop: &Arc<Atom
         }
     };
 
-    // Run the cron tick with 1 second delay between runs
+    // Run the cron tick loop
     loop {
         // Exit loop if we are done
         if stop.load(std::sync::atomic::Ordering::SeqCst) {
@@ -263,7 +263,7 @@ fn cron_tick(unit_name: &str, cron_schedules: &[cron::Schedule], stop: &Arc<Atom
         }
 
         // Make sure don't already have a Juju context ( i.e. we are in the middle )
-        // of running a hook. Wait if we already have a context
+        // of running a hook. If we do have a context, wait a second and try again.
         if std::env::var("JUJU_CONTEXT_ID").is_ok() {
             thread::sleep(Duration::from_secs(1));
             continue;
@@ -284,12 +284,13 @@ fn cron_tick(unit_name: &str, cron_schedules: &[cron::Schedule], stop: &Arc<Atom
             log::error!("Error running cron-tick process: {:?}", e);
         }
 
-        // Calculate next cron job time
+        // The next cron job time
         let mut next_time = None;
+        // Find closest next cron job time
         for schedule in cron_schedules {
             // If this schedule has an upcomming date
             if let Some(time) = schedule.upcoming(chrono::Local).next() {
-                // If we have a next time
+                // If we already have a next_time
                 if let Some(nt) = next_time {
                     // If this time is before the next time
                     if time < nt {
@@ -304,7 +305,7 @@ fn cron_tick(unit_name: &str, cron_schedules: &[cron::Schedule], stop: &Arc<Atom
             }
         }
 
-        // If there is an upcomming time
+        // If we found a next job time
         if let Some(time) = next_time {
             // Get the time between now and the next job
             let sleep_duration = match (time - chrono::Local::now()).to_std() {
@@ -316,6 +317,7 @@ fn cron_tick(unit_name: &str, cron_schedules: &[cron::Schedule], stop: &Arc<Atom
             };
             // Sleep until the time for the next job
             thread::sleep(sleep_duration);
+
         // If there are no more upcomming scheduled jobs
         } else {
             // Break out of the loop, we're done

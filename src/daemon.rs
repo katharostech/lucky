@@ -237,6 +237,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         let (job_sender, job_receiver) = unbounded_channel();
         let job_sender_ref = &job_sender;
 
+        // Create a thread scope allowing us to use references inside of the job threads
         thread_scope(|s| {
             // Loop through cron jobs and run them if necessary
             for (job_index, (schedule_str, scripts)) in
@@ -248,15 +249,28 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                 if let Some(date) = schedule.after(&last_cron_tick).next() {
                     if date < now {
                         log::info!("Triggering cron job with schedule: {}", schedule_str);
+                        // Spawn thread to run the job
                         s.spawn(move |ss| {
                             // For every script in the job
                             for (script_index, script) in scripts.iter().enumerate() {
                                 let hook_name = "cron";
 
+                                // helper to send error results over channel
+                                macro_rules! send_if_error {
+                                    ($result:expr) => {
+                                        if let Err(e) = $result {
+                                            job_sender_ref
+                                                .send(Err(e))
+                                                .expect("Channel dropped prematuresly");
+                                            return Ok(());
+                                        }
+                                    };
+                                }
+
                                 // helper to run the script
                                 macro_rules! run_script {
                                     () => {
-                                        if let Err(e) = tools::run_charm_script(
+                                        let run_result = tools::run_charm_script(
                                             &self,
                                             hook_name,
                                             &script,
@@ -267,21 +281,13 @@ impl rpc::VarlinkInterface for LuckyDaemon {
                                                 "{}_{}_{}",
                                                 hook_name, job_index, script_index
                                             )),
-                                        ) {
-                                            job_sender_ref
-                                                .send(Err(e))
-                                                .expect("Channel dropped prematurely");
-                                            return Ok(());
-                                        }
+                                        );
+
+                                        send_if_error!(run_result);
 
                                         // If docker is enabled, update container configuration
                                         if self.lucky_metadata.use_docker {
-                                            if let Err(e) = tools::apply_container_updates(self) {
-                                                job_sender_ref
-                                                    .send(Err(e))
-                                                    .expect("Channel dropped prematurely");
-                                                return Ok(());
-                                            }
+                                            send_if_error!(tools::apply_container_updates(self));
                                         }
                                     };
                                 }
