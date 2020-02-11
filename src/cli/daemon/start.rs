@@ -19,6 +19,7 @@ use crate::cli::*;
 use crate::config;
 use crate::daemon::LuckyDaemonOptions;
 use crate::log::{set_log_mode, LogMode::Daemon};
+use crate::types::LuckyMetadata;
 
 pub(super) struct StartSubcommand;
 
@@ -120,7 +121,15 @@ impl<'a> CliCommand<'a> for StartSubcommand {
 
             // Get charm dir and lucky metadata
             let charm_dir = config::get_charm_dir()?;
-            let lucky_metadata = config::load_yaml(&charm_dir, "lucky")?;
+            let lucky_metadata: LuckyMetadata = config::load_yaml(&charm_dir, "lucky")?;
+
+            // Collect cron schedules ( for scheduling cron tick )
+            let cron_schedules: Vec<cron::Schedule> = lucky_metadata
+                .cron_jobs
+                .keys()
+                .map(|x| x.parse())
+                .collect::<Result<_, _>>()
+                .map_err(|e| format_err!("Could not parse cron job: {}", e))?;
 
             log::trace!("loaded lucky.yml: {:#?}", lucky_metadata);
 
@@ -166,55 +175,7 @@ impl<'a> CliCommand<'a> for StartSubcommand {
             let unit_name_ = unit_name.to_string();
             let cron_thread = thread::Builder::new()
                 .name("cron-tick".into())
-                .spawn(move || {
-                    let stop = stop_listening;
-
-                    // Lucky exe path
-                    let lucky_exe = match std::env::current_exe() {
-                        Ok(exe) => exe,
-                        Err(e) => {
-                            // TODO: Maybe the whole program should bomb out if cron can't start?
-                            log::error!(
-                                "Could not get current executable path, cron jobs will not run: {}",
-                                e
-                            );
-                            return;
-                        }
-                    };
-
-                    // Run the cron tick with 1 second delay between runs
-                    loop {
-                        // Exit loop if we are done
-                        if stop.load(std::sync::atomic::Ordering::SeqCst) {
-                            break;
-                        }
-
-                        // Make sure don't already have a Juju context ( i.e. we are in the middle )
-                        // of running a hook. Wait if we already have a context
-                        if std::env::var("JUJU_CONTEXT_ID").is_ok() {
-                            thread::sleep(Duration::from_secs(1));
-                            continue;
-                        }
-
-                        // Use Juju run to create a Juju context and run the `lucky cron-tick`
-                        if let Err(e) = crate::process::run_cmd(
-                            "juju-run",
-                            &[
-                                &unit_name_,
-                                &format!(
-                                    "LUCKY_CONTEXT=daemon {} {}",
-                                    &lucky_exe.as_os_str().to_string_lossy(),
-                                    "cron-tick"
-                                ),
-                            ],
-                        ) {
-                            log::error!("Error running cron-tick process: {:?}", e);
-                        }
-
-                        // Sleep for 1 second
-                        thread::sleep(Duration::from_secs(1));
-                    }
-                })
+                .spawn(move || cron_tick(&unit_name_, cron_schedules.as_slice(), &stop_listening))
                 .context("Could not spawn cron-tick thread")?;
 
             // Get the server thread result
@@ -277,5 +238,88 @@ impl<'a> CliCommand<'a> for StartSubcommand {
         }
 
         Ok(data)
+    }
+}
+
+fn cron_tick(unit_name: &str, cron_schedules: &[cron::Schedule], stop: &Arc<AtomicBool>) {
+    // Lucky exe path
+    let lucky_exe = match std::env::current_exe() {
+        Ok(exe) => exe,
+        Err(e) => {
+            // TODO: Maybe the whole program should bomb out if cron can't start?
+            log::error!(
+                "Could not get current executable path, cron jobs will not run: {}",
+                e
+            );
+            return;
+        }
+    };
+
+    // Run the cron tick with 1 second delay between runs
+    loop {
+        // Exit loop if we are done
+        if stop.load(std::sync::atomic::Ordering::SeqCst) {
+            break;
+        }
+
+        // Make sure don't already have a Juju context ( i.e. we are in the middle )
+        // of running a hook. Wait if we already have a context
+        if std::env::var("JUJU_CONTEXT_ID").is_ok() {
+            thread::sleep(Duration::from_secs(1));
+            continue;
+        }
+
+        // Use Juju run to create a Juju context and run the `lucky cron-tick`
+        if let Err(e) = crate::process::run_cmd(
+            "juju-run",
+            &[
+                &unit_name,
+                &format!(
+                    "LUCKY_CONTEXT=daemon {} {}",
+                    &lucky_exe.as_os_str().to_string_lossy(),
+                    "cron-tick"
+                ),
+            ],
+        ) {
+            log::error!("Error running cron-tick process: {:?}", e);
+        }
+
+        // Calculate next cron job time
+        let mut next_time = None;
+        for schedule in cron_schedules {
+            // If this schedule has an upcomming date
+            if let Some(time) = schedule.upcoming(chrono::Local).next() {
+                // If we have a next time
+                if let Some(nt) = next_time {
+                    // If this time is before the next time
+                    if time < nt {
+                        // Update next nearest time
+                        next_time = Some(time);
+                    }
+                // If we don't have a next time
+                } else {
+                    // Set this upcomming time to the next time
+                    next_time = Some(time);
+                }
+            }
+        }
+
+        // If there is an upcomming time
+        if let Some(time) = next_time {
+            // Get the time between now and the next job
+            let sleep_duration = match (time - chrono::Local::now()).to_std() {
+                Ok(duration) => duration,
+                Err(e) => {
+                    log::error!("Could not convert duration: {}", e);
+                    continue;
+                }
+            };
+            // Sleep until the time for the next job
+            thread::sleep(sleep_duration);
+        // If there are no more upcomming scheduled jobs
+        } else {
+            // Break out of the loop, we're done
+            break;
+        }
     }
 }

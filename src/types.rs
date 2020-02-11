@@ -1,5 +1,6 @@
 //! Types specific to Lucky that are used throughout the app
 
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -126,15 +127,26 @@ pub(crate) struct LuckyMetadata {
     #[serde(default)]
     pub hooks: HashMap<String, Vec<CharmScript>>,
     /// The cron jobs for the charm
-    pub cron_jobs: HashMap<String, Vec<CharmScript>>,
+    #[serde(default)]
+    pub cron_jobs: IndexMap<String, Vec<CharmScript>>, // Use an IndexMap to preserve order
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "kebab-case")]
+pub(crate) struct CharmScript {
+    #[serde(rename = "async")]
+    #[serde(default = "default_false")]
+    pub is_async: bool,
+    #[serde(flatten)]
+    pub script_type: CharmScriptType,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(untagged)]
+#[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 /// A hook script in the `lucky.yaml` definition
-pub(crate) enum CharmScript {
+pub(crate) enum CharmScriptType {
     /// A script that runs on the host from the `host_scripts` dir
     #[serde(rename_all = "kebab-case")]
     Host {

@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use shiplift::Docker;
 
+use crossbeam::{channel::unbounded as unbounded_channel, scope as thread_scope};
+
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::fs::OpenOptions;
@@ -21,6 +23,9 @@ use crate::rpc;
 use crate::types::{LuckyMetadata, ScriptStatus};
 
 use crate::VOLUME_DIR;
+
+/// Void type
+enum Void {}
 
 /// Daemon tools
 mod tools;
@@ -173,7 +178,7 @@ impl LuckyDaemon {
         if let Some(hook_scripts) = self.lucky_metadata.hooks.get(hook_name) {
             // Execute all scripts registered for this hook
             for hook_script in hook_scripts {
-                tools::run_charm_script(&self, hook_name, hook_script, &environment)?;
+                tools::run_charm_script(&self, hook_name, hook_script, &environment, None)?;
 
                 // If docker is enabled, update container configuration
                 if self.lucky_metadata.use_docker {
@@ -207,6 +212,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         Ok(())
     }
 
+    /// Handle the cron tick and run scheduled cron jobs
     fn cron_tick(
         &self,
         call: &mut dyn rpc::Call_CronTick,
@@ -220,34 +226,108 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         // Create environment map
         let mut environment: HashMap<String, String> = HashMap::new();
         environment.insert("JUJU_CONTEXT_ID".into(), juju_context_id);
+        // Make environment a reference ( so it can be used in threads )
+        let environment = &environment;
 
         // Get the last cron tick time and the current time
         let mut last_cron_tick = self.last_cron_tick.lock().unwrap();
         let now = Local::now();
 
-        // Loop through cron jobs and run them if necessary
-        for (schedule, scripts) in &self.lucky_metadata.cron_jobs {
-            let schedule: cron::Schedule = handle_err!(schedule.parse(), call);
+        // Create a channel used to transefer our job results from their threads
+        let (job_sender, job_receiver) = unbounded_channel();
+        let job_sender_ref = &job_sender;
 
-            // If this job should be run
-            if let Some(date) = schedule.after(&last_cron_tick).next() {
-                if date < now {
-                    // Run job scripts
-                    for script in scripts {
-                        // Run script
-                        let hook_name = "cron";
-                        handle_err!(
-                            tools::run_charm_script(&self, hook_name, script, &environment),
-                            call
-                        );
+        thread_scope(|s| {
+            // Loop through cron jobs and run them if necessary
+            for (job_index, (schedule_str, scripts)) in
+                self.lucky_metadata.cron_jobs.iter().enumerate()
+            {
+                let schedule: cron::Schedule = handle_err!(schedule_str.parse(), call);
 
-                        // If docker is enabled, update container configuration
-                        if self.lucky_metadata.use_docker {
-                            handle_err!(tools::apply_container_updates(self), call);
-                        }
+                // If this job should be run
+                if let Some(date) = schedule.after(&last_cron_tick).next() {
+                    if date < now {
+                        log::info!("Triggering cron job with schedule: {}", schedule_str);
+                        s.spawn(move |ss| {
+                            // For every script in the job
+                            for (script_index, script) in scripts.iter().enumerate() {
+                                let hook_name = "cron";
+
+                                // helper to run the script
+                                macro_rules! run_script {
+                                    () => {
+                                        if let Err(e) = tools::run_charm_script(
+                                            &self,
+                                            hook_name,
+                                            &script,
+                                            environment,
+                                            // Add job and script index to script id override to
+                                            // make sure script id is unique
+                                            Some(&format!(
+                                                "{}_{}_{}",
+                                                hook_name, job_index, script_index
+                                            )),
+                                        ) {
+                                            job_sender_ref
+                                                .send(Err(e))
+                                                .expect("Channel dropped prematurely");
+                                            return Ok(());
+                                        }
+
+                                        // If docker is enabled, update container configuration
+                                        if self.lucky_metadata.use_docker {
+                                            if let Err(e) = tools::apply_container_updates(self) {
+                                                job_sender_ref
+                                                    .send(Err(e))
+                                                    .expect("Channel dropped prematurely");
+                                                return Ok(());
+                                            }
+                                        }
+                                    };
+                                }
+
+                                // If the script is asynchronous
+                                if script.is_async {
+                                    // Spawn it in another thread
+                                    ss.spawn(move |_| {
+                                        log::trace!(
+                                            "Running async cron job script for schedule[{}]: {:#?}",
+                                            schedule_str,
+                                            script
+                                        );
+                                        run_script!();
+                                        Ok::<(), Void>(())
+                                    });
+
+                                // If the script is synchronous
+                                } else {
+                                    log::trace!(
+                                        "Running cron job script for schedule[{}]: {:#?}",
+                                        schedule_str,
+                                        script
+                                    );
+                                    // Run it in place
+                                    run_script!();
+                                }
+                            }
+
+                            Ok::<(), Void>(())
+                        });
                     }
                 }
             }
+
+            Ok(())
+        })
+        .expect("Panic in scoped thread")?;
+
+        // Close the channel
+        drop(job_sender);
+
+        // Loop through job results
+        for job_result in job_receiver.iter() {
+            // Handle any errors
+            handle_err!(job_result, call);
         }
 
         // Update the last cron tick

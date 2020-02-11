@@ -10,7 +10,9 @@ use std::time::Duration;
 
 use crate::docker::ContainerInfo;
 use crate::rt::block_on;
-use crate::types::{CharmScript, ScriptState, ScriptStatus, LUCKY_EXIT_CODE_HELPER_PREFIX};
+use crate::types::{
+    CharmScript, CharmScriptType, ScriptState, ScriptStatus, LUCKY_EXIT_CODE_HELPER_PREFIX,
+};
 
 use super::*;
 
@@ -145,15 +147,21 @@ enum ScriptType {
     },
 }
 
+/// Run a charm script
 pub(super) fn run_charm_script(
     daemon: &LuckyDaemon,
     hook_name: &str,
     script: &CharmScript,
     environment: &HashMap<String, String>,
+    // TODO: This is a temporary workaround until we figure out how to calculate script uniqueness
+    // especially in the context of inline scripts inside the same hook. Script ID uniqueness is
+    // important when setting the status of that script so that it doesn't overlap other script
+    // statuses.
+    script_id_override: Option<&str>,
 ) -> anyhow::Result<()> {
-    match script {
+    match &script.script_type {
         // Run named host script
-        CharmScript::Host { host_script, args } => run_host_script(
+        CharmScriptType::Host { host_script, args } => run_host_script(
             daemon,
             ScriptType::Named {
                 name: host_script.into(),
@@ -161,9 +169,10 @@ pub(super) fn run_charm_script(
             },
             hook_name,
             &environment,
+            script_id_override,
         ),
         // Run inline host script
-        CharmScript::InlineHost {
+        CharmScriptType::InlineHost {
             inline_host_script,
             shell_command,
         } => run_host_script(
@@ -174,9 +183,10 @@ pub(super) fn run_charm_script(
             },
             hook_name,
             &environment,
+            script_id_override,
         ),
         // Run named container script
-        CharmScript::Container {
+        CharmScriptType::Container {
             container_script,
             args,
             container_name,
@@ -191,9 +201,10 @@ pub(super) fn run_charm_script(
             container_name,
             *ignore_missing_container,
             &environment,
+            script_id_override,
         ),
         // Run inline host script
-        CharmScript::InlineContainer {
+        CharmScriptType::InlineContainer {
             inline_container_script,
             shell_command,
             container_name,
@@ -208,16 +219,18 @@ pub(super) fn run_charm_script(
             container_name,
             *ignore_missing_container,
             &environment,
+            script_id_override,
         ),
     }
 }
 
-// Run one of the charm's host scripts
+/// Run one of the charm's host scripts
 fn run_host_script(
     daemon: &LuckyDaemon,
     script_type: ScriptType,
     hook_name: &str,
     environment: &HashMap<String, String>,
+    script_id_override: Option<&str>, // Optional override for script id
 ) -> anyhow::Result<()> {
     // Create script name based on script type
     let script_name = match &script_type {
@@ -288,7 +301,10 @@ fn run_host_script(
         .args(args.as_slice())
         .env("PATH", path_env)
         .env("LUCKY_CONTEXT", "client")
-        .env("LUCKY_SCRIPT_ID", &script_name);
+        .env(
+            "LUCKY_SCRIPT_ID",
+            script_id_override.unwrap_or(&script_name.as_str()),
+        );
 
     // Set environment for hook exececution
     for (k, v) in environment.iter() {
@@ -342,6 +358,7 @@ fn run_container_script(
     container_name: &Option<String>,
     ignore_missing_container: bool,
     environment: &HashMap<String, String>,
+    script_id_override: Option<&str>,
 ) -> anyhow::Result<()> {
     // Create script name based on script type
     let script_name = match &script_type {
@@ -436,7 +453,10 @@ fn run_container_script(
         .collect();
 
     // Add Lucky environment variables
-    env.push(format!("LUCKY_SCRIPT_ID={}", &script_name));
+    env.push(format!(
+        "LUCKY_SCRIPT_ID={}",
+        script_id_override.unwrap_or(&script_name.as_str())
+    ));
     // TODO: https://github.com/softprops/shiplift/issues/219
     // We currently set the context to "daemon" so we can call `lucky exit-code-helper` to help
     // us get the exit code of the container script.
