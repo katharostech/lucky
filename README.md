@@ -29,6 +29,8 @@ We also support the following package managers.
 
 ### Chocolatey ( Windows )
 
+> **Note:** The windows Chocolatey package is currently [not up-to-date](https://tree.taiga.io/project/zicklag-lucky/us/2?kanban-status=2078350) with the latest pre-release. This is temporary and will be fixed.
+
 [![Chocolatey Package Badge][choco_pack_badge_img]][choco_pack_badge_lnk] ![Chocolatey Downloads Badge][choco_dl_badge]
 
 You can install Lucky with the [Chocolatey] package manager for Windows:
