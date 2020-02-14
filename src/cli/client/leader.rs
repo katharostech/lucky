@@ -1,11 +1,10 @@
 use anyhow::format_err;
 use clap::{App, Arg, ArgMatches};
-use regex::Regex;
 
 use std::collections::HashMap;
 use std::io::Write;
 
-use crate::cli::*;
+use crate::cli::{client::KV_REGEX, *};
 use crate::rpc::{VarlinkClient, VarlinkClientInterface};
 
 pub(super) struct LeaderSubcommand;
@@ -127,14 +126,10 @@ impl<'a> CliCommand<'a> for SetSubcommand {
 
         let raw_kv_pairs = args.values_of("data").expect("Missing required arg: data");
 
-        // Create regex for matching key-value pairs
-        let re = Regex::new(r"(?ms)^(?P<key>[a-zA-Z][a-zA-Z0-9_]*)=(?P<value>.*)")
-            .expect("Could not compile regex");
-
         // Parse key-value pairs
         let mut leader_data = HashMap::new();
         for raw_kv_pair in raw_kv_pairs {
-            if let Some(captures) = re.captures(raw_kv_pair) {
+            if let Some(captures) = KV_REGEX.captures(raw_kv_pair) {
                 let key = captures.name("key").expect("Expected key").as_str();
 
                 let value = captures.name("value").expect("Expected value").as_str();
