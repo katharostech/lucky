@@ -119,7 +119,10 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .arg(Arg::with_name("key")
                 .help("The key to set in the store"))
             .arg(Arg::with_name("value")
-                .help(r#"The value to set "key" to"#))
+                .help(r#"The value to set "key" to"#)
+                .long_help(r#"The value to set "key" to. If not specified, key will be removed."#)
+                .setting(clap::ArgSettings::AllowEmptyValues)
+                .required(false))
             .arg(super::container_arg())
     }
 
@@ -137,9 +140,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .expect("Missing required argument: key");
         let container = args.value_of("container");
 
-        let value = args
-            .value_of("value")
-            .expect("Missing required argument: value");
+        let value = args.value_of("value");
 
         // Get client connection
         let mut client: Box<VarlinkClient> = data
@@ -148,9 +149,9 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .downcast()
             .expect("Invalid type");
 
-        // Set script status
+        // Set the environment value. If value was not provided the environment var will be deleted.
         client
-            .container_env_set(key.into(), Some(value.into()), container.map(Into::into))
+            .container_env_set(key.into(), value.map(Into::into), container.map(Into::into))
             .call()?;
 
         Ok(data)
