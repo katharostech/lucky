@@ -106,7 +106,7 @@ impl<'a> CliCommand<'a> for CloseSubcommand {
                 .help("The port to close")
                 .required_unless("all"))
             .arg(Arg::with_name("all")
-                .help("Remove all port bindings from the container")
+                .help("Remove all port rules")
                 .long("all")
                 .short('A'))
     }
