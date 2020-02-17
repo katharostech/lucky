@@ -1,6 +1,4 @@
 use clap::{App, AppSettings, ArgMatches};
-use lazy_static::lazy_static;
-use regex::Regex;
 
 use std::collections::HashMap;
 
@@ -22,12 +20,6 @@ use crate::cli::daemon::get_daemon_client;
 #[cfg(feature = "daemon")]
 use crate::cli::daemon::{get_daemon_connection_args, get_daemon_socket_path};
 use crate::cli::*;
-
-lazy_static! {
-    /// The regular expression for a key-value pair
-    pub(crate) static ref KV_REGEX: Regex = Regex::new(r"(?ms)^(?P<key>[a-zA-Z][a-zA-Z0-9_-]*)=(?P<value>.*)")
-        .expect("Could not compile regex");
-}
 
 pub(super) struct ClientSubcommand;
 

@@ -1,10 +1,9 @@
 use anyhow::format_err;
 use clap::{App, Arg, ArgMatches};
 
-use std::collections::HashMap;
 use std::io::Write;
 
-use crate::cli::{client::KV_REGEX, *};
+use crate::cli::*;
 use crate::rpc::{RelationGet_Args_relation, VarlinkClient, VarlinkClientInterface};
 
 pub(super) struct RelationSubcommand;
@@ -179,21 +178,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         let raw_kv_pairs = args.values_of("data").expect("Missing required arg: data");
 
         // Parse key-value pairs
-        let mut relation_data = HashMap::new();
-        for raw_kv_pair in raw_kv_pairs {
-            if let Some(captures) = KV_REGEX.captures(raw_kv_pair) {
-                let key = captures.name("key").expect("Expected key").as_str();
-
-                let value = captures.name("value").expect("Expected value").as_str();
-
-                relation_data.insert(key.to_string(), value.to_string());
-            } else {
-                return Err(format_err!(
-                    "Could not parse key-value pair: {}",
-                    raw_kv_pair
-                ));
-            }
-        }
+        let relation_data = util::parse_kv_pairs(raw_kv_pairs)?;
 
         // Set relation data
         client

@@ -7,6 +7,8 @@ use types::*;
 
 // Help utility
 pub mod doc;
+// Misc. utilities
+mod util;
 
 // Subcommands
 mod charm;
