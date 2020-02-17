@@ -178,7 +178,12 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         let raw_kv_pairs = args.values_of("data").expect("Missing required arg: data");
 
         // Parse key-value pairs
-        let relation_data = util::parse_kv_pairs(raw_kv_pairs)?;
+        let mut relation_data = util::parse_kv_pairs(raw_kv_pairs)?;
+        let relation_data = relation_data
+            .drain()
+            // Map `None`s to a null string
+            .map(|(k, v)| (k, v.unwrap_or("".into())))
+            .collect();
 
         // Set relation data
         client

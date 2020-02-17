@@ -125,7 +125,12 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         let raw_kv_pairs = args.values_of("data").expect("Missing required arg: data");
 
         // Parse key-value pairs
-        let leader_data = util::parse_kv_pairs(raw_kv_pairs)?;
+        let mut leader_data = util::parse_kv_pairs(raw_kv_pairs)?;
+        // Map `None`s to null strings
+        let leader_data = leader_data
+            .drain()
+            .map(|(k, v)| (k, v.unwrap_or("".into())))
+            .collect();
 
         // Set leader data
         client.leader_set(leader_data).call()?;

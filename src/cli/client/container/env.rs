@@ -1,6 +1,7 @@
 use clap::{App, Arg, ArgMatches};
 
 use std::io::Write;
+use std::collections::HashMap;
 
 use crate::cli::*;
 use crate::rpc::{VarlinkClient, VarlinkClientInterface};
@@ -115,14 +116,14 @@ impl<'a> CliCommand<'a> for SetSubcommand {
     #[rustfmt::skip]
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
-            .about("Set a value")
-            .arg(Arg::with_name("key")
-                .help("The key to set in the store"))
-            .arg(Arg::with_name("value")
-                .help(r#"The value to set "key" to"#)
-                .long_help(r#"The value to set "key" to. If not specified, key will be removed."#)
-                .setting(clap::ArgSettings::AllowEmptyValues)
-                .required(false))
+            .about("Set environment variables")
+            .arg(Arg::with_name("vars")
+                .help("The vars to set on the relation as `key=value` pairs separated by spaces")
+                .long_help("The vars to set on the relation as `key=value` pairs separated by \
+                            spaces. Setting values to a null string will remove the environment \
+                            var.")
+                .required(true)
+                .multiple(true))
             .arg(super::container_arg())
     }
 
@@ -135,12 +136,11 @@ impl<'a> CliCommand<'a> for SetSubcommand {
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        let key = args
-            .value_of("key")
-            .expect("Missing required argument: key");
         let container = args.value_of("container");
+        let raw_env_vars = args.values_of("vars").expect("Missing required arg: vars");
 
-        let value = args.value_of("value");
+        // Parse key-value pairs
+        let env_vars = util::parse_kv_pairs(raw_env_vars)?;
 
         // Get client connection
         let mut client: Box<VarlinkClient> = data
@@ -151,7 +151,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
 
         // Set the environment value. If value was not provided the environment var will be deleted.
         client
-            .container_env_set(key.into(), value.map(Into::into), container.map(Into::into))
+            .container_env_set(env_vars, container.map(Into::into))
             .call()?;
 
         Ok(data)
@@ -199,9 +199,12 @@ impl<'a> CliCommand<'a> for DeleteSubcommand {
             .downcast()
             .expect("Invalid type");
 
-        // Set script status
+        let mut env_vars = HashMap::new();
+        env_vars.insert(key.into(), None);
+
+        // Set key to none ( therefore deleting it )
         client
-            .container_env_set(key.into(), None, container.map(Into::into))
+            .container_env_set(env_vars, container.map(Into::into))
             .call()?;
 
         Ok(data)

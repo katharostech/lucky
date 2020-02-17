@@ -61,8 +61,8 @@ method PortGetOpened() -> (ports: []string)
 method UnitKvGet(key: string) -> (value: ?string)
 # Get all of the key-value pairs that have been set.
 method UnitKvGetAll() -> (pairs: [](key: string, value: string))
-# Set a value in the Unit's local Key-Value store. Setting `value` to null will erase the value.
-method UnitKvSet(key: string, value: ?string) -> ()
+# Set values in the Unit's local Key-Value store. Setting a value to null will erase the value.
+method UnitKvSet(data: [string]?string) -> ()
 
 #
 # Juju Relations
@@ -112,8 +112,8 @@ method ContainerImageGet(container_name: ?string) -> (image: ?string)
 
 # Get the value of a container environment variable. Value will be null if the variable is not set.
 method ContainerEnvGet(key: string, container_name: ?string) -> (value: ?string)
-# Set the value of a container environment variable. Setting value to null will delete the variable.
-method ContainerEnvSet(key: string, value: ?string, container_name: ?string) -> ()
+# Set env vars of a container. Setting a var to null will delete the variable.
+method ContainerEnvSet(vars: [string]?string, container_name: ?string) -> ()
 # Get the value of all container environment variables.
 method ContainerEnvGetAll(container_name: ?string) -> (pairs: [](key: string, value: string))
 

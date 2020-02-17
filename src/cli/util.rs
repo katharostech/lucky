@@ -12,7 +12,9 @@ lazy_static! {
         .expect("Could not compile regex");
 }
 
-pub(crate) fn parse_kv_pairs<'a, T>(raw_kv_pairs: T) -> anyhow::Result<HashMap<String, String>>
+pub(crate) fn parse_kv_pairs<'a, T>(
+    raw_kv_pairs: T,
+) -> anyhow::Result<HashMap<String, Option<String>>>
 where
     T: IntoIterator<Item = &'a str>,
 {
@@ -24,7 +26,14 @@ where
 
             let value = captures.name("value").expect("Expected value").as_str();
 
-            data.insert(key.to_string(), value.to_string());
+            data.insert(
+                key.to_string(),
+                if value == "" {
+                    None
+                } else {
+                    Some(value.into())
+                },
+            );
         } else {
             return Err(format_err!(
                 "Could not parse key-value pair: {}",

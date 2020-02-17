@@ -1,5 +1,6 @@
 use clap::{App, Arg, ArgMatches};
 
+use std::collections::HashMap;
 use std::io::Write;
 
 use crate::cli::*;
@@ -109,13 +110,11 @@ impl<'a> CliCommand<'a> for SetSubcommand {
     #[rustfmt::skip]
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
-            .about("Set a value")
-            .arg(Arg::with_name("key")
-                .help("The key to set in the store")
-                .required(true))
-            .arg(Arg::with_name("value")
-                .help(r#"The value to set "key" to"#)
-                .required(true))
+            .about("Set key-value data")
+            .arg(Arg::with_name("data")
+                .help("The data to set on the relation as `key=value` pairs separated by spaces")
+                .required(true)
+                .multiple(true))
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
@@ -127,12 +126,10 @@ impl<'a> CliCommand<'a> for SetSubcommand {
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        let key = args
-            .value_of("key")
-            .expect("Missing required argument: key");
-        let value = args
-            .value_of("value")
-            .expect("Missing required argument: value");
+        let raw_kv_pairs = args.values_of("data").expect("Missing required arg: data");
+
+        // Parse key-value pairs
+        let kv_data = util::parse_kv_pairs(raw_kv_pairs)?;
 
         // Get client connection
         let mut client: Box<VarlinkClient> = data
@@ -141,8 +138,8 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .downcast()
             .expect("Invalid type");
 
-        // Set script status
-        client.unit_kv_set(key.into(), Some(value.into())).call()?;
+        // Set the key-value data
+        client.unit_kv_set(kv_data).call()?;
 
         Ok(data)
     }
@@ -183,8 +180,11 @@ impl<'a> CliCommand<'a> for DeleteSubcommand {
             .downcast()
             .expect("Invalid type");
 
-        // Set script status
-        client.unit_kv_set(key.into(), None).call()?;
+        let mut kv_data = HashMap::new();
+        kv_data.insert(key.into(), None);
+
+        // Set key to None ( therefore deleting it )
+        client.unit_kv_set(kv_data).call()?;
 
         Ok(data)
     }

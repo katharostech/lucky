@@ -450,20 +450,21 @@ impl rpc::VarlinkInterface for LuckyDaemon {
     fn unit_kv_set(
         &self,
         call: &mut dyn rpc::Call_UnitKvSet,
-        key: String,
-        value: Option<String>,
+        data: HashMap<String, Option<String>>,
     ) -> varlink::Result<()> {
         let mut state = self.state.write().unwrap();
 
-        // If a value has been provided
-        if let Some(value) = value {
-            log::debug!("Key-Value set: {} = {}", key, value);
-            // Set key to value
-            state.kv.insert(key, value.into());
-        } else {
-            log::debug!("Key-Value delete: {}", key);
-            // Erase key
-            state.kv.remove(&key);
+        for (key, value) in data {
+            // If a value has been provided
+            if let Some(value) = value {
+                log::debug!("Key-Value set: {} = {}", key, value);
+                // Set key to value
+                state.kv.insert(key, value.into());
+            } else {
+                log::debug!("Key-Value delete: {}", key);
+                // Erase key
+                state.kv.remove(&key);
+            }
         }
 
         // Reply empty
@@ -881,8 +882,7 @@ impl rpc::VarlinkInterface for LuckyDaemon {
     fn container_env_set(
         &self,
         call: &mut dyn rpc::Call_ContainerEnvSet,
-        key: String,
-        value: Option<String>,
+        vars: HashMap<String, Option<String>>,
         container_name: Option<String>,
     ) -> varlink::Result<()> {
         let mut state = self.state.write().unwrap();
@@ -894,19 +894,21 @@ impl rpc::VarlinkInterface for LuckyDaemon {
         };
 
         if let Some(container) = &mut container {
-            // If a value has been provided
-            if let Some(value) = value {
-                log::debug!("Container env set: {} = {}", key, value);
-                // Set key to value
-                container.update(|c| {
-                    c.config.env_vars.insert(key, value);
-                });
-            } else {
-                log::debug!("Container env deleted: {}", key);
-                // Erase key
-                container.update(|c| {
-                    c.config.env_vars.remove(&key);
-                });
+            for (key, value) in vars {
+                // If a value has been provided
+                if let Some(value) = value {
+                    log::debug!("Container env set: {} = {}", key, value);
+                    // Set key to value
+                    container.update(|c| {
+                        c.config.env_vars.insert(key, value);
+                    });
+                } else {
+                    log::debug!("Container env deleted: {}", key);
+                    // Erase key
+                    container.update(|c| {
+                        c.config.env_vars.remove(&key);
+                    });
+                }
             }
         }
 
