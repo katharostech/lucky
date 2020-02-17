@@ -153,9 +153,9 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#set" id="set">set</a></h1>
-<p>Set a value</p>
+<p>Set environment variables</p>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
-<p><code>set [FLAGS] [OPTIONS] [ARGS]</code></p>
+<p><code>set [FLAGS] [OPTIONS] &lt;vars&gt;...</code></p>
 <h3><a class="header" href="#options" id="options">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
@@ -167,8 +167,7 @@
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>&lt;key&gt;</code></td><td></td><td>The key to set in the store</td></tr>
-<tr><td><code>&lt;value&gt;</code></td><td></td><td>The value to set "key" to. If not specified, key will be removed.</td></tr>
+<tr><td><code>&lt;vars&gt;</code></td><td></td><td>The vars to set on the relation as <code>key=value</code> pairs separated by spaces. Setting values to a null string will remove the environment var.</td></tr>
 </tbody>
 </table>
 

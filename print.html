@@ -364,7 +364,7 @@ $ charm push build/charm_name
 <h3><a class="header" href="#subcommands-3" id="subcommands-3">Subcommands</a></h3>
 <ul>
 <li><a href="cli/lucky/client/./kv/get.html">get</a>: Get a value</li>
-<li><a href="cli/lucky/client/./kv/set.html">set</a>: Set a value</li>
+<li><a href="cli/lucky/client/./kv/set.html">set</a>: Set key-value data</li>
 <li><a href="cli/lucky/client/./kv/delete.html">delete</a>: Delete a value</li>
 </ul>
 <h1><a class="header" href="#get" id="get">get</a></h1>
@@ -379,15 +379,14 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set" id="set">set</a></h1>
-<p>Set a value</p>
+<p>Set key-value data</p>
 <h2><a class="header" href="#usage-8" id="usage-8">Usage</a></h2>
-<p><code>set [FLAGS] &lt;key&gt; &lt;value&gt;</code></p>
+<p><code>set [FLAGS] &lt;data&gt;...</code></p>
 <h3><a class="header" href="#positionals-4" id="positionals-4">Positionals</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>&lt;key&gt;</code></td><td></td><td>The key to set in the store</td></tr>
-<tr><td><code>&lt;value&gt;</code></td><td></td><td>The value to set "key" to</td></tr>
+<tr><td><code>&lt;data&gt;</code></td><td></td><td>The data to set on the relation as <code>key=value</code> pairs separated by spaces</td></tr>
 </tbody>
 </table>
 <h1><a class="header" href="#delete" id="delete">delete</a></h1>
@@ -473,7 +472,7 @@ $ charm push build/charm_name
 <h3><a class="header" href="#subcommands-6" id="subcommands-6">Subcommands</a></h3>
 <ul>
 <li><a href="cli/lucky/client/container/./env/get.html">get</a>: Get an environment variable</li>
-<li><a href="cli/lucky/client/container/./env/set.html">set</a>: Set a value</li>
+<li><a href="cli/lucky/client/container/./env/set.html">set</a>: Set environment variables</li>
 <li><a href="cli/lucky/client/container/./env/delete.html">delete</a>: Delete a value</li>
 </ul>
 <h1><a class="header" href="#get-2" id="get-2">get</a></h1>
@@ -495,9 +494,9 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#set-2" id="set-2">set</a></h1>
-<p>Set a value</p>
+<p>Set environment variables</p>
 <h2><a class="header" href="#usage-17" id="usage-17">Usage</a></h2>
-<p><code>set [FLAGS] [OPTIONS] [ARGS]</code></p>
+<p><code>set [FLAGS] [OPTIONS] &lt;vars&gt;...</code></p>
 <h3><a class="header" href="#options-7" id="options-7">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
@@ -509,8 +508,7 @@ $ charm push build/charm_name
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>&lt;key&gt;</code></td><td></td><td>The key to set in the store</td></tr>
-<tr><td><code>&lt;value&gt;</code></td><td></td><td>The value to set "key" to. If not specified, key will be removed.</td></tr>
+<tr><td><code>&lt;vars&gt;</code></td><td></td><td>The vars to set on the relation as <code>key=value</code> pairs separated by spaces. Setting values to a null string will remove the environment var.</td></tr>
 </tbody>
 </table>
 <h1><a class="header" href="#delete-1" id="delete-1">delete</a></h1>
