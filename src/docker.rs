@@ -221,6 +221,10 @@ impl ContainerConfig {
         // Add environment
         options.env(env.iter().map(AsRef::as_ref).collect());
 
+        // TODO: Right now we will always add the "restart unless-stopped" flag, but we should
+        // parameterize this later.
+        options.restart_policy("unless-stopped", 0 /* Maximum retry count */);
+
         // Build options
         Ok(options.build())
     }
