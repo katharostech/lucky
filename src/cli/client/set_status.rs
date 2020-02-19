@@ -17,16 +17,16 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
         self.get_base_app()
             .about("Set the status of the current script")
             .arg(Arg::with_name("status_name")
-                .long("status-name")
+                .long("name")
                 .short('n')
                 .help("The name of the status to set: defaults to the script's name.")
-                .long_help(concat!(
-                    "The name of the status to set: defaults to the script's name. By default, ",
-                    "setting the status will set the status only for the current script, ",
-                    "leaving other statuses untouched. If you specify a name for the status ",
-                    "other scripts can change that status by specifying the same name when ",
-                    "calling `set-status`."
-                ))
+                .long_help(
+                    "The name of the status to set: defaults to the script's name. By default, \
+                    setting the status will set the status only for the current script, \
+                    leaving other statuses untouched. If you specify a name for the status \
+                    other scripts can change that status by specifying the same name when \
+                    calling `set-status`."
+                )
                 .env("LUCKY_SCRIPT_ID")
                 .required(true))
             .arg(Arg::with_name("state")

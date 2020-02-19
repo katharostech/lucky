@@ -150,6 +150,7 @@ pub fn run_with_error_handler(f: fn() -> anyhow::Result<()>) {
     })
     // Catch any panics and print an error message. This will appear after the message given by
     // colored backtrace.
+    // TODO: Replace all uses of the concat macro fro wrapping strings with backslash escapes
     .or_else(|_| -> Result<(), ()> {
         log::error!(concat!(
             "The program has encountered a critical internal error and will now exit. ",
