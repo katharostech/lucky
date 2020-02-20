@@ -7,6 +7,12 @@ use regex::Regex;
 use walkdir::WalkDir;
 
 fn main() {
+    // Set lucky version env var if not set
+    if std::env::var("LUCKY_VERSION").is_err() {
+        // use git version to set the version
+        println!("cargo:rustc-env=LUCKY_VERSION={}", git_version::git_version!());
+    }
+
     generate_varlink_code();
 
     package_charm_template();
