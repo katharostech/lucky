@@ -182,7 +182,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         let relation_data = relation_data
             .drain()
             // Map `None`s to a null string
-            .map(|(k, v)| (k, v.unwrap_or("".into())))
+            .map(|(k, v)| (k, v.unwrap_or_else(|| "".into())))
             .collect();
 
         // Set relation data

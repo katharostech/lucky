@@ -129,7 +129,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
         // Map `None`s to null strings
         let leader_data = leader_data
             .drain()
-            .map(|(k, v)| (k, v.unwrap_or("".into())))
+            .map(|(k, v)| (k, v.unwrap_or_else(|| "".into())))
             .collect();
 
         // Set leader data
