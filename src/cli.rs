@@ -63,7 +63,7 @@ impl<'a> CliCommand<'a> for LuckyCli {
 
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
-            .version(crate::GIT_VERSION)
+            .version(crate::LUCKY_VERSION)
             .setting(AppSettings::ArgRequiredElseHelp)
             .about("The Lucky charm framework for Juju.")
     }

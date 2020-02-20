@@ -6,6 +6,8 @@ steps:
   - name: build-lucky
     image: clux/muslrust:nightly-2019-11-24
     commands:
+      # Set Lucky version for build
+      - export LUCKY_VERSION=pre-release-$$(echo ${DRONE_COMMIT} | awk '{print substr($$0, 0, 8)}')
       # Generate CLI docs
       - cargo run --release --features doc-gen docs/book/src/
       # Build Lucky CLI
@@ -81,6 +83,8 @@ steps:
   - name: build
     image: rust:latest
     commands:
+      # Set Lucky version for build
+      - export LUCKY_VERSION=pre-release-$$(echo ${DRONE_COMMIT} | awk '{print substr($$0, 0, 8)}')
       - apt-get update
       - apt-get install -y gcc-mingw-w64-x86-64 zip
       - rustup default nightly-2019-11-24
@@ -165,6 +169,8 @@ steps:
   - name: build
     image: katharostech/rust-osxcross:rust-latest_v0.1.0
     commands:
+      # Set Lucky version for build
+      - export LUCKY_VERSION=pre-release-$$(echo ${DRONE_COMMIT} | awk '{print substr($$0, 0, 8)}')
       - PATH="$PATH:/build/osxcross/target/bin"
       # Configure build to use Mac linker and libraries
       - mkdir -p /drone/src/.cargo

@@ -36,8 +36,9 @@ pub(crate) mod process;
 #[cfg(feature = "daemon")]
 pub(crate) mod rt;
 
-use git_version::git_version;
-// TODO: Not working right with drone builds to use the tag as the version
-const GIT_VERSION: &str = git_version!();
+/// Lucky version from environment var
+/// 
+/// This env var will be set by the build.rs script to the git version if not present at build time.
+const LUCKY_VERSION: &str = env!("LUCKY_VERSION");
 
 const VOLUME_DIR: &str = "volumes";
