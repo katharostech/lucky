@@ -11,3 +11,6 @@
 parts
 prime
 stage
+
+# RLS logs
+rls*.log
