@@ -405,6 +405,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "crossterm"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8a3223215bc00c666d6be730e88aef245ad4a4f837e87a16c347e8acf701643"
+dependencies = [
+ "bitflags",
+ "crossterm_winapi",
+ "lazy_static",
+ "libc",
+ "mio",
+ "parking_lot 0.10.0",
+ "signal-hook",
+ "winapi 0.3.8",
+]
+
+[[package]]
 name = "crossterm_winapi"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -874,7 +890,7 @@ dependencies = [
  "clap",
  "cron",
  "crossbeam",
- "crossterm",
+ "crossterm 0.15.0",
  "ctrlc",
  "dirs",
  "function_name",
@@ -1745,12 +1761,12 @@ dependencies = [
 
 [[package]]
 name = "termimad"
-version = "0.8.12"
+version = "0.8.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fa7167e7faf980ea158947633be776237e54dc22e0c0c82675c575c8c962fdd"
+checksum = "0eecea4fdb05e8718979c8a999ce2f197fe6da681a8ba35af38a90c6cb08270c"
 dependencies = [
  "crossbeam",
- "crossterm",
+ "crossterm 0.16.0",
  "lazy_static",
  "minimad",
  "thiserror",
