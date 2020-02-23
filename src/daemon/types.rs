@@ -21,6 +21,8 @@ pub(crate) struct Cd<T: Clone + PartialEq> {
     inner: T,
     /// The updated inner type if any
     new_inner: Option<T>,
+    /// This forces the type to be recognized as dirty even if the type's equality has not changed
+    force_dirty: bool,
 }
 
 impl<T: Clone + PartialEq> Cd<T> {
@@ -29,6 +31,7 @@ impl<T: Clone + PartialEq> Cd<T> {
         Cd {
             inner,
             new_inner: None,
+            force_dirty: false,
         }
     }
 
@@ -39,12 +42,17 @@ impl<T: Clone + PartialEq> Cd<T> {
             std::mem::swap(&mut self.inner, new_inner);
             // And delete the old value ( now stored in `new_inner` )
             self.new_inner = None;
+            // Clear the force_dirty flag
+            self.force_dirty = false;
         }
     }
 
     /// Returns `true` if the inner type has **not** been modified since the last run of
     /// `clean()`.
     pub fn is_clean(&self) -> bool {
+        // Return false if the force_dirty flag is set
+        if self.force_dirty { return false }
+
         // If we have some updated types
         if let Some(new_inner) = self.new_inner.as_ref() {
             // We are clean if the updated type is identical to the old one
@@ -54,6 +62,11 @@ impl<T: Clone + PartialEq> Cd<T> {
             // We are clean
             true
         }
+    }
+
+    /// Marks the type as dirty until cleaned, regardless of the equality of the old and new value
+    pub fn mark_dirty(&mut self) {
+        self.force_dirty = true;
     }
 
     /// Consumes the `Cd` and converts to the inner type
