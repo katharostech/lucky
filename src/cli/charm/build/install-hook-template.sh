@@ -36,8 +36,10 @@ if [ ! -f ./bin/lucky ]; then
 # If Lucky was bundled
 else
     # Copy lucky binary to the data dir
-    mkdir -p $bin_dir
-    cp ./bin/lucky $lucky
+    if [ ! -f $lucky ]; then
+        mkdir -p $bin_dir
+        cp ./bin/lucky $lucky
+    fi
 fi
 
 # Start the Lucky daemon
