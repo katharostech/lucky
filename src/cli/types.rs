@@ -148,15 +148,7 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
 
     #[rustfmt::skip]
     fn get_base_app(&self) -> App<'a> {
-        App::new(self.get_name())
-            // Set the max term width the 3 short of  the actual width so that we don't wrap
-            // on the help pager. Width is 3 shorter because of 1 char for the scrollbar and
-            // 1 char padding on each side.
-            .max_term_width(
-                crossterm::terminal::size()
-                    .map(|size| if size.0 >= 3 { size.0 - 3 } else { 0 })
-                    .unwrap_or(0) as usize,
-            )
+        let mut app = App::new(self.get_name())
             .setting(AppSettings::ColoredHelp)
             .setting(AppSettings::VersionlessSubcommands)
             .setting(AppSettings::ArgRequiredElseHelp)
@@ -172,7 +164,22 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
                     None => "Does nothing for this command: this command does not have a doc page"
                 })
                 .long("doc")
-                .short('H'))
+                .short('H'));
+
+        // If the proceess stdout is a terminal
+        if atty::is(atty::Stream::Stdout) {
+            app = app
+                // Set the max term width the 3 short of  the actual width so that we don't wrap
+                // on the help pager. Width is 3 shorter because of 1 char for the scrollbar and
+                // 1 char padding on each side.
+                .max_term_width(
+                    crossterm::terminal::size()
+                        .map(|size| if size.0 > 3 { size.0 - 3 } else { 0 })
+                        .unwrap_or(0) as usize,
+                );
+        }
+
+        app
     }
 }
 
