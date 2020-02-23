@@ -227,10 +227,21 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
         )?;
         set_file_mode(&install_hook_path, 0o755)?;
 
+        // Create upgrade-charm hook
+        let upgrade_charm_hook_path = hook_dir.join("upgrade-charm");
+        write_file(
+            &upgrade_charm_hook_path,
+            &format!(
+                include_str!("build/upgrade-charm-hook-template.sh"),
+                log_level = log_level
+            ),
+        )?;
+        set_file_mode(&upgrade_charm_hook_path, 0o755)?;
+
         // Create normal Juju hooks ( those not specific to a relation or storage )
         for &hook in JUJU_NORMAL_HOOKS {
             // Skip the stop and install hooks because we have already created them
-            if hook == "stop" || hook == "install" {
+            if hook == "stop" || hook == "install" || hook == "upgrade-charm" {
                 continue;
             }
             let new_hook_path = hook_dir.join(hook);
