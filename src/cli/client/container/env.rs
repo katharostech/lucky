@@ -1,7 +1,7 @@
 use clap::{App, Arg, ArgMatches};
 
-use std::io::Write;
 use std::collections::HashMap;
+use std::io::Write;
 
 use crate::cli::*;
 use crate::rpc::{VarlinkClient, VarlinkClientInterface};

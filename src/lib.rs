@@ -37,7 +37,7 @@ pub(crate) mod process;
 pub(crate) mod rt;
 
 /// Lucky version from environment var
-/// 
+///
 /// This env var will be set by the build.rs script to the git version if not present at build time.
 const LUCKY_VERSION: &str = env!("LUCKY_VERSION");
 
