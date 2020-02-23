@@ -11,6 +11,7 @@ pub(super) fn handle_pre_hook(daemon: &LuckyDaemon, hook_name: &str) -> anyhow::
     match hook_name {
         "install" => handle_pre_install(daemon),
         "config-changed" => handle_pre_config_changed(daemon),
+        "upgrade-charm" => handle_pre_upgrade_charm(daemon),
         _ => Ok(()),
     }
 }
@@ -73,6 +74,31 @@ fn handle_post_stop(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     // Erase container config
     state.default_container = None;
 
+    daemon_set_status!(&mut state, ScriptState::Active);
+    Ok(())
+}
+
+#[function_name::named]
+fn handle_pre_upgrade_charm(daemon: &LuckyDaemon) -> anyhow::Result<()> {
+    let mut state = daemon.state.write().unwrap();
+    daemon_set_status!(&mut state, ScriptState::Maintenance, "Updating containers after charm upgrade");
+
+    // Mark any containers as dirty because they need to be restarted
+    if let Some(container) = &mut state.default_container {
+        container.mark_dirty();
+    }
+    for container in &mut state.named_containers.values_mut() {
+        container.mark_dirty();
+    }
+    
+    // Drop state while we apply container updates
+    drop(state);
+
+    tools::apply_container_updates(&daemon)
+        .context("Could not apply container updates during charm upgrade")?;
+
+    // Set status to active
+    let mut state = daemon.state.write().unwrap();
     daemon_set_status!(&mut state, ScriptState::Active);
     Ok(())
 }
