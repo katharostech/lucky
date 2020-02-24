@@ -652,27 +652,16 @@ dependencies = [
 
 [[package]]
 name = "handlebars"
-version = "2.0.4"
+version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af92141a22acceb515fb6b13ac59d6d0b3dd3437e13832573af8e0d3247f29d5"
+checksum = "ba758d094d31274eb49d15da6f326b96bf3185239a6359bf684f3d5321148900"
 dependencies = [
- "hashbrown",
  "log",
  "pest",
  "pest_derive",
  "quick-error",
  "serde",
  "serde_json",
- "walkdir",
-]
-
-[[package]]
-name = "hashbrown"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1de41fb8dba9714efd92241565cdff73f78508c95697dd56787d3cba27e2353"
-dependencies = [
- "serde",
 ]
 
 [[package]]
