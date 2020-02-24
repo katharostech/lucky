@@ -175,39 +175,8 @@ def windows_pipelines(config):
         ]
     })
 
-    # Choco: Create the Chocolatey Package
-    steps.append({
-        "name": "build-choco",
-        "depends_on": ["build"],
-        "image": "linuturk/mono-choco",
-        "commands": [
-            "cd chocolatey",
-            # Replace the Lucky version placeholder in the nuspec file
-            """sed -i "s/{{version}}/0.1.0-pre-release-${DRONE_BUILD_NUMBER}/" lucky.nuspec""",
-            # Create the package
-            "choco pack"
-        ]
-    })
-
     # Pre-release steps
     if config["ctx"].build.ref == "refs/tags/pre-release":
-        # Publish Chocolatey pre-release
-        steps.append({
-            "name": "publish-choco-pre-release",
-            "depends_on": ["build-choco"],
-            "image": "linuturk/mono-choco",
-            "environment": {
-                "API_KEY": {
-                    "from_secret": "chocolatey_api_key"
-                }
-            },
-            "commands": [
-                "cd chocolatey",
-                # Push to chocolatey.org
-                """choco push --api-key "$${API_KEY}" --source https://push.chocolatey.org/""",
-            ]
-        })
-
         # Publish pre-release to GitHub releases
         steps.append({
             "name": "publish-github-pre-release",

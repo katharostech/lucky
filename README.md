@@ -21,26 +21,11 @@ The documentation is hosted at [katharostech.github.io/lucky].
 
 ## Installation
 
-Currently there isn't much to try yet, but you can test the latest pre-release of Lucky by downloading the build for your platform from the [releases] page.
+You can test the latest pre-release of Lucky by downloading the build for your platform from the [releases] page.
 
 We also support the following package managers.
 
 [releases]: https://github.com/katharostech/lucky/releases
-
-### Chocolatey ( Windows )
-
-> **Note:** The windows Chocolatey package is currently [not up-to-date](https://tree.taiga.io/project/zicklag-lucky/us/2?kanban-status=2078350) with the latest pre-release. This is temporary and will be fixed.
-
-[![Chocolatey Package Badge][choco_pack_badge_img]][choco_pack_badge_lnk] ![Chocolatey Downloads Badge][choco_dl_badge]
-
-You can install Lucky with the [Chocolatey] package manager for Windows:
-
-    choco install lucky --pre
-
-[chocolatey]: https://chocolatey.org/
-[choco_pack_badge_img]: https://img.shields.io/chocolatey/vpre/lucky?label=Chocolatey
-[choco_pack_badge_lnk]: https://chocolatey.org/packages/lucky
-[choco_dl_badge]: https://img.shields.io/chocolatey/dt/lucky?label=Downloads
 
 ### Snap ( Linux )
 
@@ -52,7 +37,7 @@ We have a [snap] which can be installed on supported linux distros from the comm
 
 [snap]: https://snapcraft.io/lucky
 
-> **Note:** Unlike the Windows and mac packages, this will install Lucky from the latest commit on master instead of the latest pre-release.
+> **Note:** Unlike the Homebrew package, this will install Lucky from the latest commit on master instead of the latest pre-release.
 
 ### Homebrew ( MacOS )
 
