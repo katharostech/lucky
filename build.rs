@@ -12,7 +12,7 @@ fn main() {
         // use git version to set the version
         println!(
             "cargo:rustc-env=LUCKY_VERSION={}",
-            git_version::git_version!()
+            git_version::git_version!(args = ["--always", "--dirty=-modified", "--long"])
         );
     }
 
