@@ -218,24 +218,29 @@
 <h3><a class="header" href="#subcommands" id="subcommands">Subcommands</a></h3>
 <ul>
 <li><a href="cli/./lucky/charm.html">charm</a>: Build and create Lucky charms</li>
-<li><a href="cli/./lucky/client.html">client</a>: Communicate with the Lucky daemon in charm scripts</li>
+<li><a href="cli/./lucky/client.html">client</a>: Communicate with Lucky and Juju in charm scripts</li>
 </ul>
 <h2><a class="header" href="#development-2" id="development-2">Development</a></h2>
-<p>If you are reading this now, you probably know that Lucky is under heavy development and is currently incomplete. This will hopefully change soon! Please pardon the missing features and documentation as we work to get out our first release.</p>
-<p>If you have any thoughts don't be afraid to leave feedback on <a href="https://github.com/katharostech/lucky">GitHub</a> or ping/private message @zicklag on the <a href="https://discourse.jujucharms.com">Juju forum</a>.</p>
+<p>Lucky is currently under active development and is in an alpha state. Features and documentation may be missing, but we at Katharos Technology are already producing charms with Lucky that are being used in the wild. Lucky is getting real testing and solving real problems.</p>
+<p>If you have any thoughts or questions please don't hesitate to <a href="https://discourse.jujucharms.com/new-topic">open a forum topic</a> in the Lucky category on the Juju forum. You can also make <a href="https://tree.taiga.io/project/zicklag-lucky/issues">feature requests or bug reports</a> on our Taiga instance.</p>
 <h2><a class="header" href="#the-doc-pages-and-help" id="the-doc-pages-and-help">The Doc Pages and Help</a></h2>
-<p>Most of the commands in the Lucky CLI have an extra doc page, like this one, that can be accessed with the <code>--doc</code> or <code>-H</code> flag. We will strive to make these built-in docs sufficient enough to learn to use Lucky without even using the internet!</p>
+<p>Most of the commands in the Lucky CLI have an extra doc page, like this one, that can be accessed with the <code>--doc</code> or <code>-H</code> flag. These will usually have extra information and examples on how to use the command.</p>
 <p>Another useful thing to know is that you will get different output by using the <code>-h</code> and <code>--help</code> flags. The <code>-h</code> flag will give you more compact help output while the <code>--help</code> flag will give you more details on the available options.</p>
 <h2><a class="header" href="#getting-started" id="getting-started">Getting Started</a></h2>
 <p>The first step to getting started with Lucky is to create your charm using the built-in charm template.</p>
-<pre><code>$ lucky charm create [target_directory]
+<pre><code>$ lucky charm create my-first-charm
 </code></pre>
-<p>You will be prompted for some basic fields that it will fill out for you in the charm metadata. The doc page for <code>lucky charm create</code> has more information about what the different files in the charm are for.</p>
-<p>Once you have tweak your new charm and added your own scripts you must build the charm. Building the charm packages it so that it can be deployed to a Juju server or the charm store.</p>
-<pre><code>$ lucky charm build
+<p>You will be prompted for some basic fields that it will use to fill in the charm metadata. The doc page for <code>lucky charm create</code> has more information about what the different files in the charm are for.</p>
+<p>After you have created your charm, you need to edit the <code>lucky.yaml</code> file to configure which scripts to run as a part of your charm. The charm template comes with some scripts and an example <code>lucky.yaml</code> file with comments that show the available options.</p>
+<p>Once you have uncommented out the lines in the <code>lucky.yaml</code> you have to build the charm. Building the charm packages it so that it can be deployed to a Juju server or the charm store.</p>
+<pre><code>$ cd my-lucky-charm
+$ lucky charm build
 </code></pre>
-<p>That should complete almost immediately and you can then deploy the charm to a Juju controller:</p>
-<pre><code>$ juju deploy build/charm_name</code></pre>
+<p>The build should complete almost immediately and you can then deploy the charm to a Juju controller:</p>
+<pre><code>$ juju deploy ./build/my-lucky-charm
+</code></pre>
+<h2><a class="header" href="#learning-more" id="learning-more">Learning More</a></h2>
+<p>For a full tutorial you can read the <a href="https://katharostech.github.io/lucky/development.html">Getting Started guide</a> in the Lucky documentation.</p>
 <h1><a class="header" href="#lucky-charm" id="lucky-charm">Lucky Charm</a></h1>
 <p>The Lucky <code>charm</code> command contains the tools you will need for charm development.</p>
 <h2><a class="header" href="#usage-1" id="usage-1">Usage</a></h2>
@@ -313,7 +318,7 @@ $ charm push build/charm_name
 </tbody>
 </table>
 <h1><a class="header" href="#client" id="client">client</a></h1>
-<p>Communicate with the Lucky daemon in charm scripts</p>
+<p>Communicate with Lucky and Juju in charm scripts</p>
 <h2><a class="header" href="#usage-4" id="usage-4">Usage</a></h2>
 <p><code>client [FLAGS] [OPTIONS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#options-2" id="options-2">Options</a></h3>
