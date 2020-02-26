@@ -31,29 +31,29 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
         // of having Lucky installed from the snap.
         #[cfg(all(unix, feature = "daemon"))]
         let app = app.arg(Arg::with_name("use_local_lucky")
-                .help("Build the charm with the local copy of lucky included")
-                .long_help(include_str!("build/arg_use-local-lucky.txt"))
+                .help("Build the charm bundled with the current version of Lucky")
+                .long_help("Build the charm bundled with the current version of Lucky. This is \
+                             mostly useful during development. See \"Building With Local Lucky\" in \
+                             the doc page.")
                 .long("use-local-lucky")
                 .short('l'));
 
         app.arg(Arg::with_name("log_level")
                 .help("The log level to build the charm with")
-                .long_help(concat!(
-                    "The log level to build the charm with. Build with the log level set to ",
-                    "\"trace\" to get more verbose logging from Lucky while the charm is ",
-                    "running"))
+                .long_help("The log level to build the charm with. Build with the log level set to \
+                              \"trace\" to get more verbose logging from Lucky while the charm is \
+                              running")
                 .long("log-level")
                 .short('L')
                 .possible_values(&["trace", "debug", "info", "warn", "error"])
                 .case_insensitive(true)
                 .default_value("debug"))
             .arg(Arg::with_name("build_dir")
-                .help(concat!(
-                    "The directory to put the built charm in. Defaults to the `build` ",
-                    "directory in the charm_dir."))
-                .long_help(concat!(
-                    "The directory to put the built charm in. Defaults to the `build` directory ",
-                    "in the charm dir. The built charm will be in `build_dir/charm_name`."))
+                .help("The directory to put the built charm in. Defaults to the \"build\" \
+                         directory in the charm_dir.")
+                .long_help("The directory to put the built charm in. Defaults to the \"build\" \
+                              directory in the charm dir. The built charm will be in \
+                              \"build_dir/charm_name\".")
                 .long("build-dir")
                 .short('b')
                 .takes_value(true))
@@ -68,7 +68,10 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_charm_build",
+            content: include_str!("build/build.md"),
+        })
     }
 
     fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {

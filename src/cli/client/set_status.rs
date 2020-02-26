@@ -44,7 +44,10 @@ impl<'a> CliCommand<'a> for SetStatusSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_set-status",
+            content: include_str!("doc/set-status.md"),
+        })
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {

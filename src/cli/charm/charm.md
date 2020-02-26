@@ -1,6 +1,6 @@
 # Lucky Charm
 
-The Lucky `charm` command contains the tools you will need for charm development.
+The `lucky charm` command contains the tools you will need for charm development.
 
 ${help_message}
 
@@ -18,7 +18,7 @@ $ lucky charm build
 # Login to the charm store
 $ charm login
 # Push the charm to the charm store
-$ charm push build/charm_name
+$ charm push ./build/my-charm my-charm
 ```
 
 See the Juju [documentation](https://jaas.ai/docs/charm-writing/store) for more information about publishing charms.
