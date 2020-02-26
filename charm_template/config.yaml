@@ -1,14 +1,15 @@
+# These are config values that users can set from the GUI or the commandline
 options:
-  string-option:
+  name:
     type: string
-    default: "Default Value"
-    description: "A short description of the configuration option"
-  boolean-option:
+    default: John
+    description: The name of something
+  enable-something:
     type: boolean
     default: False
-    description: "A short description of the configuration option"
-  int-option:
+    description: Whether or not to enable something
+  count:
     type: int
-    default: 9001
-    description: "A short description of the configuration option"
+    default: 100
+    description: How much of something
 

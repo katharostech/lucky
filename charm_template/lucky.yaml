@@ -1,10 +1,66 @@
-# This allows you to set which of your scripts to run and in what order when
-# hooks are triggered.
-hooks:
-  install:
-    # Run a script on the host. `install.sh` must exist in the `host_scripts`
-    # directory.
-    - host-script: install.sh
-    # Run a script inside the container. `configure.sh` must exist in the
-    # `container_scripts` directory.
-    - container-script: configure.sh
+# Below is an example of most of the things you can put in a Lucky YAML. You can uncomment
+# the lines below to 
+# 
+# # Whether or not to install and use Docker. Optional. Defaults to `true`.
+# use-docker: true
+
+# # This allows you to set what kind of script to run and in what order when juju
+# # hooks are triggered. See https://discourse.jujucharms.com/t/charm-hooks/1040 for a list of the
+# # Juju hooks and when they run.
+# hooks:
+#   install:
+#     # Run a script on the host. `install.sh` must exist in the `host_scripts`
+#     # directory.
+#     - host-script: install.sh
+
+#     # Run an inline script on this host
+#     - inline-host-script: |
+#         lucky set-status maintenance "Pretending to do something"
+#         sleep 5
+#         lucky set-status active
+    
+#     # Run a script inside the container. `configure.sh` must exist in the
+#     # `container_scripts` directory.
+#     - container-script: configure.sh
+#       # If the container hasn't been run yet, don't error out. Optional. Defaut false.
+#       ignore-missing-container: true
+
+#     # Run an inline script inside the container
+#     - inline-container-script: |
+#         lucky set-status maintenance "Hello from inline container script"
+#         sleep 3
+#         lucky set-status active
+
+#   config-changed:
+#     - host-script: update-config.sh
+#       # If a script is async, the next script in the list will be run immediately without waiting
+#       # for the async script to exit. 
+#       async: true
+
+#     # The same scripts can be specified in multiple hooks. This script is run for `install` and for
+#     # `config-changed`.
+#     - container-script: configure.sh
+
+#     - container-script: update-container-config.sh
+#       # You can specify args that will be passed to the script
+#       args: [ "arg1", "arg2" ]
+      
+#     - inline-host-script: |
+#         lucky set-status maintenance "Running inline host script in /bin/sh"
+#         sleep 3
+#         lucky set-status active
+#       # You can also override the shell command that will be used to run inline scripts
+#       shell-command: ["/bin/sh", "-c"]
+
+# # These are periodic jobs, scheduled by the Lucky daemon. They do not touch your system crontab
+# # You specify the cron schedule to run the task with. The crontab format is different than the
+# # default Ubuntu crontab. The reference can be found here:
+# # https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm
+# cron-jobs:
+#   # Run every minute
+#   "0 * * * * *":
+#     # You specify a list of scripts just like you do for hooks
+#     - inline-host-script: |
+#         lucky set-status maintenance "Hello from a cron job"
+#         sleep 10
+#         lucky set-status active

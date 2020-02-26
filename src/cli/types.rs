@@ -161,7 +161,7 @@ impl<'a, C: CliCommand<'a>> CliCommandExt<'a> for C {
             .arg(Arg::with_name("doc")
                 .help(match self.get_doc() {
                     Some(_) => "Show the detailed command documentation ( similar to a man page )",
-                    None => "Does nothing for this command: this command does not have a doc page"
+                    None => "This command does not have a doc page: shows long help message instead"
                 })
                 .long("doc")
                 .short('H'));

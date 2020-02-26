@@ -32,7 +32,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
         let app = self
             .get_base_app()
             .setting(AppSettings::SubcommandRequiredElseHelp)
-            .about("Communicate with the Lucky daemon in charm scripts");
+            .about("Communicate with Lucky and Juju in charm scripts");
 
         #[cfg(feature = "daemon")]
         let app = app.args(&get_daemon_connection_args());
