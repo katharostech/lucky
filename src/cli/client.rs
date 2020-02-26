@@ -57,7 +57,10 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client",
+            content: include_str!("client/client.md"),
+        })
     }
 
     // Client commands are only available when Lucky is built with the "daemon" feature

@@ -79,7 +79,10 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_charm_create",
+            content: include_str!("create/create.md"),
+        })
     }
 
     fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {

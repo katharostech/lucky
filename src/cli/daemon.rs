@@ -62,7 +62,9 @@ pub(crate) fn get_daemon_connection_args<'a>() -> [Arg<'a>; 2] {
             ))
             .takes_value(true)
             .env("JUJU_UNIT_NAME")
-            .required_unless("socket_path"),
+            .required_unless("socket_path")
+            // The user will not have to use this so we hide it from the help
+            .hidden(true),
         Arg::with_name("socket_path")
             .long("socket-path")
             .short('s')
@@ -73,7 +75,9 @@ pub(crate) fn get_daemon_connection_args<'a>() -> [Arg<'a>; 2] {
                 "named `mysql/2`, the socket path will be `/run/lucky_mysql_2.sock`"
             ))
             .takes_value(true)
-            .env("LUCKY_DAEMON_SOCKET"),
+            .env("LUCKY_DAEMON_SOCKET")
+            // The user will not have to use this so we hide it from the help
+            .hidden(true),
     ]
 }
 
