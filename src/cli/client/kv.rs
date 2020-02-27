@@ -1,6 +1,5 @@
 use clap::{App, Arg, ArgMatches};
 
-use std::collections::HashMap;
 use std::io::Write;
 
 use crate::cli::*;
@@ -24,12 +23,14 @@ impl<'a> CliCommand<'a> for KvSubcommand {
         vec![
             Box::new(GetSubcommand),
             Box::new(SetSubcommand),
-            Box::new(DeleteSubcommand),
         ]
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_kv",
+            content: include_str!("doc/kv.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
@@ -63,7 +64,10 @@ impl<'a> CliCommand<'a> for GetSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_kv_get",
+            content: include_str!("doc/kv_get.md"),
+        })
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
@@ -122,7 +126,10 @@ impl<'a> CliCommand<'a> for SetSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_kv_set",
+            content: include_str!("doc/kv_set.md"),
+        })
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
@@ -139,51 +146,6 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .expect("Invalid type");
 
         // Set the key-value data
-        client.unit_kv_set(kv_data).call()?;
-
-        Ok(data)
-    }
-}
-
-struct DeleteSubcommand;
-
-impl<'a> CliCommand<'a> for DeleteSubcommand {
-    fn get_name(&self) -> &'static str {
-        "delete"
-    }
-
-    #[rustfmt::skip]
-    fn get_app(&self) -> App<'a> {
-        self.get_base_app()
-            .about("Delete a value")
-            .arg(Arg::with_name("key")
-                .help("The key to delete from the store"))
-    }
-
-    fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
-        vec![]
-    }
-
-    fn get_doc(&self) -> Option<CliDoc> {
-        None
-    }
-
-    fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        let key = args
-            .value_of("key")
-            .expect("Missing required argument: key");
-
-        // Get client connection
-        let mut client: Box<VarlinkClient> = data
-            .remove("client")
-            .expect("Missing client data")
-            .downcast()
-            .expect("Invalid type");
-
-        let mut kv_data = HashMap::new();
-        kv_data.insert(key.into(), None);
-
-        // Set key to None ( therefore deleting it )
         client.unit_kv_set(kv_data).call()?;
 
         Ok(data)
