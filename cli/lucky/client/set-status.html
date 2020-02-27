@@ -152,8 +152,8 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#set-status" id="set-status">set-status</a></h1>
-<p>Set the status of the current script</p>
+                        <h1><a class="header" href="#lucky-set-status" id="lucky-set-status">Lucky Set-Status</a></h1>
+<p>Set the Juju status of the script.</p>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
 <p><code>set-status [FLAGS] --name &lt;status_name&gt; [ARGS]</code></p>
 <h3><a class="header" href="#options" id="options">Options</a></h3>
@@ -171,6 +171,22 @@
 <tr><td><code>&lt;message&gt;</code></td><td></td><td>An optional message to provide with the state</td></tr>
 </tbody>
 </table>
+<h2><a class="header" href="#usage-1" id="usage-1">Usage</a></h2>
+<p><code>lucky set-status</code>, by default, will set the status <strong>for the script <em>and</em> hook combination that it is run in</strong>. This means that running <code>lucky set-status</code> in one script, will not overwrite the satus set by another script. Also, if you set the status in a script that was triggered by one hook, it will not overwrite the status set by the same script in a different hook.</p>
+<p>When multiple status are set at the same time, the Juju status will be set to a comma separated list of the statuses. This means that, when multiple scripts are running at the same time, you will not have to worry about their statuses getting overwritten by other scripts that are also trying to set the status.</p>
+<p>It is typical in charm scripts do something like this:</p>
+<pre><code class="language-bash"># At the beginning of the script
+lucky set-status maintenance &quot;Doing something&quot;
+
+# Do stuff...
+
+# At the end of the script
+lucky set-status active
+</code></pre>
+<p>This will show that you are &quot;Doing something&quot; while the script is running, and then clear the status at the end of the script.</p>
+<h2><a class="header" href="#setting-the-status-name" id="setting-the-status-name">Setting the Status Name</a></h2>
+<p>When setting the status, you can specify the <code>--name</code> or <code>-n</code> flag to set a specific name for the status. While this name is not visible anywhere, it allows other scripts to set and override that specific status. This allows you to break out of the &quot;each script sets it own status&quot; design.</p>
+<p>For example, if you set a status with the name <code>global-status</code> in an <code>install.sh</code> script, you can later change that status in another script by specifying its name.</p>
 
                     </main>
 

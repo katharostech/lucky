@@ -152,10 +152,10 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#client" id="client">client</a></h1>
-<p>Communicate with Lucky and Juju in charm scripts</p>
+                        <h1><a class="header" href="#lucky-client" id="lucky-client">Lucky Client</a></h1>
+<p>Interact with Juju, Lucky, and Docker in charm scripts.</p>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
-<p><code>client [FLAGS] [OPTIONS] &lt;SUBCOMMAND&gt;</code></p>
+<p><code>client [FLAGS] &lt;SUBCOMMAND&gt;</code></p>
 <h3><a class="header" href="#options" id="options">Options</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
@@ -178,6 +178,9 @@
 <li><a href="./client/random.html">random</a>: Generate random numbers and strings</li>
 <li><a href="./client/get-resource.html">get-resource</a>: Get the path to a Juju resource</li>
 </ul>
+<h2><a class="header" href="#getting-started" id="getting-started">Getting Started</a></h2>
+<p>The <code>lucky client</code> command contains every command that your charm scripts can use to interact with Juju, Lucky, and Docker.</p>
+<p>It is important to realize that this command is <em>only</em> used in charm scipts and as help reference for the charm developer. Also, when using this command in charm scripts, you leave out the <code>client</code> portion of the command and just use <code>lucky</code>. For example, if you locally use <code>lucky client set-status --help</code> to find out what options the <code>set-status</code> command has, when you use it in your charm scripts, you just put <code>lucky set-status</code>, without the <code>client</code>.</p>
 
                     </main>
 

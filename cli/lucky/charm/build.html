@@ -152,16 +152,15 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#build" id="build">build</a></h1>
-<p>Build a Lucky charm and make it ready for deployment to the Juju server or charm store</p>
+                        <h1><a class="header" href="#lucky-charm-build" id="lucky-charm-build">Lucky Charm Build</a></h1>
+<p>Build a charm and make it ready for deployment.</p>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
 <p><code>build [FLAGS] [OPTIONS] [charm_dir]</code></p>
 <h3><a class="header" href="#flags" id="flags">Flags</a></h3>
 <table>
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
-<tr><td><code>-l</code>, <code>--use-local-lucky</code></td><td></td><td>Build charm with the local copy of lucky embedded. This means that the charm will not attempt to download lucky when it starts and that the charm will only run on the platform and architecture that the charm was built with. This is mostly useful during development and only works on Linux builds made with the "daemon" feature.
-<p>If this is not specified, an automated build of lucky for the architecture that the charm is deployed to will be automatically downloaded when the charm is installed.</td></tr></p>
+<tr><td><code>-l</code>, <code>--use-local-lucky</code></td><td></td><td>Build the charm bundled with the current version of Lucky. This is mostly useful during development. See "Building With Local Lucky" in the doc page.</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#options" id="options">Options</a></h3>
@@ -169,7 +168,7 @@
 <thead><tr><th>Arg</th><th>Environment Variable</th><th>Description</th><tr></thead>
 <tbody>
 <tr><td><code>-L</code>, <code>--log-level</code><code>&lt;log_level&gt;</code></td><td></td><td>The log level to build the charm with. Build with the log level set to "trace" to get more verbose logging from Lucky while the charm is running<br /><strong>default:</strong> <code>debug</code><br /><strong>possible values:</strong> <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code></td></tr>
-<tr><td><code>-b</code>, <code>--build-dir</code><code>&lt;build_dir&gt;</code></td><td></td><td>The directory to put the built charm in. Defaults to the <code>build</code> directory in the charm dir. The built charm will be in <code>build_dir/charm_name</code>.</td></tr>
+<tr><td><code>-b</code>, <code>--build-dir</code><code>&lt;build_dir&gt;</code></td><td></td><td>The directory to put the built charm in. Defaults to the "build" directory in the charm dir. The built charm will be in "build_dir/charm_name".</td></tr>
 </tbody>
 </table>
 <h3><a class="header" href="#positionals" id="positionals">Positionals</a></h3>
@@ -179,6 +178,14 @@
 <tr><td><code>&lt;charm_dir&gt;</code></td><td></td><td>The path to the charm you want to build<br /><strong>default:</strong> <code>.</code></td></tr>
 </tbody>
 </table>
+<h2><a class="header" href="#getting-started" id="getting-started">Getting Started</a></h2>
+<p>The <code>lucky charm build</code> command will take a Lucky charm and package it so that it can be deployed to a Juju server or the charm store. By default, the charm will be built to the <code>build/my-charm</code> directory and can be deployed like so:</p>
+<pre><code class="language-bash">$ lucky charm build
+$ juju deploy ./build/my-charm
+</code></pre>
+<h2><a class="header" href="#building-with-local-lucky" id="building-with-local-lucky">Building With Local Lucky</a></h2>
+<p>When building with the <code>--use-local-lucky</code> or <code>-l</code> argument, Lucky will bundle the local version of Lucky that was used to build the charm into the built charm. This means that the charm will not attempt to download Lucky when it starts up and that the charm will only run on the same CPU architecture. This is mostly useful during development and only works on Linux builds made with the &quot;daemon&quot; feature.</p>
+<p>If this is not specified, an automated build of Lucky for the architecture that the charm is deployed to will be automatically downloaded when the charm is installed.</p>
 
                     </main>
 

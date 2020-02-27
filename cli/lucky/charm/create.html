@@ -152,8 +152,8 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#create" id="create">create</a></h1>
-<p>Create a new lucky charm</p>
+                        <h1><a class="header" href="#lucky-charm-create" id="lucky-charm-create">Lucky Charm Create</a></h1>
+<p>Create a new Lucky charm from a template.</p>
 <h2><a class="header" href="#usage" id="usage">Usage</a></h2>
 <p><code>create [FLAGS] [OPTIONS] [target_dir]</code></p>
 <h3><a class="header" href="#flags" id="flags">Flags</a></h3>
@@ -180,6 +180,20 @@
 <tr><td><code>&lt;target_dir&gt;</code></td><td></td><td>The directory to create the charm in</td></tr>
 </tbody>
 </table>
+<h2><a class="header" href="#getting-started" id="getting-started">Getting Started</a></h2>
+<p>Running <code>lucky charm create</code> is the first step to getting started writing a Lucky charm. The command will prompt you for some basic information about your new charm and will then create all of the files necessary to get started.</p>
+<h2><a class="header" href="#files" id="files">Files</a></h2>
+<p>Here are the files you will need to modify to get started on your charm.</p>
+<h3><a class="header" href="#metadatayaml" id="metadatayaml"><code>metadata.yaml</code></a></h3>
+<p>The <code>metadata.yaml</code> file has information about the charm such as name, description, and the kind of relations it supports. The <a href="https://discourse.jujucharms.com/t/charm-metadata/1043">Juju Documentation</a> has more information on what can go in the <code>metadata.yaml</code>.</p>
+<h3><a class="header" href="#configyaml" id="configyaml"><code>config.yaml</code></a></h3>
+<p>The <code>config.yaml</code> file outlines the different configuration options that users can provide to the charm. This might be used for things like admin passwords, web server ports, or other similar options. More information on charm config can be found in the <a href="https://discourse.jujucharms.com/t/creating-config-yaml-and-configuring-charms/1039">Juju Config</a>.</p>
+<h3><a class="header" href="#luckyyaml" id="luckyyaml"><code>lucky.yaml</code></a></h3>
+<p>The <code>lucky.yaml</code> file is your &quot;control panel&quot; so to speak for what charm code gets executed when, in response to things like <a href="https://discourse.jujucharms.com/t/charm-hooks/1040">Juju hooks</a> or cron jobs. Without telling Lucky to execute your charm scripts by adding entries to the <code>lucky.yaml</code>, your charm will not do anything.</p>
+<p>The example <code>lucky.yaml</code> file that comes with the charm template has commented sections indicating all of the different kinds of entries you can add to the <code>lucky.yaml</code>.</p>
+<h3><a class="header" href="#host_scripts-and-container_scripts" id="host_scripts-and-container_scripts"><code>host_scripts/</code> and <code>container_scripts/</code></a></h3>
+<p>These directories contiain your charm scripts which represent the charm's logic. Each of the files in these dirs should be executable and are usually shell scripts starting with a proper &quot;shabang&quot;: <code>#!/bin/bash</code>. The <code>host_scripts</code> dir contains scripts that are to be executed on the host system while <code>container_scripts</code> contains scripts that will be mounted into any containers that the charm runs.</p>
+<p>These scripts will use the <code>lucky client</code> commands to interact with Juju, Lucky, and Docker. Se the <code>lucky client</code> doc page for more information.</p>
 
                     </main>
 
