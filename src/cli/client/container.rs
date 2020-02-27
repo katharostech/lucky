@@ -41,7 +41,10 @@ impl<'a> CliCommand<'a> for ContainerSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_container",
+            content: include_str!("doc/container.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
