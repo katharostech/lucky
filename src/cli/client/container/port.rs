@@ -25,12 +25,15 @@ impl<'a> CliCommand<'a> for PortSubcommand {
         vec![
             Box::new(AddSubcommand),
             Box::new(RemoveSubcommand),
-            Box::new(GetSubcommand),
+            Box::new(ListSubcommand),
         ]
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_container_port",
+            content: include_str!("cli_help/port.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
@@ -67,12 +70,6 @@ impl<'a> CliCommand<'a> for AddSubcommand {
         None
     }
 
-    #[cfg(not(feature = "daemon"))]
-    fn execute_command(&self, _args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        Ok(data)
-    }
-
-    #[cfg(feature = "daemon")]
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
         let container = args.value_of("container");
 
@@ -136,12 +133,6 @@ impl<'a> CliCommand<'a> for RemoveSubcommand {
         None
     }
 
-    #[cfg(not(feature = "daemon"))]
-    fn execute_command(&self, _args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        Ok(data)
-    }
-
-    #[cfg(feature = "daemon")]
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
         let remove_all = args.is_present("all");
         let container = args.value_of("container");
@@ -179,17 +170,17 @@ impl<'a> CliCommand<'a> for RemoveSubcommand {
     }
 }
 
-struct GetSubcommand;
+struct ListSubcommand;
 
-impl<'a> CliCommand<'a> for GetSubcommand {
+impl<'a> CliCommand<'a> for ListSubcommand {
     fn get_name(&self) -> &'static str {
-        "get"
+        "list"
     }
 
     #[rustfmt::skip]
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
-            .about("Get a list of the containers port bindings")
+            .about("Get a list of the container's port bindings")
             .arg(super::container_arg())
     }
 
@@ -201,12 +192,6 @@ impl<'a> CliCommand<'a> for GetSubcommand {
         None
     }
 
-    #[cfg(not(feature = "daemon"))]
-    fn execute_command(&self, _args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        Ok(data)
-    }
-
-    #[cfg(feature = "daemon")]
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
         let container = args.value_of("container");
 

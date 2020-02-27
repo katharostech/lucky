@@ -59,7 +59,7 @@ impl<'a> CliCommand<'a> for ClientSubcommand {
     fn get_doc(&self) -> Option<CliDoc> {
         Some(CliDoc {
             name: "lucky_client",
-            content: include_str!("client/client.md"),
+            content: include_str!("cli_help/lucky_client.md"),
         })
     }
 

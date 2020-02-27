@@ -29,7 +29,7 @@ impl<'a> CliCommand<'a> for KvSubcommand {
     fn get_doc(&self) -> Option<CliDoc> {
         Some(CliDoc {
             name: "lucky_client_kv",
-            content: include_str!("doc/kv.md"),
+            content: include_str!("cli_help/kv.md"),
         })
     }
 
@@ -66,7 +66,7 @@ impl<'a> CliCommand<'a> for GetSubcommand {
     fn get_doc(&self) -> Option<CliDoc> {
         Some(CliDoc {
             name: "lucky_client_kv_get",
-            content: include_str!("doc/kv_get.md"),
+            content: include_str!("cli_help/kv_get.md"),
         })
     }
 
@@ -128,7 +128,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
     fn get_doc(&self) -> Option<CliDoc> {
         Some(CliDoc {
             name: "lucky_client_kv_set",
-            content: include_str!("doc/kv_set.md"),
+            content: include_str!("cli_help/kv_set.md"),
         })
     }
 

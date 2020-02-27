@@ -23,7 +23,10 @@ impl<'a> CliCommand<'a> for ImageSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_container_image",
+            content: include_str!("cli_help/image.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {

@@ -45,4 +45,4 @@ Whenever a container config update needs to be made, the existing container, if 
 
 ## Container Removal
 
-All running containers will be automatically stopped and removed by Lucky when the charm is removed. Currently there is no way to remove containers after creating them. This functionality is on the roadmap. If you need this please [open an issue](https://tree.taiga.io/project/zicklag-lucky/issues).
+All running containers will be automatically stopped and removed by Lucky when the charm is removed. You can manually delete a container in your charm logic with `lucky container delete`.

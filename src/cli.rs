@@ -78,7 +78,7 @@ impl<'a> CliCommand<'a> for LuckyCli {
     fn get_doc(&self) -> Option<CliDoc> {
         Some(CliDoc {
             name: "lucky",
-            content: include_str!("cli/cli.md"),
+            content: include_str!("cli/cli_help/lucky.md"),
         })
     }
 
