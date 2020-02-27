@@ -28,7 +28,10 @@ impl<'a> CliCommand<'a> for VolumeSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_container_volume",
+            content: include_str!("cli_help/volume.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
@@ -47,22 +50,16 @@ impl<'a> CliCommand<'a> for AddSubcommand {
     fn get_app(&self) -> App<'a> {
         self.get_base_app()
             .about("Add a volume to the container")
-            .long_about(concat!(
-                "Add a volume to the container.\n",
-                "\n",
-                "Note: This command does not exhibit the same behaviour docker does when ",
-                "mounting an empty volume to an non-empty directory in the container. If you ",
-                "use this command to mount an empty volume to a non-empty path in the container ",
-                "the path in the container will be replaced by the empty volume. Please tell us ",
-                "if this is an issue for you by opening a forum topic: ",
-                "https://discourse.jujucharms.com/c/related-software/lucky"
-            ))
+            .long_about("Add a volume to the container.\n\n\
+                         NOTE: This command does not exhibit the same behaviour docker does when \
+                         mounting an empty volume to an non-empty directory in the container. \
+                         See the doc page for more info."
+            )
             .arg(Arg::with_name("source")
                 .help("The source for the volume.")
-                .long_help(concat!(
-                    "The source for the volume: either a name for a named volume or an absolute ",
-                    "path on the host"
-                )))
+                .long_help("The source for the volume: either a name for a named volume or an \
+                            absolute path on the host"
+                ))
             .arg(Arg::with_name("target")
                 .help("The absolute path in the container to mount `source` to")
                 .value_name("container_path"))

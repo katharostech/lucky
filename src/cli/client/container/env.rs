@@ -1,6 +1,5 @@
 use clap::{App, Arg, ArgMatches};
 
-use std::collections::HashMap;
 use std::io::Write;
 
 use crate::cli::*;
@@ -23,12 +22,14 @@ impl<'a> CliCommand<'a> for EnvSubcommand {
         vec![
             Box::new(GetSubcommand),
             Box::new(SetSubcommand),
-            Box::new(DeleteSubcommand),
         ]
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_container_env",
+            content: include_str!("cli_help/env.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
@@ -120,7 +121,7 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .arg(Arg::with_name("vars")
                 .help("The vars to set on the relation as `key=value` pairs separated by spaces")
                 .long_help("The vars to set on the relation as `key=value` pairs separated by \
-                            spaces. Setting values to a null string will remove the environment \
+                            spaces. Setting values to nothing will remove the environment \
                             var.")
                 .required(true)
                 .multiple(true))
@@ -150,59 +151,6 @@ impl<'a> CliCommand<'a> for SetSubcommand {
             .expect("Invalid type");
 
         // Set the environment value. If value was not provided the environment var will be deleted.
-        client
-            .container_env_set(env_vars, container.map(Into::into))
-            .call()?;
-
-        Ok(data)
-    }
-}
-
-struct DeleteSubcommand;
-
-impl<'a> CliCommand<'a> for DeleteSubcommand {
-    fn get_name(&self) -> &'static str {
-        "delete"
-    }
-
-    #[rustfmt::skip]
-    fn get_app(&self) -> App<'a> {
-        self.get_base_app()
-            .about("Delete a value")
-            .arg(Arg::with_name("key")
-                .help("The key to delete from the store"))
-            .arg(Arg::with_name("container")
-                .help("The name of the container to delete the environment variable for")
-                .short('c')
-                .long("container")
-                .takes_value(true))
-    }
-
-    fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
-        vec![]
-    }
-
-    fn get_doc(&self) -> Option<CliDoc> {
-        None
-    }
-
-    fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
-        let key = args
-            .value_of("key")
-            .expect("Missing required argument: key");
-        let container = args.value_of("container");
-
-        // Get client connection
-        let mut client: Box<VarlinkClient> = data
-            .remove("client")
-            .expect("Missing client data")
-            .downcast()
-            .expect("Invalid type");
-
-        let mut env_vars = HashMap::new();
-        env_vars.insert(key.into(), None);
-
-        // Set key to none ( therefore deleting it )
         client
             .container_env_set(env_vars, container.map(Into::into))
             .call()?;

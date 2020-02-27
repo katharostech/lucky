@@ -34,7 +34,10 @@ impl<'a> CliCommand<'a> for SetNetworkSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_container_set-network",
+            content: include_str!("cli_help/set_network.md"),
+        })
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {

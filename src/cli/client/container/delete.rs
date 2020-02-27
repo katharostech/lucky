@@ -23,7 +23,10 @@ impl<'a> CliCommand<'a> for DeleteSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_container_delete",
+            content: include_str!("cli_help/delete.md"),
+        })
     }
 
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
