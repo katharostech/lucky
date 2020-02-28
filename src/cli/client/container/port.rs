@@ -70,6 +70,12 @@ impl<'a> CliCommand<'a> for AddSubcommand {
         None
     }
 
+    #[cfg(not(feature = "daemon"))]
+    fn execute_command(&self, _args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
+        Ok(data)
+    }
+
+    #[cfg(feature = "daemon")]
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
         let container = args.value_of("container");
 
@@ -133,6 +139,12 @@ impl<'a> CliCommand<'a> for RemoveSubcommand {
         None
     }
 
+    #[cfg(not(feature = "daemon"))]
+    fn execute_command(&self, _args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
+        Ok(data)
+    }
+
+    #[cfg(feature = "daemon")]
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
         let remove_all = args.is_present("all");
         let container = args.value_of("container");
@@ -192,6 +204,12 @@ impl<'a> CliCommand<'a> for ListSubcommand {
         None
     }
 
+    #[cfg(not(feature = "daemon"))]
+    fn execute_command(&self, _args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
+        Ok(data)
+    }
+
+    #[cfg(feature = "daemon")]
     fn execute_command(&self, args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {
         let container = args.value_of("container");
 
