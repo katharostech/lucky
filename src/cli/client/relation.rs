@@ -30,7 +30,10 @@ impl<'a> CliCommand<'a> for RelationSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_relation",
+            content: include_str!("cli_help/relation.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {

@@ -31,7 +31,10 @@ impl<'a> CliCommand<'a> for GetResourceSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_get-resource",
+            content: include_str!("cli_help/get_resource.md"),
+        })
     }
 
     #[allow(clippy::filter_map)]

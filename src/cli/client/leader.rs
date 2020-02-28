@@ -28,7 +28,10 @@ impl<'a> CliCommand<'a> for LeaderSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_leader",
+            content: include_str!("cli_help/leader.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {

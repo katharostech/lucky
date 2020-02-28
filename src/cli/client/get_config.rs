@@ -32,7 +32,10 @@ impl<'a> CliCommand<'a> for GetConfigSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_get-config",
+            content: include_str!("cli_help/get_config.md"),
+        })
     }
 
     #[allow(clippy::filter_map)]
