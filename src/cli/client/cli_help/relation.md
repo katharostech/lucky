@@ -12,14 +12,12 @@ Juju relations allow the units on each side of a relation to *set* values on the
 
 While we hope to provide more documentation on using relations later, currently the best reference is the [Juju documentation](https://discourse.jujucharms.com/t/the-hook-environment-hook-tools-and-how-hooks-are-run/1047#heading--relation-get). The lucky relation commands serve the same functions as the built-in Juju hook tools. The mappings are as follows:
 
-|:-:|:-:|
 |**Lucky Command**|**Juju Command**
 |:-|:-|
 |`lucky relation set`|`relation-set`|
 |`lucky relation get`|`relation-get`|
 |`lucky relation list-ids`|`relation-ids`|
 |`lucky relation list-units`|`relation-list`|
-|-
 
 ## Examples
 
@@ -48,8 +46,8 @@ for relation_id in $(lucky relation list-ids --relation-name http); do
         lucky relation set -r $relation_id -u $related_unit key=value
     done
 
-    # You can also get the values that you have set on this relation by specifying your unit name
-    # ( from the $JUJU_UNIT_NAME env var ) as the -u argument
+    # You can also get the values that you have set on this relation by specifying
+    # your unit name ( from the $JUJU_UNIT_NAME env var ) as the -u argument
     lucky relation get -r $relation_id -u $JUJU_UNIT_NAME hostname
 done
 ```
