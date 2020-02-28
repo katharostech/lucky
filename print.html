@@ -1073,14 +1073,12 @@ $ lucky port open $(lucky get-config listen-port)
 <p>The <code>lucky relation</code> command has all of the tools that you need to interact with Juju's concept of relations. Relations are a somwhat complicated concept to grasp but they are probably the most important concept in Juju and they are what powers Juju's ability to deploy apps in a conceptually simple manner.</p>
 <p>Juju relations allow the units on each side of a relation to <em>set</em> values on their side of the relation that can be <em>read</em> by the unit on the other side. A unit can <code>set</code> and <code>get</code> values on its own side of the relation, but it can only <code>get</code> values from the other side of the relation.</p>
 <p>While we hope to provide more documentation on using relations later, currently the best reference is the <a href="https://discourse.jujucharms.com/t/the-hook-environment-hook-tools-and-how-hooks-are-run/1047#heading--relation-get">Juju documentation</a>. The lucky relation commands serve the same functions as the built-in Juju hook tools. The mappings are as follows:</p>
-<p>|:-:|:-:|
-|<strong>Lucky Command</strong>|<strong>Juju Command</strong>
-|:-|:-|
-|<code>lucky relation set</code>|<code>relation-set</code>|
-|<code>lucky relation get</code>|<code>relation-get</code>|
-|<code>lucky relation list-ids</code>|<code>relation-ids</code>|
-|<code>lucky relation list-units</code>|<code>relation-list</code>|
-|-</p>
+<table><thead><tr><th align="left"><strong>Lucky Command</strong></th><th align="left"><strong>Juju Command</strong></th></tr></thead><tbody>
+<tr><td align="left"><code>lucky relation set</code></td><td align="left"><code>relation-set</code></td></tr>
+<tr><td align="left"><code>lucky relation get</code></td><td align="left"><code>relation-get</code></td></tr>
+<tr><td align="left"><code>lucky relation list-ids</code></td><td align="left"><code>relation-ids</code></td></tr>
+<tr><td align="left"><code>lucky relation list-units</code></td><td align="left"><code>relation-list</code></td></tr>
+</tbody></table>
 <h2><a class="header" href="#examples-12" id="examples-12">Examples</a></h2>
 <p><strong>Iterating over charm relations:</strong></p>
 <p>This will work inside or outside of a <code>relation-*</code> hook.</p>
@@ -1104,8 +1102,8 @@ for relation_id in $(lucky relation list-ids --relation-name http); do
         lucky relation set -r $relation_id -u $related_unit key=value
     done
 
-    # You can also get the values that you have set on this relation by specifying your unit name
-    # ( from the $JUJU_UNIT_NAME env var ) as the -u argument
+    # You can also get the values that you have set on this relation by specifying
+    # your unit name ( from the $JUJU_UNIT_NAME env var ) as the -u argument
     lucky relation get -r $relation_id -u $JUJU_UNIT_NAME hostname
 done
 </code></pre>
