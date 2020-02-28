@@ -1,6 +1,6 @@
 [package]
 name = "lucky"
-version = "0.1.0-pre-release"
+version = "0.1.0-alpha.0"
 authors = ["Katharos Technology"]
 edition = "2018"
 license-file = "LICENSE"

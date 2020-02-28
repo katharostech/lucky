@@ -28,7 +28,7 @@ if [ ! -f ./bin/lucky ]; then
     if [ ! -f $lucky ]; then
         mkdir -p $bin_dir
         curl -L \
-            https://github.com/katharostech/lucky/releases/download/pre-release/lucky-linux-x86_64.tgz \
+            https://github.com/katharostech/lucky/releases/download/{lucky_version}/lucky-linux-x86_64.tgz \
             | tar -xzO > $lucky
     fi
     chmod +x $lucky
