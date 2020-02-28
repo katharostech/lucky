@@ -225,7 +225,8 @@ impl<'a> CliCommand<'a> for BuildSubcommand {
             &install_hook_path,
             &format!(
                 include_str!("build/install-hook-template.sh"),
-                log_level = log_level
+                log_level = log_level,
+                lucky_version = env!("LUCKY_VERSION"),
             ),
         )?;
         set_file_mode(&install_hook_path, 0o755)?;
