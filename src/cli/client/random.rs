@@ -62,7 +62,10 @@ impl<'a> CliCommand<'a> for RandomSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_random",
+            content: include_str!("cli_help/random.md"),
+        })
     }
 
     fn execute_command(&self, args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {

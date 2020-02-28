@@ -25,7 +25,10 @@ impl<'a> CliCommand<'a> for PublicAddressSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_public_address",
+            content: include_str!("cli_help/public_address.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, mut data: CliData) -> anyhow::Result<CliData> {

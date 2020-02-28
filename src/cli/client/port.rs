@@ -32,7 +32,10 @@ impl<'a> CliCommand<'a> for PortSubcommand {
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
-        None
+        Some(CliDoc {
+            name: "lucky_client_port",
+            content: include_str!("cli_help/port.md"),
+        })
     }
 
     fn execute_command(&self, _args: &ArgMatches, data: CliData) -> anyhow::Result<CliData> {
