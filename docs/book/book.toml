@@ -12,3 +12,4 @@ git-repository-icon = "fa-github"
 
 [build]
 build-dir = "build"
+create-missing = false
