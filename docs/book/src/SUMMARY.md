@@ -2,10 +2,13 @@
 
 [Overview](./overview.md)
 
+- [Getting Started](./getting-started.md)
+
 ---
 
-- [Design](./design.md)
-- [Development](./development.md)
+- [Lucky Development](./lucky-development/index.md)
+  - [Design](lucky-development/design.md)
+  - [Development](lucky-development/building.md)
 
 ---
 

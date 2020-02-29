@@ -4,13 +4,13 @@ Lucky is a framework for writing [Juju] charms. It is being designed specificall
 
 [juju]: https://jaas.ai/
 
-## Developer Experience
+## Getting Started
 
-The Lucky framework will provide a CLI that will be used to create and build Lucky charms. We will be focusing on making it easy to write charms in bash or any other shell language, but, through the Lucky commandline interface, any programming language could be used.
+See the [Getting Started guide](./getting-started.md) to learn how to write your first Lucky charm. The guide will walk you through creating a charm for [CodiMD](https://github.com/hackmdio/codimd).
 
 ## Development
 
-Lucky is currently in Alpha. There are likely bugs and the documentation is still a work-in-progress, but you should still be able to use it to make charms. Soon we will have a getting started guide that shows you how to make a full charm with Lucky. For now the CLI documentation is available on this site.
+Lucky is currently in Alpha. There are likely bugs and the documentation is still a work-in-progress, but you should still be able to use it to make charms.
 
 ## Bugs, Features, and Questions
 
