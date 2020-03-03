@@ -8,29 +8,29 @@ ${help_message}
 
 **Set a var:**
 
-    $ lucky kv set var=value
+    $ lucky container env set var=value
 
 **Set multiple vars:**
 
-    $ lucky kv set var1=value1 var2=value2 var3=value3
+    $ lucky container env set var1=value1 var2=value2 var3=value3
 
 **Set vars with spaces or newlines in it:**
 
-    $ lucky kv set "var1=value with space
+    $ lucky container env set "var1=value with space
     and newline"
 
 **Get a var:**
 
-    $ lucky kv get var1
+    $ lucky container env get var1
     value1
 
 **Get all vars:**
 
-    $ lucky kv get
+    $ lucky container env get
     var1=value1
     var2=value2
     var3=value3
 
 **Delete a var:** Delete values by setting to nothing.
 
-    $ lucky kv set var3=
+    $ lucky container env set var3=
