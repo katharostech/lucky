@@ -1,0 +1,17 @@
+options:
+  domain:
+    type: string
+    default: example.org
+    description: The domain CodiMD is hosted under
+  url-path:
+    type: string
+    default: ""
+    description: If CodiMD is run from a subdirectory like "www.example.com/<urlpath>"
+  port:
+    type: int
+    default: 80
+    description: The port to host CodiMD on
+  https:
+    type: boolean
+    default: false
+    description: Whether or not the server will be accessed over HTTPS
