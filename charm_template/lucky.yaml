@@ -1,5 +1,5 @@
 # Below is an example of most of the things you can put in a Lucky YAML. You can uncomment
-# the lines below to 
+# the lines below to test them out with the charm template.
 # 
 # # Whether or not to install and use Docker. Optional. Defaults to `true`.
 # use-docker: true
