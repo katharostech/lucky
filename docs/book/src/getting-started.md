@@ -163,3 +163,47 @@ options:
 That config will give us enough information for us to get started, but we would probably want to add the rest of the config later if we were wanting to provide a general purpose charm for the community.
 
 [codi_config_doc]: https://github.com/codimd/server/blob/master/docs/configuration-env-vars.md
+
+### `lucky.yaml`
+
+The final metadata file we are interested in is the `lucky.yaml` file. This file acts as your "control panel" so to speak when it comes to the execution of your charm logic. The job of the `lucky.yaml` is to tell lucky *when* and *how* to execute your charm scripts. The charm template comes with an example `lucky.yaml` that shows you everything that you can put in a `lucky.yaml` file. For the sake of this tutorial we are going to take everything out of the `lucky.yaml` and build on it as we go.
+
+**lucky.yaml:**
+
+```yaml
+# Nothing here yet!
+```
+
+## Writing Your First Script
+
+Now we are ready to write our first script! In Lucky there are two kinds of scripts, host scripts and container scripts, which are put in the `host_scripts/` and `container_scripts/` directories. The difference is that host scripts run on the host and container scripts are mounted and run inside of the your containers. Our scripts for CodiMD will go in the `host_scripts/` dir.
+
+You will notice that there are some scripts from the charm template already in the `hosts_scripts/` and `container_scripts/` dirs. These are just examples and you can remove them for this tutorial.
+
+The first script that we will create for our charm is the start script. Note that the name of the script is arbitrary and you could call it whatever you want.
+
+**start.sh:**
+
+```bash
+#!/bin/bash
+
+# Set the status so users can se what our charm is doing
+lucky set-status maintenance "Starting CodiMD"
+
+# Set the Docker image, this will cause lucky to create a container when this script exits
+lucky container image set quay.io/codimd/server:1.6.0-alpine
+
+# Set the status to active and don't specify a message to clear the status
+lucky set-status active
+```
+
+First notice that we have a "shabang", as it is called, at the top of the file: `#!/bin/bash`. This tells the system to execute our file with bash. We will also need to make our file executable by running `chmod +x start.sh`. This makes sure that Lucky will be able to execute the script when the charm runs.
+
+Next we use the `lucky set-status` command to show the user that we are performing maintenance and "Starting CodiMD". `lucky set-status` is one of the collection of Lucky CLI tools that you will use in your charm to interact with Juju and Docker. You can find all of the available commands in the [Lucky client CLI documentation](./cli/lucky/client.md).
+
+Then we set the Docker container image with the `lucky container image set` command. Setting a container's image is the way to create a new contianer that will be deployed by Lucky automatically when our script exits. Additionally, when we change any container configuration, such as environment variables or port bindings, Lucky will wait until our script exits and then apply any changes that we have made. We will see more how this works later.
+
+That is actually all that we need in this script. Lets move on to the `configure.sh` script.
+
+## Writing the `configure.sh` Script
+
