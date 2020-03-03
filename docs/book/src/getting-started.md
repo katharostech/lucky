@@ -2,10 +2,12 @@
 
 Welcome to the getting started guide for the Lucky charming framework. Here we will walk through the process of creating a charm for [CodiMD]. This charm will provide an `http` interface, allowing you to hook it up to other charms such as [HAProxy] for load balancing. The charm will also require a `pgsql` interface which we will use to connect the charm to a [PostgreSQL] database charm.
 
+You can find the entire source for the charm we will be writing in this tutorial [here][charm_source].
+
 [CodiMD]: https://github.com/hackmdio/codimd
 [HaProxy]: https://jaas.ai/haproxy
 [PostgreSQL]: https://jaas.ai/postgresql
-
+[charm_source]: https://github.com/katharostech/lucky/tree/master/docs/book/src/codimd-example-charm
 
 ## Installing Required Tools
 
@@ -141,23 +143,7 @@ options:
 The purpose of `config.yaml` is to define the options to our charm that users are allowed to change. We can see all of the available config options for CodiMD in their [documentation][codi_config_doc], but we aren't going to want to add *everything* that is there, and some of it will be configured automatically by our charm, such as the database connection. For now we'll just give some of the minimal essential options in our `config.yaml`.
 
 ```yaml
-options:
-  domain:
-    type: string
-    default: example.org
-    description: The domain CodiMD is hosted under.
-  url-path:
-    type: string
-    default: ""
-    description: If CodiMD is run from a subdirectory like "www.example.com/<urlpath>"
-  port:
-    type: string
-    default: RANDOM
-    description: The port to host CodiMD on, or "RANDOM" to have the charm pick a random port.
-  https:
-    type: boolean
-    default: false
-    description: Whether or not the server will be accessed over HTTPS
+{{#include ./codimd-example-charm/config.yaml}}
 ```
 
 That config will give us enough information for us to get started, but we would probably want to add the rest of the config later if we were wanting to provide a general purpose charm for the community.
@@ -180,30 +166,76 @@ Now we are ready to write our first script! In Lucky there are two kinds of scri
 
 You will notice that there are some scripts from the charm template already in the `hosts_scripts/` and `container_scripts/` dirs. These are just examples and you can remove them for this tutorial.
 
-The first script that we will create for our charm is the start script. Note that the name of the script is arbitrary and you could call it whatever you want.
+The first script that we will create for our charm is the install script. Note that the name of the script is arbitrary and you could call it whatever you want.
 
-**start.sh:**
+**install.sh:**
 
 ```bash
-#!/bin/bash
-
-# Set the status so users can se what our charm is doing
-lucky set-status maintenance "Starting CodiMD"
-
-# Set the Docker image, this will cause lucky to create a container when this script exits
-lucky container image set quay.io/codimd/server:1.6.0-alpine
-
-# Set the status to active and don't specify a message to clear the status
-lucky set-status active
+{{#include ./codimd-example-charm/host_scripts/install.sh}}
 ```
 
-First notice that we have a "shabang", as it is called, at the top of the file: `#!/bin/bash`. This tells the system to execute our file with bash. We will also need to make our file executable by running `chmod +x start.sh`. This makes sure that Lucky will be able to execute the script when the charm runs.
+First notice that we have a "shabang", as it is called, at the top of the file: `#!/bin/bash`. This tells the system to execute our file with bash. We also include a `set -e`, which will make sure that he script will exit early if any of the commands in it fail. Additionally we need to make our file executable by running `chmod +x install.sh`. This makes sure that Lucky will be able to execute the script when the charm runs.
 
-Next we use the `lucky set-status` command to show the user that we are performing maintenance and "Starting CodiMD". `lucky set-status` is one of the collection of Lucky CLI tools that you will use in your charm to interact with Juju and Docker. You can find all of the available commands in the [Lucky client CLI documentation](./cli/lucky/client.md).
+After that we use the `lucky set-status` command set the status Juju status, which will be visible in the Juju GUI.
 
 Then we set the Docker container image with the `lucky container image set` command. Setting a container's image is the way to create a new contianer that will be deployed by Lucky automatically when our script exits. Additionally, when we change any container configuration, such as environment variables or port bindings, Lucky will wait until our script exits and then apply any changes that we have made. We will see more how this works later.
 
-That is actually all that we need in this script. Lets move on to the `configure.sh` script.
+### Understanding Lucky Status
+
+At this point the Lucky status mechanism should be explained. In Lucky, when you call `set-status`, by default, Lucky will set the given status *for only that script*. This means that if another script uses `set-status` it will not overwrite the status that the previous script set, but will instead *add* its status to the previous status by comma separating the list of all script status messages.
+
+It is common pattern in Lucky scripts to have a `lucky set status maintenance "Message"` at the top  of the script and a `lucky set-status active` at the bottom. This makes sure that the user will be notified of the scripts action, and that the action message will be cleared before the script exits.
+
+Alternatively, when you set a status with a `--name <name>`, you can set that status from *any* script by specifying the same `--name`. In this exmple, we use a status with a `db-state` name that we use to indicate the status of our database connection. When the charm is first installed, it will not have a database relation, and we use this opportunity to tell the user that we need a database connection to work. Later, when we get a database connection in a *different* script, we will call `lucky set-status --name db-state active` to clear the blocked status.
+
+### Adding Our Script to the `lucky.yaml`
+
+Ok, so we now have a written script, but currently there is nothing instructing Lucky to run the script at any time. The script existing is *not* enough to cause it to run. That is why we add entries to the `lucky.yaml`, to tell Lucky when to run our scripts.
+
+In this case, we want our `install.sh` host script to run when the Juju `install` hook is triggered:
+
+**lucky.yaml:**
+
+```yaml
+{{#include ./codimd-example-charm/lucky.yaml:1:6}}
+```
+
+Pretty simple right? Now Lucky will run our `install.sh` host script whenever the Juju `install` hook is run.
+
+Lets move on to the `configure.sh` script.
 
 ## Writing the `configure.sh` Script
 
+So we have our app installing, and actually starting ( becuse Lucky will start the container when we set the docker image ) with the `install.sh` script, but it won't really do anything because it doesn't have any of our configuration. That is what we are going to do with our `configure.sh` script. We are going to read the configuration values that we have defined in our `config.yaml` and use those values to set environment variables on our CodiMD container.
+
+**configure.sh:**
+
+```bash
+{{#include ./codimd-example-charm/host_scripts/configure.sh}}
+```
+
+In this script we introduce some extra `lucky` commands. As always, you can access extra information on those commands in the [Lucky client](./cli/lucky/client.md) documentation.
+
+> **Note:** You can also access the CLI documentation from the Lucky CLI itself, by prefixing the command that we use in our script with `client` and adding the `--doc` flag. For example, you can run `lucky client get-config --doc` on your workstation to get terminal rendered view of the same CLI documentation available on this site. This can be very useful when needing to quickly look something up without using a web browser or the internet.
+
+Overall this script is pretty simple, when the config changes, we make sure that our container environment variables are up-to-date. Also we make sure that we mount the configured port on the host to the container. When working with ports that are opened according to configuration values, we need to make sure that we remove any ports that were opened by previous configuration. This makes sure that we don't end up with multiple ports mounted into the container if the user changes the configured port and the `configure.sh` script is re-run.
+
+### The Difference Between `lucky container port` and `lucky port`
+
+You may notice in the above example that we do both a `lucky container port add` and a `lucky port open`, so what is the difference?
+
+`lucky contianer port add` will add a port binding from the host to the container. `lucky port open`, on the other hand, registers that port with Juju so that it will be opened through the hosts *firewall* when users run `juju expose codimd`.
+
+If you want to be able to communicate to a port only on the private network, such as app-to-app communication, you do **not** want to use `lucky open` because that will expose that port to the internet on the hosts firewall. In such a case you will still need to use `lucky contianer port add` to make sure that the containers can communicate.
+
+If you *do* want to be able to hit the port from the internet, though, like in the case of CodiMD, you *will* need to `lucky open port` *and* the users will need to `juju expose` the application before you can access that port.
+
+### Adding `configure.sh` to the `lucky.yaml`
+
+Now we can add `configure.sh` to the `lucky.yaml` just like we did with the `install.sh` script.
+
+```yaml
+{{#include ./codimd-example-charm/lucky.yaml:1:10}}
+```
+
+## Handling the DB Relation
