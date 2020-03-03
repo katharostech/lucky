@@ -3,6 +3,7 @@
 //! Lucky is a charm writing framework for [Juju](https://jaas.ai).
 
 // Set compiler warning settings
+#![deny(clippy::indexing_slicing)]
 #![warn(missing_docs)]
 #![warn(future_incompatible)]
 #![warn(clippy::pedantic)]
