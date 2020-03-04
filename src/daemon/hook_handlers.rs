@@ -81,7 +81,11 @@ fn handle_post_stop(daemon: &LuckyDaemon) -> anyhow::Result<()> {
 #[function_name::named]
 fn handle_pre_upgrade_charm(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     let mut state = daemon.state.write().unwrap();
-    daemon_set_status!(&mut state, ScriptState::Maintenance, "Updating containers after charm upgrade");
+    daemon_set_status!(
+        &mut state,
+        ScriptState::Maintenance,
+        "Updating containers after charm upgrade"
+    );
 
     // Mark any containers as dirty because they need to be restarted
     if let Some(container) = &mut state.default_container {
@@ -90,7 +94,7 @@ fn handle_pre_upgrade_charm(daemon: &LuckyDaemon) -> anyhow::Result<()> {
     for container in &mut state.named_containers.values_mut() {
         container.mark_dirty();
     }
-    
+
     // Drop state while we apply container updates
     drop(state);
 

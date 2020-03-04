@@ -51,7 +51,9 @@ impl<T: Clone + PartialEq> Cd<T> {
     /// `clean()`.
     pub fn is_clean(&self) -> bool {
         // Return false if the force_dirty flag is set
-        if self.force_dirty { return false }
+        if self.force_dirty {
+            return false;
+        }
 
         // If we have some updated types
         if let Some(new_inner) = self.new_inner.as_ref() {
