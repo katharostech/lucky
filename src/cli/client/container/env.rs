@@ -19,10 +19,7 @@ impl<'a> CliCommand<'a> for EnvSubcommand {
     }
 
     fn get_subcommands(&self) -> Vec<Box<dyn CliCommand<'a>>> {
-        vec![
-            Box::new(GetSubcommand),
-            Box::new(SetSubcommand),
-        ]
+        vec![Box::new(GetSubcommand), Box::new(SetSubcommand)]
     }
 
     fn get_doc(&self) -> Option<CliDoc> {
