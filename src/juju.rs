@@ -205,7 +205,7 @@ pub(crate) fn resource_get(resource_name: &str) -> anyhow::Result<String> {
 /// debug log.
 ///
 /// If `juju-log` is not in the path, this function will print to stdout. Stdout is captured by
-/// Juju and ignore it.
+/// Juju and sent to the Juju controller.
 ///
 /// If there is a problem while running `juju-log` the error will be printed to stderr.
 ///
