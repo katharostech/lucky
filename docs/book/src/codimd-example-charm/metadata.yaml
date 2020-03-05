@@ -9,7 +9,7 @@ tags:
   # https://jujucharms.com/docs/stable/authors-charm-metadata
   - misc
 subordinate: false
-profiles:
+provides:
   website:
     interface: http
 requires:

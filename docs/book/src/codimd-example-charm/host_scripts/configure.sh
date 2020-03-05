@@ -8,6 +8,7 @@ lucky set-status maintenance "Configuring CodiMD"
 domain="$(lucky get-config domain)"
 url_path="$(lucky get-config url-path)"
 https="$(lucky get-config https)"
+add_port="$(lucky get-config add-port-to-domain)"
 port="$(lucky get-config port)"
 
 # Set the respective container environment variables
@@ -15,6 +16,7 @@ lucky container env set \
     "CMD_DOMAIN=$domain" \
     "CMD_URL_PATH=$url_path" \
     "CMD_PORT=$port" \
+    "CMD_URL_ADDPORT=$add_port" \
     "CMD_PROTOCOL_USESSL=$https"
 
 # Remove any mounted container ports that might have been added in previous

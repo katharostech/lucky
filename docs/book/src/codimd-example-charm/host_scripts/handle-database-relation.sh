@@ -30,6 +30,8 @@ elif [ "$1" = "update" ]; then
     # Set database connection environment variable
     lucky container env set "CMD_DB_URL=postgres://$dbuser:$dbpassword@$dbhost:$dbport/$db_name"
 
+    lucky set-status --name db-state active
+
 elif [ "$1" = "leave" ]; then
     lucky set-status --name db-state maintenance "Disconnecting from database"
 
