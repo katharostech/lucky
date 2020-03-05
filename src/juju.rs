@@ -204,7 +204,8 @@ pub(crate) fn resource_get(resource_name: &str) -> anyhow::Result<String> {
 /// Write out a message to the Juju Log. Setting `debug` to `true` will tell Juju the log is a
 /// debug log.
 ///
-/// If `juju-log` is not in the path, this function will silently ignore it.
+/// If `juju-log` is not in the path, this function will print to stdout. Stdout is captured by
+/// Juju and ignore it.
 ///
 /// If there is a problem while running `juju-log` the error will be printed to stderr.
 ///
@@ -221,6 +222,7 @@ pub(crate) fn juju_log(message: &str, debug: bool) {
     if let Err(e) = cmd.output() {
         // Ignore it if juju-log isn't in the path
         if let std::io::ErrorKind::NotFound = e.kind() {
+            println!("{}", message);
         }
         // Otherwise print a warning that we couldn't log
         else {
