@@ -1,5 +1,6 @@
 use anyhow::format_err;
 use futures::prelude::*;
+use rand::{seq::IteratorRandom, thread_rng};
 use shiplift::{builder::ExecContainerOptions, PullOptions};
 use subprocess::{Exec, ExitStatus, Redirection};
 
@@ -13,6 +14,8 @@ use crate::rt::block_on;
 use crate::types::{
     CharmScript, CharmScriptType, ScriptState, ScriptStatus, LUCKY_EXIT_CODE_HELPER_PREFIX,
 };
+
+const CONTAINER_SUFFIX_CHARS: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
 
 use super::*;
 
@@ -642,11 +645,29 @@ fn apply_updates(
         }
 
         // Create the container
-        let docker_options = container_info.config.to_container_options(
+        let mut docker_options = container_info.config.to_container_options(
             &daemon.charm_dir,
             &daemon.lucky_data_dir,
             &daemon.socket_path,
         )?;
+        let unit_name = std::env::var("JUJU_UNIT_NAME")
+            .context("Env var JUJU_UNIT_NAME not readable!")?
+            .replace("/", "_");
+        docker_options.name = Some(format!("lucky_{}_{}", unit_name, {
+            // Generate random suffix
+            let mut rng = thread_rng();
+            let mut buffer = String::with_capacity(8);
+            for _ in 0..8 {
+                buffer.push(
+                    CONTAINER_SUFFIX_CHARS
+                        .chars()
+                        .choose(&mut rng)
+                        .expect("Empty suffix chars"),
+                );
+            }
+            buffer
+        }));
+
         log::trace!("Creating container with options: {:#?}", docker_options);
         let create_info = block_on(containers.create(&docker_options))?;
 
