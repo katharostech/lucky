@@ -11,14 +11,6 @@ options:
     type: int
     default: 9000
     description: The port to host CodiMD on
-  add-port-to-domain:
-    type: boolean
-    default: false
-    # This ">" here is yaml syntax for collapsing the content below it into one line
-    description: > 
-      Set this to true if you will be accessing codimd with the port in the URL. For
-      example:`http://example.org:9000. You must still set the domain to
-      "example.org:9000" for this to work.
   https:
     type: boolean
     default: false

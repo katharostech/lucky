@@ -16,8 +16,8 @@ lucky container env set \
     "CMD_DOMAIN=$domain" \
     "CMD_URL_PATH=$url_path" \
     "CMD_PORT=$port" \
-    "CMD_URL_ADDPORT=$add_port" \
-    "CMD_PROTOCOL_USESSL=$https"
+    "CMD_PROTOCOL_USESSL=$https" \
+    "CMD_URL_ADDPORT=false" # This last config fixes issues when hosting on different ports
 
 # Remove any mounted container ports that might have been added in previous
 # runs of `configure.sh`.
