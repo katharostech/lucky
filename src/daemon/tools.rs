@@ -629,12 +629,7 @@ fn apply_updates(
 
     // If this contianer was not meant to be removed
     if !container_info.pending_removal {
-        let mut image_name = container_info.config.image.clone();
-
-        // Add `:latest` if the image name doesn't specify a tag
-        if !image_name.contains(':') {
-            image_name = format!("{}:latest", image_name);
-        }
+        let image_name = container_info.config.image.clone();
 
         if container_info.pull_image {
             // Pull the image
