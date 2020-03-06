@@ -391,8 +391,6 @@ After that settles our charm should show as `blocked` and "Waiting for database 
 
 After PostgreSQL finishes deploying and configuring, you should be able to hit your new CodiMD instance on its IP and port. You're done!
 
-> **Note:** I've noticed that sometimes CodiMD doesn't seem to like it if the port that you are accessing it on is different than the port that you have set it to listen on. This *may* be a problem if you are running it behind a reverse proxy on port `443`, for instance, and CodiMD itself has `port=9000`. Some situations I tested like that *did* work so I don't know exactly what will work and what will not. That would be something to investigate if you wanted to actually *use* this CodiMD charm, but it doesn't hurt the effectiveness of our tutorial.
-
 ## Publishing Your Charm
 
 OK, you were almost done, but now you want to share your charm creation with the world! To get a full guide on publishing charms to the store you can read the [Juju Documentation][charm_store_doc], but we'll go over the quick version here.
