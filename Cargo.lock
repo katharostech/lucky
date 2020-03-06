@@ -388,8 +388,7 @@ dependencies = [
 [[package]]
 name = "crossterm"
 version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8a3223215bc00c666d6be730e88aef245ad4a4f837e87a16c347e8acf701643"
+source = "git+https://github.com/crossterm-rs/crossterm.git?rev=33b90c8#33b90c85c96e1452deb6e978ce06d9cb6f6da1a9"
 dependencies = [
  "bitflags",
  "crossterm_winapi",
@@ -400,6 +399,13 @@ dependencies = [
  "signal-hook",
  "winapi 0.3.8",
 ]
+
+[[package]]
+name = "crossterm"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8a3223215bc00c666d6be730e88aef245ad4a4f837e87a16c347e8acf701643"
+replace = "crossterm 0.16.0 (git+https://github.com/crossterm-rs/crossterm.git?rev=33b90c8)"
 
 [[package]]
 name = "crossterm_winapi"
@@ -851,7 +857,7 @@ dependencies = [
 
 [[package]]
 name = "lucky"
-version = "0.1.0-alpha.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "atty",
@@ -860,7 +866,7 @@ dependencies = [
  "clap",
  "cron",
  "crossbeam",
- "crossterm",
+ "crossterm 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ctrlc",
  "dirs",
  "function_name",
@@ -1736,7 +1742,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "324bd8a9b97026b3d2152e3d13a9c50d6230ecbdc891eab1e0fe308d4408c1d4"
 dependencies = [
  "crossbeam",
- "crossterm",
+ "crossterm 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
  "minimad",
  "thiserror",
