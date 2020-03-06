@@ -380,9 +380,9 @@ After that you will find the built charm in `./build/codimd`. This directory is 
 
     juju deploy ./build/codimd
 
-You will need to configure the domain and port for the codimd app before you can get to it. In this case the IP address is assumed to be the address of the server you depoyed CodiMD to. `add-port-to-domain` is required if you are not hosting CodiMD on port `80` or `443`:
+You will need to configure the domain and port for the codimd app before you can get to it. In this case the IP address is assumed to be the address of the server you depoyed CodiMD to. You will need to put the port in the domain as well if you are not hosting on port `80` or `443`:
 
-    juju config codimd domain=10.176.159.221:3000 port=3000 add-port-to-domain=true
+    juju config codimd domain=10.176.159.221:3000 port=3000
 
 After that settles our charm should show as `blocked` and "Waiting for database connection". To fix that we deploy the PostgreSQL charm and relate it to our codimd charm.
 
@@ -390,6 +390,8 @@ After that settles our charm should show as `blocked` and "Waiting for database 
     juju relate codimd postgresql:db
 
 After PostgreSQL finishes deploying and configuring, you should be able to hit your new CodiMD instance on its IP and port. You're done!
+
+> **Note:** I've noticed that sometimes CodiMD doesn't seem to like it if the port that you are accessing it on is different than the port that you have set it to listen on. This *may* be a problem if you are running it behind a reverse proxy on port `443`, for instance, and CodiMD itself has `port=9000`. Some situations I tested like that *did* work so I don't know exactly what will work and what will not. That would be something to investigate if you wanted to actually *use* this CodiMD charm, but it doesn't hurt the effectiveness of our tutorial.
 
 ## Publishing Your Charm
 
