@@ -1,0 +1,46 @@
+# Juju hooks
+hooks:
+  
+  # When the charm is installed
+  install:
+    # Run our install.sh host script
+    - host-script: install.sh
+  
+  # When configuration has been changed
+  config-changed:
+    # Run our configure.sh host script
+    - host-script: configure.sh 
+    # Update our website relations with new config
+    - host-script: handle-website-relation.sh
+      args: ["update"]
+
+  #
+  # Website relation
+  #
+
+  # When a new app is related to our website relation
+  website-relation-joined:
+    # Run our website join handler
+    - host-script : handle-website-relation.sh
+      args: ["join"]
+
+  #
+  # Database relation
+  #
+  
+  # When we are related to a database
+  database-relation-joined:
+    # Run our database join handler
+    - host-script: handle-database-relation.sh
+      args: ["join"]
+
+  # When the datbase relation changes
+  database-relation-changed:
+    - host-script: handle-database-relation.sh
+      args: ["update"]
+  
+  # When we are disconnected from a database
+  database-relation-departed:
+    # Run our database departed handler
+    - host-script: handle-database-relation.sh
+      args: ["leave"]
