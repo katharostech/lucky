@@ -43,7 +43,7 @@ You can skip installing the charm tools if you don't want to push charms to the 
 
 Now we install Lucky itself. You can download Lucky from the GitHub [releases] page. Lucky will eventually support at least the Snap package manager, but for now you can also use this one-liner to install Lucky:
 
-    curl -L https://github.com/katharostech/lucky/releases/download/v0.1.0-alpha.0/lucky-linux-x86_64.tgz | sudo tar -xzC /usr/local/bin/
+    curl -L https://github.com/katharostech/lucky/releases/download/v0.1.0-alpha.1/lucky-linux-x86_64.tgz | sudo tar -xzC /usr/local/bin/
 
 You can verify that the install worked:
 
