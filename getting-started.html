@@ -561,7 +561,7 @@ elif [ &quot;$1&quot; = &quot;update&quot; ]; then
     lucky set-status maintenance &quot;Updating HTTP relations&quot;
 
     # For every appliacation connected to or &quot;website&quot; relation
-    for relation_id in $(lucky relation list-ids website); do
+    for relation_id in $(lucky relation list-ids --relation-name website); do
         # Set the hostname and port values for the relation
         lucky relation set --relation-id $relation_id \
             &quot;hostname=$(lucky private-address)&quot; \
@@ -591,9 +591,6 @@ lucky set-status active
 juju relate codimd postgresql:db
 </code></pre>
 <p>After PostgreSQL finishes deploying and configuring, you should be able to hit your new CodiMD instance on its IP and port. You're done!</p>
-<blockquote>
-<p><strong>Note:</strong> I've noticed that sometimes CodiMD doesn't seem to like it if the port that you are accessing it on is different than the port that you have set it to listen on. This <em>may</em> be a problem if you are running it behind a reverse proxy on port <code>443</code>, for instance, and CodiMD itself has <code>port=9000</code>. Some situations I tested like that <em>did</em> work so I don't know exactly what will work and what will not. That would be something to investigate if you wanted to actually <em>use</em> this CodiMD charm, but it doesn't hurt the effectiveness of our tutorial.</p>
-</blockquote>
 <h2><a class="header" href="#publishing-your-charm" id="publishing-your-charm">Publishing Your Charm</a></h2>
 <p>OK, you were almost done, but now you want to share your charm creation with the world! To get a full guide on publishing charms to the store you can read the <a href="https://discourse.jujucharms.com/t/the-juju-charm-store/1045?u=zicklag">Juju Documentation</a>, but we'll go over the quick version here.</p>
 <p>First you make sure you have built you charm:</p>

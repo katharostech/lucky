@@ -18,7 +18,7 @@ elif [ "$1" = "update" ]; then
     lucky set-status maintenance "Updating HTTP relations"
 
     # For every appliacation connected to or "website" relation
-    for relation_id in $(lucky relation list-ids website); do
+    for relation_id in $(lucky relation list-ids --relation-name website); do
         # Set the hostname and port values for the relation
         lucky relation set --relation-id $relation_id \
             "hostname=$(lucky private-address)" \
