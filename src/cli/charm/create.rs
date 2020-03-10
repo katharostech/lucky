@@ -134,7 +134,7 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
             if !args.is_present("charm_name") {
                 template_settings.charm_name = template_settings
                     .charm_display_name
-                    .replace(" ", "_")
+                    .replace(" ", "-")
                     .to_lowercase();
             }
 
@@ -159,7 +159,7 @@ impl<'a> CliCommand<'a> for CreateSubcommand {
             if !args.is_present("charm_name") {
                 let default = &template_settings
                     .charm_display_name
-                    .replace(" ", "_")
+                    .replace(" ", "-")
                     .to_lowercase();
                 let response = prompt_reply_stdout(&format!("Charm name [{}]: ", default))
                     .context("Could not prompt for charm name")?;
