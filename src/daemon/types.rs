@@ -14,6 +14,10 @@ use std::ops::Deref;
 /// version and will return `true` if the clone and the original are the same. This means that if
 /// you modify the type and the set it back to what it was previously, `is_clean()` will still
 /// return `true`.
+/// 
+/// > **Note:** Newly created `Cd`'s start off "dirty" and `is_clean()` will return false. You
+/// > can also force any `Cd` to register as dirty, regardless of whether or not the inner type has
+/// > changed by running `mark_dirty()`.
 ///
 /// The inner type is required to implement `Clone` and `PartialEq`.
 pub(crate) struct Cd<T: Clone + PartialEq> {
@@ -31,7 +35,8 @@ impl<T: Clone + PartialEq> Cd<T> {
         Cd {
             inner,
             new_inner: None,
-            force_dirty: false,
+            // New change detectors start off "dirty"
+            force_dirty: true,
         }
     }
 
