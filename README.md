@@ -21,7 +21,7 @@ The documentation is hosted at [katharostech.github.io/lucky].
 
 ## Installation
 
-Lucky 0.1.0-alpha.0 is out! Lucky is now ready to be tested by other users. A getting started guide will be released soon, but for now we have the CLI [documentation][katharostech.github.io/lucky] and you can get started by downloading the build for your platform from the [releases] page.
+Lucky 0.1.0-alpha.0 is out! Lucky is now ready to be tested by other users. If you want to try it out, check out [Getting Started Guide](https://katharostech.github.io/lucky/getting-started.html) which will walk you through creating a functional charm for [CodiMD](https://github.com/codimd/server/) using the Lucky framework.
 
 If you need any help, don't hesitate to reach out on the [Juju forum][juju_forum].
 
