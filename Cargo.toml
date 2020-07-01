@@ -15,7 +15,7 @@ categories = ["command-line-utilities"]
 [dependencies]
 # Use Clap v3.0.0-beta.1
 clap = { git = "https://github.com/clap-rs/clap.git", rev="92c2b5d", features = ["wrap_help"] }
-zip = { version = "0.5.0", features = ["bzip2"], default-features = false }
+zip = { version = "0.5.6", features = ["bzip2"], default-features = false }
 # TODO: I think handlebars is overkill for our use-case. We can probably refactor it out with
 # something lighter weight.
 handlebars = "3.0.1"
