@@ -38,7 +38,7 @@ serde_yaml = "0.8.0"
 varlink = { git = "https://github.com/varlink/rust.git", rev = "04b2a5a" }
 ctrlc = { version = "3.1", features = ["termination"] }
 log = "0.4.0"
-strum = "0.17.1"
+strum = "0.19.2"
 strum_macros = "0.16.0"
 subprocess = "0.1.0"
 thiserror = "1.0.0"
