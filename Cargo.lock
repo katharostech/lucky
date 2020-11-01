@@ -408,6 +408,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "crossterm"
+version = "0.17.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a880035bfe4707e344da9acf50cc94d003fe337f50afd94c8722c1bb4e0a933"
+dependencies = [
+ "bitflags",
+ "crossterm_winapi",
+ "lazy_static",
+ "libc",
+ "mio",
+ "parking_lot 0.10.0",
+ "signal-hook",
+ "winapi 0.3.8",
+]
+
+[[package]]
 name = "crossterm_winapi"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -866,7 +882,7 @@ dependencies = [
  "clap",
  "cron",
  "crossbeam",
- "crossterm 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "crossterm 0.17.4",
  "ctrlc",
  "dirs",
  "function_name",
