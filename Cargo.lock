@@ -388,6 +388,13 @@ dependencies = [
 [[package]]
 name = "crossterm"
 version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8a3223215bc00c666d6be730e88aef245ad4a4f837e87a16c347e8acf701643"
+replace = "crossterm 0.16.0 (git+https://github.com/crossterm-rs/crossterm.git?rev=33b90c8)"
+
+[[package]]
+name = "crossterm"
+version = "0.16.0"
 source = "git+https://github.com/crossterm-rs/crossterm.git?rev=33b90c8#33b90c85c96e1452deb6e978ce06d9cb6f6da1a9"
 dependencies = [
  "bitflags",
@@ -399,13 +406,6 @@ dependencies = [
  "signal-hook",
  "winapi 0.3.8",
 ]
-
-[[package]]
-name = "crossterm"
-version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8a3223215bc00c666d6be730e88aef245ad4a4f837e87a16c347e8acf701643"
-replace = "crossterm 0.16.0 (git+https://github.com/crossterm-rs/crossterm.git?rev=33b90c8)"
 
 [[package]]
 name = "crossterm_winapi"
@@ -1617,9 +1617,9 @@ checksum = "6446ced80d6c486436db5c078dde11a9f73d42b57fb273121e160b84f63d894c"
 
 [[package]]
 name = "strum"
-version = "0.17.1"
+version = "0.19.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "530efb820d53b712f4e347916c5e7ed20deb76a4f0457943b3182fb889b06d2c"
+checksum = "b89a286a7e3b5720b9a477b23253bc50debac207c8d21505f8e70b36792f11b5"
 
 [[package]]
 name = "strum_macros"
