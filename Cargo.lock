@@ -589,9 +589,9 @@ dependencies = [
 
 [[package]]
 name = "get-port"
-version = "1.3.1"
+version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2681e6a467d914a882d14c5c04bd704171b93c5a4d2ab46f81b0097eaa365b3"
+checksum = "ac6c41a39c60ae1fc5bf0e220347ce90fa1e4bb0fcdac65b09bb5f4576bebc84"
 
 [[package]]
 name = "getopts"
