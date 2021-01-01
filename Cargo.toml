@@ -54,7 +54,7 @@ get-port = "3.0.0"
 cron = "0.7.0"
 chrono = "0.4.19"
 crossbeam = "0.8.0"
-indexmap = { version = "1.6.0", features = ["serde-1"] }
+indexmap = { version = "1.6.1", features = ["serde-1"] }
 
 [features]
 default = ["better-panic", "daemon"]
