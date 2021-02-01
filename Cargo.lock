@@ -1038,9 +1038,9 @@ checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
 
 [[package]]
 name = "minimad"
-version = "0.6.7"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24fe6f533320d060be6644ff3967df0ddb2e3061164ab4976c9157995702e887"
+checksum = "cb5ed7ea8b54916318ac7ec6ff06b2b428fdf9cb54d1867714f699dbd1659ad4"
 dependencies = [
  "lazy_static",
 ]
