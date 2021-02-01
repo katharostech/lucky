@@ -42,7 +42,7 @@ strum = "0.20.0"
 strum_macros = "0.16.0"
 subprocess = "0.1.0"
 thiserror = "1.0.23"
-regex = "1.4.2"
+regex = "1.4.3"
 shiplift =  { version = "0.6.0", default-features = false, features = ["chrono", "unix-socket"], optional = true }
 tokio = { version = "0.1.22", optional = true }
 futures = { version = "0.1.29", optional = true }
