@@ -1,0 +1,26 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: futures
+    versions:
+    - "> 0.1.29"
+  - dependency-name: subprocess
+    versions:
+    - "> 0.1.20, < 1"
+  - dependency-name: tokio
+    versions:
+    - "> 0.1.22"
+  - dependency-name: serde_yaml
+    versions:
+    - 0.8.15
+  - dependency-name: minimad
+    versions:
+    - 0.6.9
+  - dependency-name: rand
+    versions:
+    - 0.8.0
