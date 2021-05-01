@@ -19,7 +19,7 @@ zip = { version = "0.5.9", features = ["bzip2"], default-features = false }
 # TODO: I think handlebars is overkill for our use-case. We can probably refactor it out with
 # something lighter weight.
 handlebars = "3.5.2"
-serde = { version = "1.0.117", features = ["derive"] }
+serde = { version = "1.0.125", features = ["derive"] }
 serde_derive = "1.0.0"
 better-panic = { version = "0.2.0", optional = true }
 # This is a very small lib that could be removed if we wanted to implement it ourselves for some
