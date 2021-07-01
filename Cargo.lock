@@ -966,7 +966,7 @@ dependencies = [
  "indexmap",
  "lazy_static",
  "log",
- "minimad",
+ "minimad 0.8.0",
  "rand 0.7.3",
  "regex",
  "rprompt",
@@ -1038,11 +1038,20 @@ checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
 
 [[package]]
 name = "minimad"
-version = "0.6.7"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24fe6f533320d060be6644ff3967df0ddb2e3061164ab4976c9157995702e887"
+checksum = "cb5ed7ea8b54916318ac7ec6ff06b2b428fdf9cb54d1867714f699dbd1659ad4"
 dependencies = [
  "lazy_static",
+]
+
+[[package]]
+name = "minimad"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8957f240ecb82a4e699bcf4db189fe8a7f5aa68b9e6d5abf829c62a9ee4630ed"
+dependencies = [
+ "once_cell",
 ]
 
 [[package]]
@@ -1156,6 +1165,12 @@ dependencies = [
  "hermit-abi",
  "libc",
 ]
+
+[[package]]
+name = "once_cell"
+version = "1.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
 
 [[package]]
 name = "opaque-debug"
@@ -1838,7 +1853,7 @@ dependencies = [
  "crossbeam 0.7.3",
  "crossterm 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
- "minimad",
+ "minimad 0.6.9",
  "thiserror",
 ]
 
